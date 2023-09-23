@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "343475080236",
+    "project_id": "mymenu-bdf37",
+    "storage_bucket": "mymenu-bdf37.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343475080236:android:358b5750b9091ad6509589",
+        "android_client_info": {
+          "package_name": "com.mymenu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaVomiYEUsutLpDRSMYlrBJEB25tWi_OQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343475080236:android:34cec3648b1f86bd509589",
+        "android_client_info": {
+          "package_name": "dev.lueem.mymenu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaVomiYEUsutLpDRSMYlrBJEB25tWi_OQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
