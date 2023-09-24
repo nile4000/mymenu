@@ -1,6 +1,7 @@
 # 🛸 mymenu
 
 > ⚠️ [Please be sure your environment is set up correctly for React Native CLI.](https://reactnative.dev/docs/environment-setup)
+> ⚠️ [You need to configure a Firebase and Supabase Project to use this template.]
 
 ## ⭐ Features
 
@@ -10,9 +11,9 @@
 - [React Native Vector Icons](https://github.com/oblador/react-native-vector-icons#readme)
 - [React Native Paper](https://callstack.github.io/react-native-paper/)
 - [React Native Firebase](https://rnfirebase.io)
-- [React Native Facebook SDK](https://github.com/thebergamo/react-native-fbsdk-next#readme)
-- [React Native Google Signin](https://github.com/react-native-google-signin/google-signin#readme)
 - [React Native Apple Authentication](https://github.com/invertase/react-native-apple-authentication#readme)
+- [Supabase.js](https://supabase.io/docs/reference/javascript/supabase-client)
+- [Supabase UI](https://ui.supabase.io/)
 
 ## Running the app
 

@@ -11,6 +11,7 @@ import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {useAlerts} from 'react-native-paper-alerts';
 
 import {useAppSettings} from '../../components/AppSettings';
+import {useSupabase} from 'app/App';
 
 function CreateAccount(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
@@ -18,6 +19,7 @@ function CreateAccount(): JSX.Element {
   const [password, setPassword] = useState<string>('');
   const [confirm, setConfirm] = useState<string>('');
   const Alert = useAlerts();
+  const supabase = useSupabase();
 
   const [help, setHelp] = useState<string>('');
   const theme = useTheme();
@@ -34,11 +36,30 @@ function CreateAccount(): JSX.Element {
   async function handleCreate() {
     try {
       setLoading(true);
-      const credential = await auth().createUserWithEmailAndPassword(
-        email,
-        password,
-      );
-      credential.user.sendEmailVerification();
+      await auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then(async ({user}) => {
+          user.sendEmailVerification();
+          if (user) {
+            // Speichern des Benutzers in Supabase
+            const {error} = await supabase.from('User').insert([
+              {
+                created_at: user.metadata.creationTime,
+                firebase_uid: user.uid,
+                firebase_email: user.email,
+              },
+            ]);
+            if (error) {
+              Alert.alert(
+                appSettings.t('createAccountError'),
+                appSettings.t(error.code ?? 'unknownError'),
+                [{text: appSettings.t('OK')}],
+              );
+            } else {
+              console.log('Benutzer in Supabase gespeichert!');
+            }
+          }
+        });
     } catch (e) {
       setLoading(false);
       const error = e as FirebaseAuthTypes.PhoneAuthError;

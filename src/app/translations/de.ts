@@ -20,8 +20,11 @@ export const german: translation = {
 
   // shopping
   shopping: 'Einkaufen',
-  goToShopping:'Einkaufen',
+  shoppingList: 'Meine Einkaufszettel',
+  goToShopping: 'Einkaufen',
   goToWine: 'Weine',
+  createItems: 'Hinzufügen',
+  deleteSelectedItems: 'Löschen',
 
   createAccountError: 'Kontoerstellung - Fehler',
   createAccountPasswordsDifferent: 'Passwörter stimmen nicht überein',

@@ -77,12 +77,7 @@ module.exports = {
       ),
     },
     plugins: {
-      add: [] /* An array of plugins */,
-      add: [
-        // plugin1,
-        // [plugin2, 'append'],
-        // [plugin3, 'prepend'] /* Specify if plugin should be appended or prepended */
-      ] /* An array of plugins */,
+      add: [],
       remove:
         [] /* An array of plugin constructor's names (i.e. "StyleLintPlugin", "ESLintWebpackPlugin" ) */,
     },

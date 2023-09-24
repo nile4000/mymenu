@@ -1,6 +1,13 @@
 import appJson from '../app.json';
 import {StyleSheet, View} from 'react-native';
-import {createContext, Fragment, ReactNode, useEffect, useState} from 'react';
+import {
+  createContext,
+  Fragment,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {
   Headline,
@@ -17,6 +24,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import {useAppSettings} from './components/AppSettings';
 import {AlertsProvider} from 'react-native-paper-alerts';
 
+import {createClient, SupabaseClient} from '@supabase/supabase-js';
+
 /**
  * Types
  */
@@ -26,12 +35,25 @@ type User = FirebaseAuthTypes.User | null;
  * Contexts
  */
 export const UserContext = createContext<User>(null);
+export const SupabaseContext = createContext<SupabaseClient | null>(null);
+
+export function useSupabase() {
+  const supabase = useContext(SupabaseContext);
+  if (!supabase) {
+    throw new Error(
+      'useSupabase must be used within a SupabaseContext.Provider',
+    );
+  }
+  return supabase;
+}
 
 function App(): JSX.Element {
   const [initializing, setInitializing] = useState(true);
   const [listenUser, setListenUser] = useState(false);
   const [user, setUser] = useState<User>(null);
   const appSettings = useAppSettings();
+  const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || '';
+  const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || '';
 
   /** Listen for auth state changes */
   useEffect(() => {
@@ -152,14 +174,18 @@ function App(): JSX.Element {
       </SafeAreaProvider>
     );
   }
-
+  const supabase = createClient(supabaseUrl, supabaseKey);
   return container(
     user ? (
       <UserContext.Provider value={user}>
-        <SignedInStack />
+        <SupabaseContext.Provider value={supabase}>
+          <SignedInStack />
+        </SupabaseContext.Provider>
       </UserContext.Provider>
     ) : (
-      <SignedOutStack />
+      <SupabaseContext.Provider value={supabase}>
+        <SignedOutStack />
+      </SupabaseContext.Provider>
     ),
   );
 }

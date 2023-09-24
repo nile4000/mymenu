@@ -6,6 +6,7 @@ import ForgotPassword from './ForgotPassword';
 import PhoneSignIn from './PhoneSignIn';
 import SignIn from './SignIn';
 import {NotFound} from '../../components/NotFound';
+
 const Stack = createStackNavigator();
 
 function SignedOutStack() {
@@ -17,11 +18,11 @@ function SignedOutStack() {
         component={SignIn}
         options={{headerShown: false, title: appSettings.t('signIn')}}
       />
-      <Stack.Screen
-        name="CreateAccount"
-        options={{title: appSettings.t('createAnAccount')}}
-        component={CreateAccount}
-      />
+        <Stack.Screen
+          name="CreateAccount"
+          options={{title: appSettings.t('createAnAccount')}}
+          component={CreateAccount}
+        />
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPassword}

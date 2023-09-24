@@ -93,12 +93,12 @@ export const Home = () => {
             {appSettings.t('goToShopping')}
           </Button>
         </View>
-        <Section title="Weinekeller erfassen"></Section>
+        {/* <Section title="Weinkeller erfassen"></Section>
         <View style={[backgroundStyle, styles.detailsContainer]}>
           <Button onPress={() => linkTo('/wine-list')} style={styles.button}>
             {appSettings.t('goToWine')}
           </Button>
-        </View>
+        </View> */}
       </View>
     </ScrollView>
   );
