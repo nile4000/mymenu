@@ -30,6 +30,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
+    borderBottomEndRadius: 50,
+    borderBottomStartRadius: 50,
     width: '100%',
     height: '100%',
     position: 'absolute', // Das Bild bleibt absolut positioniert

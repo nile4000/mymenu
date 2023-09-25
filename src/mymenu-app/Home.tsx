@@ -9,24 +9,24 @@
  */
 
 import appJson from '../app.json';
-import React from 'react';
+// import React from 'react';
 import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
-import {Button, useTheme} from 'react-native-paper';
+import {Button, Headline, useTheme} from 'react-native-paper';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-  // @ts-ignore -- these are not well typed, but are only example screens
-} from 'react-native/Libraries/NewAppScreen';
+// import {
+//   Colors,
+//   DebugInstructions,
+//   Header,
+//   LearnMoreLinks,
+//   ReloadInstructions,
+//   // @ts-ignore -- these are not well typed, but are only example screens
+// } from 'react-native/Libraries/NewAppScreen';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import Icon from 'react-native-vector-icons/FontAwesome';
+// import Icon from 'react-native-vector-icons/FontAwesome';
 import {useAppSettings} from '../app/components/AppSettings';
 import {NavigationContainer, useLinkTo} from '@react-navigation/native';
 
@@ -34,38 +34,38 @@ import {NavigationContainer, useLinkTo} from '@react-navigation/native';
 // This pasted directly in from this file upstream
 // https://github.com/react-native-community/react-native-template-typescript/blob/main/template/App.tsx
 // The SafeAreaView and StatusBar are commented as those characteristics are provided by react-navigation
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            // color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            // color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+// const Section: React.FC<{
+//   title: string;
+// }> = ({children, title}) => {
+//   const isDarkMode = useColorScheme() === 'dark';
+//   return (
+//     <View style={styles.sectionContainer}>
+//       <Text
+//         style={[
+//           styles.sectionTitle,
+//           {
+//             // color: isDarkMode ? Colors.white : Colors.black,
+//           },
+//         ]}>
+//         {title}
+//       </Text>
+//       <Text
+//         style={[
+//           styles.sectionDescription,
+//           {
+//             // color: isDarkMode ? Colors.light : Colors.dark,
+//           },
+//         ]}>
+//         {children}
+//       </Text>
+//     </View>
+//   );
+// };
 
 export const Home = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  // const isDarkMode = useColorScheme() === 'dark';
   const linkTo = useLinkTo();
-  const theme = useTheme();
+  // const theme = useTheme();
   const appSettings = useAppSettings();
 
   const backgroundStyle = {
@@ -73,19 +73,22 @@ export const Home = () => {
   };
 
   return (
-    // <SafeAreaView style={backgroundStyle}> // <-- provided by react-navigation
-    // <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} /> // <-- provided by react-navigation
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={backgroundStyle}>
-      {/* <Header /> */}
       <View
         style={
           {
             // backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }
         }>
-        <Section title="Wilkommen bei MyMenü"></Section>
+        <Headline
+          style={[
+            styles.padded,
+            {color: appSettings.currentTheme.colors.text},
+          ]}>
+          {appSettings.t('welcome')}
+        </Headline>
         <View style={[backgroundStyle, styles.detailsContainer]}>
           <Button
             onPress={() => linkTo('/shopping-list')}
@@ -164,7 +167,7 @@ const TabbedApp = () => {
     <SafeAreaProvider>
       <NavigationContainer
         linking={{
-          prefixes: ['plaut-ro.github.io/luna', 'localhost'],
+          prefixes: ['localhost'],
           config: {
             screens: {
               Details: 'details',
@@ -189,6 +192,7 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 5,
   },
   button: {
     marginVertical: 5,
@@ -209,6 +213,11 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  padded: {
+    paddingLeft: 10,
+    paddingBottom: 40,
+    paddingTop: 20,
   },
 });
 

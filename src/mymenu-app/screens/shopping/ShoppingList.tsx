@@ -1,7 +1,7 @@
 import {useSupabase} from 'app/App';
-import {useEffect, useState} from 'react';
-import {View, Text, FlatList, StyleSheet} from 'react-native';
-import {Button, Headline, useTheme} from 'react-native-paper';
+import {useEffect, useState, useCallback} from 'react';
+import {View, StyleSheet} from 'react-native';
+import {Button, Headline, DataTable, useTheme} from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 import {SupabaseClient} from '@supabase/supabase-js';
 import {Checkbox} from 'react-native-paper';
@@ -35,7 +35,7 @@ const getUserIdByFirebaseUID = async (
   }
 };
 
-const getUserReceipts = async (
+const getUserItems = async (
   userId: number,
   supabase: SupabaseClient<any, 'public', any>,
 ) => {
@@ -46,7 +46,7 @@ const getUserReceipts = async (
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Fehler beim Abrufen der Receipts:', error);
+      console.error('Fehler beim Abrufen der Daten:', error);
       return [];
     }
     return data || [];
@@ -55,6 +55,7 @@ const getUserReceipts = async (
     return [];
   }
 };
+
 // Hilfsfunktion, um nur das Datum zu extrahieren
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -63,46 +64,37 @@ const formatDate = (dateString: string): string => {
     .padStart(2, '0')}.${date.getFullYear()}`;
 };
 
-const ReceiptHeader = () => {
-  return (
-    <View style={styles.header}>
-      <Text style={styles.headerText}>Nummer</Text>
-      <Text style={styles.headerText}>Datum</Text>
-    </View>
-  );
-};
-
-const ReceiptItem = ({item, isSelected, onToggle}) => {
-  return (
-    <View style={styles.receiptItem}>
-      <Checkbox
-        status={isSelected ? 'checked' : 'unchecked'}
-        onPress={onToggle}
-      />
-      <Text style={styles.itemText}>{item.id}</Text>
-      <Text style={styles.itemText}>
-        {item.generated_at ? formatDate(item.generated_at) : 'N/A'}
-      </Text>
-    </View>
-  );
-};
-
 const ShoppingList = () => {
   const supabase = useSupabase();
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [items, setReceipts] = useState<Receipt[]>([]);
   const appSettings = useAppSettings();
   const theme = useTheme();
 
-  const loadReceipts = async () => {
-    const {currentUser} = auth();
-    if (!currentUser) return;
-
-    const userId = await getUserIdByFirebaseUID(currentUser.uid, supabase);
-    if (!userId) return;
-
-    const userReceipts = await getUserReceipts(userId, supabase);
-    setReceipts(userReceipts);
+  // DetailView
+  const showDetail = (item: Receipt) => {
+    console.log('Detailansicht für', item.id, 'wird angezeigt');
   };
+
+  // DataList
+  const [page, setPage] = useState<number>(0);
+  const [itemsPerPage, onItemsPerPageChange] = useState<number>(10);
+  const from = page * itemsPerPage;
+  const totalItems = items.length;
+  const to = Math.min((page + 1) * itemsPerPage, totalItems);
+
+  const fetchUserId = useCallback(async () => {
+    const {currentUser} = auth();
+    if (!currentUser) return null;
+    return await getUserIdByFirebaseUID(currentUser.uid, supabase);
+  }, [supabase]);
+
+  const loadItems = useCallback(async () => {
+    const userId = await fetchUserId();
+    if (!userId) return;
+    const userReceipts = await getUserItems(userId, supabase);
+    setReceipts(userReceipts);
+  }, [fetchUserId, supabase]);
+
   // Zustand für ausgewählte Einträge
   const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>(
     {},
@@ -120,35 +112,25 @@ const ShoppingList = () => {
       .filter(id => selectedItems[parseInt(id)])
       .map(id => parseInt(id));
 
-    const {error} = await supabase
-      .from('Receipt')
-      .delete()
-      .in('id', isToDelete);
-
+    await supabase.from('Receipt').delete().in('id', isToDelete);
     // Aktualisieren der Liste
-    loadReceipts();
+    loadItems();
   };
 
   useEffect(() => {
-    loadReceipts();
+    loadItems();
   }, [supabase]);
 
-  const createReceipt = async () => {
-    const {currentUser} = auth();
-    if (!currentUser) return;
-
-    const userId = await getUserIdByFirebaseUID(currentUser.uid, supabase);
+  const createItem = async () => {
+    const userId = await fetchUserId();
     if (!userId) return;
-
     const {error} = await supabase
       .from('Receipt')
       .insert([{user_id: userId, generated_at: new Date().toISOString()}]);
-
     if (error) {
       console.error('Fehler beim Erstellen des Receipts:', error);
     } else {
-      // Lade die Liste nach dem erfolgreichen Erstellen erneut
-      loadReceipts();
+      loadItems();
     }
   };
 
@@ -158,41 +140,68 @@ const ShoppingList = () => {
         style={[styles.padded, {color: appSettings.currentTheme.colors.text}]}>
         {appSettings.t('shoppingList')}
       </Headline>
-      {/* <Text style={{color: theme.colors.text}}></Text> */}
       <View style={styles.buttonContainer}>
-        <Button style={styles.createButton} onPress={createReceipt} icon="plus">
+        <Button
+          mode="contained"
+          style={styles.createButton}
+          onPress={createItem}
+          icon="plus">
           {appSettings.t('createItems')}
         </Button>
-
         <Button
+          mode="text"
           style={styles.deleteButton}
           onPress={deleteSelectedItems}
+          disabled={
+            Object.entries(selectedItems).filter(
+              ([_, isSelected]) => isSelected,
+            ).length === 0
+          }
           icon="delete">
           {appSettings.t('deleteSelectedItems')}
         </Button>
       </View>
-
-      <ReceiptHeader />
-
-      <FlatList
-        data={receipts}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({item}) => (
-          <ReceiptItem
-            item={item}
-            isSelected={selectedItems[item.id]}
-            onToggle={() => toggleSelectedItem(item.id)}
-          />
-        )}
-      />
+      <DataTable>
+        <DataTable.Header
+          style={[styles.Header, {backgroundColor: theme.colors.surface}]}>
+          <DataTable.Title>Nummer</DataTable.Title>
+          <DataTable.Title>Erstelldatum</DataTable.Title>
+          <DataTable.Title> </DataTable.Title>
+        </DataTable.Header>
+        {items.slice(from, to).map(item => (
+          <DataTable.Row key={item.id} onPress={() => showDetail(item)}>
+            <DataTable.Cell>{item.id}</DataTable.Cell>
+            <DataTable.Cell>
+              {item.generated_at ? formatDate(item.generated_at) : 'N/A'}
+            </DataTable.Cell>
+            <DataTable.Cell numeric>
+              <Checkbox
+                status={selectedItems[item.id] ? 'checked' : 'unchecked'}
+                onPress={() => toggleSelectedItem(item.id)}
+              />
+            </DataTable.Cell>
+          </DataTable.Row>
+        ))}
+        <DataTable.Pagination
+          page={page}
+          numberOfPages={Math.ceil(totalItems / itemsPerPage)}
+          onPageChange={page => setPage(page)}
+          label={`${from + 1}-${to} von ${totalItems}`}
+          numberOfItemsPerPageList={[5, 10, 20]}
+          numberOfItemsPerPage={itemsPerPage}
+          onItemsPerPageChange={onItemsPerPageChange}
+          showFastPaginationControls
+          selectPageDropdownLabel={'Einträge pro Seite'}
+        />
+      </DataTable>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5', // leichter Hintergrund
+    padding: 5,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -201,46 +210,18 @@ const styles = StyleSheet.create({
   },
   createButton: {
     flex: 1,
-    marginRight: 5, // Abstand zwischen den Buttons
-    elevation: 5,
-    shadowOffset: {width: 2, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    marginRight: 5,
   },
   deleteButton: {
     flex: 1,
     marginLeft: 5,
-    color: '#ff0000',
   },
-  header: {
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#e0e0e0',
-    marginBottom: 10,
-    paddingHorizontal: 5, // Hinzugefügt für bessere Abstände
-  },
-  headerText: {
-    flex: 1,
-    fontSize: 18, // Vergrößerte Schrift
-    textAlign: 'center',
-    paddingBottom: 5, // Hinzugefügt für bessere Abstände
-  },
-  receiptItem: {
-    flexDirection: 'row',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderRadius: 8,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#ffffff', // Weißer Hintergrund für Listenelemente
-    marginVertical: 2, // Vertikaler Abstand zwischen Listenelementen
-  },
-  itemText: {
-    flex: 1,
-    fontSize: 14, // Ein wenig kleiner als die Kopfzeile
-    textAlign: 'center',
+  Header: {
+    borderTopEndRadius: 10,
+    borderTopStartRadius: 10,
   },
   padded: {
-    paddingBottom: 40,
+    paddingBottom: 20,
     paddingTop: 20,
   },
 });

@@ -101,7 +101,7 @@ function App(): JSX.Element {
       <View
         style={[
           styles.loadingContainer,
-          {backgroundColor: appSettings.currentTheme.colors.background},
+          // {backgroundColor: appSettings.currentTheme.colors.background},
         ]}>
         {!waiting && (
           <Fragment>

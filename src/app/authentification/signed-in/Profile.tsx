@@ -16,7 +16,6 @@ import {useLinkTo} from '@react-navigation/native';
 import {UserContext} from '../../App';
 import Hero from '../../components/Hero';
 import Provider from '../../components/AuthProvider';
-import Facebook from '../auth-providers/Facebook';
 import Google from '../auth-providers/Google';
 import Apple from '../auth-providers/Apple';
 import {getProviders} from '../../util/helpers';
@@ -24,7 +23,7 @@ import {
   fallbackLanguageLocale,
   useAppSettings,
 } from '../../components/AppSettings';
-require('dayjs/locale/en');
+require('dayjs/locale/de');
 require('dayjs/locale/es');
 
 function Profile() {
@@ -39,6 +38,15 @@ function Profile() {
 
   // Array of providers the the user is linked with
   const providers = getProviders(user);
+
+  const formatDate = (date: string, format: string = 'DD.MM.YYYY') => {
+    return dayjs(date)
+      .locale(
+        appSettings.languageLocale?.languageTag ??
+          fallbackLanguageLocale.languageTag,
+      )
+      .format(format);
+  };
 
   return (
     <View style={styles.container}>
@@ -71,20 +79,14 @@ function Profile() {
         {!!user.phoneNumber && <Subheading>{user.phoneNumber}</Subheading>}
         {!!user.metadata.lastSignInTime && (
           <Caption>
-            {`${appSettings.t('profileLastSignIn')}: ${dayjs(
+            {`${appSettings.t('profileLastSignIn')}: ${formatDate(
               user.metadata.lastSignInTime,
-            )
-              .locale(
-                appSettings.languageLocale?.languageTag ??
-                  fallbackLanguageLocale.languageTag,
-              )
-              .format()}`}
+            )}`}
           </Caption>
         )}
       </View>
       <View style={[styles.providers, {backgroundColor: theme.colors.surface}]}>
         <Provider type="password" active={providers.includes('password')} />
-        <Provider type="facebook" active={providers.includes('facebook.com')} />
         <Provider type="google" active={providers.includes('google.com')} />
         <Provider type="phone" active={providers.includes('phone')} />
       </View>
@@ -95,7 +97,6 @@ function Profile() {
       />
 
       <View style={styles.center}>
-        {Platform.OS !== 'web' && <Facebook />}
         {Platform.OS !== 'web' && <Google />}
         {Platform.OS !== 'web' && <Apple />}
       </View>

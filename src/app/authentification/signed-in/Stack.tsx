@@ -65,6 +65,11 @@ const SignedIn = () => {
         component={GettingStarted}
       />
       <TopTabs.Screen
+        name="WineList"
+        options={{title: appSettings.t('wine')}}
+        component={WineList}
+      />
+      <TopTabs.Screen
         name="ShoppingList"
         options={{title: appSettings.t('shopping')}}
         component={ShoppingList}

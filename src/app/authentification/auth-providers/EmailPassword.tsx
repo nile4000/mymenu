@@ -38,12 +38,12 @@ function EmailPassword(): JSX.Element {
   const styles = StyleSheet.create({
     signinButton: {
       alignSelf: 'center',
-      backgroundColor: theme.colors.primary,
+      // backgroundColor: theme.colors.primary,
       width: 300,
     },
     form: {
       flex: 1,
-      padding: 20,
+      padding: 40,
       textAlign: 'center',
       justifyContent: 'center',
       alignSelf: 'stretch',

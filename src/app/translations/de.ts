@@ -12,6 +12,7 @@ export const german: translation = {
   signIn: 'Anmelden',
 
   home: 'Startseite',
+  welcome: 'Willkommen bei MyMenü',
   NotFound: 'Seite nicht gefunden',
   PageNotFoundText: 'Oh, nein! Diese Seite existiert nicht.',
   gettingStarted: 'Erste Schritte',
@@ -25,6 +26,9 @@ export const german: translation = {
   goToWine: 'Weine',
   createItems: 'Hinzufügen',
   deleteSelectedItems: 'Löschen',
+
+  // wine
+  wine: 'Wein',
 
   createAccountError: 'Kontoerstellung - Fehler',
   createAccountPasswordsDifferent: 'Passwörter stimmen nicht überein',

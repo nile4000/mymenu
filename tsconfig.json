@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "allowJs": true,                          /* Allow javascript files to be compiled. */
-    "isolatedModules": true,                  /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
-    "jsx": "react-jsx",                       /* Specify JSX code generation: 'preserve', 'react-native', 'react-jsx' or 'react'. */
-    "lib": [                                  /* Specify library files to be included in the compilation. */
-      "es2017"
+    "allowJs": true /* Allow javascript files to be compiled. */,
+    "isolatedModules": true /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */,
+    "jsx": "react-jsx" /* Specify JSX code generation: 'preserve', 'react-native', 'react-jsx' or 'react'. */,
+    "lib": [
+      /* Specify library files to be included in the compilation. */ "es2017"
     ],
-    "module": "esnext",                       /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
-    "target": "esnext",                       /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
-    "noEmit": true,                           /* Do not emit outputs. */
+    "module": "esnext" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+    "target": "esnext" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */,
+    "noEmit": true /* Do not emit outputs. */,
+    "noImplicitAny": false,
     // "checkJs": true,                       /* Report errors in .js files. */
     // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
@@ -34,16 +35,16 @@
     // "noUnusedLocals": true,                /* Report errors on unused locals. */
     // "noUnusedParameters": true,            /* Report errors on unused parameters. */
     // "noImplicitReturns": true,             /* Report error when not all code paths in function return a value. */
-    "noFallthroughCasesInSwitch": true,       /* Report errors for fallthrough cases in switch statement. */
-    "forceConsistentCasingInFileNames": true, /* Will issue an error if a program tries to include a file by a casing different from the casing on disk. */
+    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "forceConsistentCasingInFileNames": true /* Will issue an error if a program tries to include a file by a casing different from the casing on disk. */,
 
     /* Module Resolution Options */
-    "allowSyntheticDefaultImports": true,     /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
-    "baseUrl": "src",                         /* Base directory to resolve non-absolute module names. */
-    "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
-    "moduleResolution": "node",               /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    "skipLibCheck": true,                     /* Skip type checking of declaration files. */
-    "resolveJsonModule": true                 /* Allows importing modules with a ‘.json’ extension, which is a common practice in node projects. */
+    "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
+    "baseUrl": "src" /* Base directory to resolve non-absolute module names. */,
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "resolveJsonModule": true /* Allows importing modules with a ‘.json’ extension, which is a common practice in node projects. */
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
@@ -66,7 +67,5 @@
     "metro.config.js",
     "jest.config.js"
   ],
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
