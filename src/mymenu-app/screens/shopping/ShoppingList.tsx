@@ -7,7 +7,10 @@ import {Checkbox} from 'react-native-paper';
 import {useAppSettings} from 'app/components/AppSettings';
 import ReceiptDetailModal from './ReceiptDetailModal';
 import {Item, Receipt} from 'mymenu-app/interfaces/interfaces';
-import { getUserIdByFirebaseUID, getUserReceipts } from 'mymenu-app/supabase/getters';
+import {
+  getUserIdByFirebaseUID,
+  getUserReceipts,
+} from 'mymenu-app/supabase/getters';
 
 // Hilfsfunktion, um nur das Datum zu extrahieren
 const formatDate = (dateString: string): string => {
@@ -92,26 +95,11 @@ const ShoppingList = () => {
     }
   };
 
-  const addReceiptItem = async id => {
-    const {data, error} = await supabase
-      .from('Item')
-      .insert([
-        {receipt_id: id, name: 'test', price: 0, unit: 'Stk.', quantity: 1},
-      ])
-      .select();
-    if (error) {
-      console.error('Fehler beim Erstellen des Receipt Items:', error);
-    } else {
-      loadItems();
-    }
-  };
-
   return (
     <View style={styles.container}>
       <ReceiptDetailModal
         receipt={selectedReceipt}
         onClose={closeDetail}
-        onAddItem={addReceiptItem}
       />
       <Headline
         style={[styles.padded, {color: appSettings.currentTheme.colors.text}]}>

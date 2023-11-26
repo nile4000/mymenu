@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {View, StyleSheet, Modal, Text} from 'react-native';
 import {
   Button,
@@ -13,7 +13,7 @@ import {getUserReceiptItems} from 'mymenu-app/supabase/getters';
 import {useAppSettings} from 'app/components/AppSettings';
 import {updateItem} from 'mymenu-app/supabase/updaters';
 
-const ReceiptDetailModal = ({receipt, onClose, onAddItem}) => {
+const ReceiptDetailModal = ({receipt, onClose}) => {
   const supabase = useSupabase();
   const [items, setItems] = useState<Item[]>([]);
   const theme = useTheme();
@@ -27,6 +27,28 @@ const ReceiptDetailModal = ({receipt, onClose, onAddItem}) => {
     quantity: '',
     unit: '',
   });
+
+  const addReceiptItem = async id => {
+    const {data, error} = await supabase
+      .from('Item')
+      .insert([
+        {receipt_id: id, name: 'test', price: 0, unit: 'Stk.', quantity: 1},
+      ])
+      .select();
+    if (error) {
+      console.error('Fehler beim Erstellen des Receipt Items:', error);
+    } else {
+      setItems(currentItems => [...currentItems, data[0]]);
+    }
+  };
+
+  const loadReceiptItems = useCallback(async () => {
+    if (receipt) {
+      getUserReceiptItems(receipt.id, supabase).then(data => {
+        setItems(data);
+      });
+    }
+  }, [receipt]);
 
   const handleEdit = item => {
     setEditItem(item.id);
@@ -56,12 +78,8 @@ const ReceiptDetailModal = ({receipt, onClose, onAddItem}) => {
   };
 
   useEffect(() => {
-    if (receipt) {
-      getUserReceiptItems(receipt.id, supabase).then(data => {
-        setItems(data);
-      });
-    }
-  }, [receipt]);
+    loadReceiptItems();
+  }, [loadReceiptItems]);
 
   return (
     <Modal
@@ -75,7 +93,7 @@ const ReceiptDetailModal = ({receipt, onClose, onAddItem}) => {
       </Headline>
       <View style={styles.buttonContainer}>
         <Button
-          onPress={() => onAddItem(receipt.id)}
+          onPress={() => addReceiptItem(receipt.id)}
           style={styles.createButton}
           mode="contained"
           icon="plus">
