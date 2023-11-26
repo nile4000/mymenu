@@ -21,7 +21,7 @@
 
 #### Development
 
-Install the app: `yarn install`
+(initial) Install the app: `yarn install`
 Run the app: `yarn web`
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 

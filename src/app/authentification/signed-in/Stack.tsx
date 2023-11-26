@@ -64,11 +64,11 @@ const SignedIn = () => {
         options={{title: appSettings.t('gettingStarted')}}
         component={GettingStarted}
       />
-      <TopTabs.Screen
+      {/* <TopTabs.Screen
         name="WineList"
         options={{title: appSettings.t('wine')}}
         component={WineList}
-      />
+      /> */}
       <TopTabs.Screen
         name="ShoppingList"
         options={{title: appSettings.t('shopping')}}

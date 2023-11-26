@@ -23,7 +23,6 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {useAppSettings} from './components/AppSettings';
 import {AlertsProvider} from 'react-native-paper-alerts';
-
 import {createClient, SupabaseClient} from '@supabase/supabase-js';
 
 /**

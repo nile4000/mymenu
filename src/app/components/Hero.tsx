@@ -28,12 +28,17 @@ function Hero({image, height, children, style}: Props): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
   },
   image: {
     borderBottomEndRadius: 50,
     borderBottomStartRadius: 50,
-    width: '100%',
-    height: '100%',
+    width: '300px',
+    height: '320px',
+    borderColor: '#FFFFEB',
+    borderWidth: 2,
+    // marginLeft: 100,
+    // marginRight: 50,
     position: 'absolute', // Das Bild bleibt absolut positioniert
   },
 });

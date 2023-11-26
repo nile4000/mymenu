@@ -19,13 +19,22 @@ export const german: translation = {
   userInfo: 'Profil',
   settings: 'Einstellungen',
 
+  // forms
+
+  formClose: 'Schliessen',
+
   // shopping
   shopping: 'Einkaufen',
   shoppingList: 'Meine Einkaufszettel',
   goToShopping: 'Einkaufen',
+  scanList: 'Einkaufszettel scannen',
   goToWine: 'Weine',
   createItems: 'Hinzufügen',
   deleteSelectedItems: 'Löschen',
+
+  // article
+  article: 'Artikel',
+  articleList: 'Meine Artikelliste',
 
   // wine
   wine: 'Wein',

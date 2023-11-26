@@ -3,58 +3,11 @@ import {useEffect, useState, useCallback} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Button, Headline, DataTable, useTheme} from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
-import {SupabaseClient} from '@supabase/supabase-js';
 import {Checkbox} from 'react-native-paper';
 import {useAppSettings} from 'app/components/AppSettings';
-
-interface Receipt {
-  created_at: string;
-  generated_at: string | null;
-  id: number;
-  user_id: number | null;
-}
-
-const getUserIdByFirebaseUID = async (
-  firebaseUID: string | undefined,
-  supabase: SupabaseClient<any, 'public', any>,
-): Promise<number | null> => {
-  try {
-    const {data, error} = await supabase
-      .from('User')
-      .select('id')
-      .eq('firebase_uid', firebaseUID);
-
-    if (error || !data || data.length === 0) {
-      console.error('Fehler beim Abrufen der Daten:', error || 'Keine Daten');
-      return null;
-    }
-    return data[0].id;
-  } catch (err) {
-    console.error('Unerwarteter Fehler:', err);
-    return null;
-  }
-};
-
-const getUserItems = async (
-  userId: number,
-  supabase: SupabaseClient<any, 'public', any>,
-) => {
-  try {
-    const {data, error} = await supabase
-      .from('Receipt')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Fehler beim Abrufen der Daten:', error);
-      return [];
-    }
-    return data || [];
-  } catch (err) {
-    console.error('Unerwarteter Fehler:', err);
-    return [];
-  }
-};
+import ReceiptDetailModal from './ReceiptDetailModal';
+import {Item, Receipt} from 'mymenu-app/interfaces/interfaces';
+import { getUserIdByFirebaseUID, getUserReceipts } from 'mymenu-app/supabase/getters';
 
 // Hilfsfunktion, um nur das Datum zu extrahieren
 const formatDate = (dateString: string): string => {
@@ -67,12 +20,18 @@ const formatDate = (dateString: string): string => {
 const ShoppingList = () => {
   const supabase = useSupabase();
   const [items, setReceipts] = useState<Receipt[]>([]);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null); // Zustand für den ausgewählten Receipt
   const appSettings = useAppSettings();
   const theme = useTheme();
 
-  // DetailView
-  const showDetail = (item: Receipt) => {
-    console.log('Detailansicht für', item.id, 'wird angezeigt');
+  // Funktion, um die Detailansicht zu öffnen
+  const openDetail = (receipt: Receipt) => {
+    setSelectedReceipt(receipt);
+  };
+
+  // Funktion, um die Detailansicht zu schließen
+  const closeDetail = () => {
+    setSelectedReceipt(null);
   };
 
   // DataList
@@ -91,11 +50,10 @@ const ShoppingList = () => {
   const loadItems = useCallback(async () => {
     const userId = await fetchUserId();
     if (!userId) return;
-    const userReceipts = await getUserItems(userId, supabase);
+    const userReceipts = await getUserReceipts(userId, supabase);
     setReceipts(userReceipts);
   }, [fetchUserId, supabase]);
 
-  // Zustand für ausgewählte Einträge
   const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>(
     {},
   );
@@ -134,8 +92,27 @@ const ShoppingList = () => {
     }
   };
 
+  const addReceiptItem = async id => {
+    const {data, error} = await supabase
+      .from('Item')
+      .insert([
+        {receipt_id: id, name: 'test', price: 0, unit: 'Stk.', quantity: 1},
+      ])
+      .select();
+    if (error) {
+      console.error('Fehler beim Erstellen des Receipt Items:', error);
+    } else {
+      loadItems();
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <ReceiptDetailModal
+        receipt={selectedReceipt}
+        onClose={closeDetail}
+        onAddItem={addReceiptItem}
+      />
       <Headline
         style={[styles.padded, {color: appSettings.currentTheme.colors.text}]}>
         {appSettings.t('shoppingList')}
@@ -169,7 +146,7 @@ const ShoppingList = () => {
           <DataTable.Title> </DataTable.Title>
         </DataTable.Header>
         {items.slice(from, to).map(item => (
-          <DataTable.Row key={item.id} onPress={() => showDetail(item)}>
+          <DataTable.Row key={item.id} onPress={() => openDetail(item)}>
             <DataTable.Cell>{item.id}</DataTable.Cell>
             <DataTable.Cell>
               {item.generated_at ? formatDate(item.generated_at) : 'N/A'}
