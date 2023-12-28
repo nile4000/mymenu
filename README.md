@@ -12,7 +12,8 @@ MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch d
 4. Datenverarbeitung mit chatGPT: Die aufbereiteten Daten werden an ChatGPT übermittelt, wo sie strukturiert und in ein JSON-Format umgewandelt werden. Dies ermöglicht eine präzise und nutzerfreundliche Darstellung der Einkaufsdaten.
 
 5. Frontend-Interaktion: Im Frontend der Applikation können Nutzer die verarbeiteten Daten einsehen und bei Bedarf bearbeiten. Dieser Schritt ist entscheidend, um die Genauigkeit und Relevanz der Menüvorschläge zu gewährleisten.
-  <img src="https://github.com/nile4000/mymenu-reactnative/assets/61655582/140fe71a-cae1-421c-9983-cc063d3da0d0" width="300">
+
+  <img src="https://github.com/nile4000/mymenu-reactnative/assets/61655582/8fb044fe-ae8e-4ba2-8617-f7b888cc7b77" width="300">
 
 7. Menüzusammenstellung: Nach der Bereinigung der Daten können Benutzer per chatGPT, personalisierte Menüvorschläge für den Beleg und die Woche zusammenstellen lassen. Diese Funktion nutzt die bearbeiteten Daten, um kreative und abwechslungsreiche Speisepläne zu erstellen.
 
