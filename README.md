@@ -1,19 +1,27 @@
 # 🛸 mymenu
 
-> ⚠️ [Please be sure your environment is set up correctly for React Native CLI.](https://reactnative.dev/docs/environment-setup)
-> ⚠️ [You need to configure a Firebase and Supabase Project to use this template.]
+MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie React-Native, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Coop-Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
+
+![localhost_3000_shopping-list(Pixel 7)](https://github.com/nile4000/mymenu-reactnative/assets/61655582/cd392cdb-b41c-4851-bf50-f9f65a060ec6)
+
+## Funktionen
+
+1. Einkaufsbeleg-Scannen: Registrierte Benutzer können ihren Coop Einkaufsbeleg über ihr Mobilgerät einscannen. Die Applikation unterstützt die Einlesung von Belegen als Bild- oder PDF-Datei.
+
+2. Textextraktion: Nach dem Einlesen wird der Beleg an eine Middleware gesendet, die für die Textextraktion und -aufbereitung zuständig ist. Diese Konversionsschicht stellt sicher, dass die Daten sparsam und in einem für die weitere Verarbeitung geeigneten Format vorliegen.
+
+3. Datenverarbeitung mit chatGPT: Die aufbereiteten Daten werden an ChatGPT übermittelt, wo sie strukturiert und in ein JSON-Format umgewandelt werden. Dies ermöglicht eine präzise und nutzerfreundliche Darstellung der Einkaufsdaten.
+
+4. Frontend-Interaktion: Im Frontend der Applikation können Nutzer die verarbeiteten Daten einsehen und bei Bedarf bearbeiten. Dieser Schritt ist entscheidend, um die Genauigkeit und Relevanz der Menüvorschläge zu gewährleisten.
+
+5. Menüzusammenstellung: Nach der Bereinigung der Daten können Benutzer per chatGPT, personalisierte Menüvorschläge für den Beleg und die Woche zusammenstellen lassen. Diese Funktion nutzt die bearbeiteten Daten, um kreative und abwechslungsreiche Speisepläne zu erstellen.
 
 ## ⭐ Features
-
 - [React Native Web](https://necolas.github.io/react-native-web/)
-- [TypeScript](https://www.typescriptlang.org/)
 - [React Navigation](https://reactnavigation.org/)
-- [React Native Vector Icons](https://github.com/oblador/react-native-vector-icons#readme)
 - [React Native Paper](https://callstack.github.io/react-native-paper/)
-- [React Native Firebase](https://rnfirebase.io)
-- [React Native Apple Authentication](https://github.com/invertase/react-native-apple-authentication#readme)
+- [React Native Firebase Authentication](https://rnfirebase.io)
 - [Supabase.js](https://supabase.io/docs/reference/javascript/supabase-client)
-- [Supabase UI](https://ui.supabase.io/)
 
 ## Running the app
 
@@ -44,11 +52,8 @@ Use the app `npx serve -s build/`
 1. Check your code style with `yarn lint:all` (runs eslint, prettier, and tsc)
 1. Check your code correctness with `yarn test:all` (runs jest)
 
-## Project Configuration
-
-This project assumes you have followed the configuration instructions provided in [the template README](https://github.com/invertase/react-native-firebase-authentication-example#readme).
-
-Social authentication providers are not currently working on web, but work on native.
+## Support
+If you have any questions or issues, please contact nile4000.
 
 PRs welcome to these repositories to add react-native-web support! :pray:
 
