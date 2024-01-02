@@ -11,7 +11,6 @@
 import appJson from '../app.json';
 import {ScrollView, StyleSheet, Text, useColorScheme, View} from 'react-native';
 import {Button, Headline, useTheme} from 'react-native-paper';
-
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -24,18 +23,13 @@ export const Home = () => {
   const linkTo = useLinkTo();
   const appSettings = useAppSettings();
 
-  const backgroundStyle = {
-  };
+  const backgroundStyle = {};
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={backgroundStyle}>
-      <View
-        style={
-          {
-          }
-        }>
+      <View>
         <Headline
           style={[
             styles.padded,
@@ -44,14 +38,25 @@ export const Home = () => {
           {appSettings.t('welcome')}
         </Headline>
         <View style={[backgroundStyle, styles.detailsContainer]}>
-          <Button onPress={() => linkTo('/scan-list')} style={styles.button}>
+          <Button
+            onPress={() => linkTo('/shopping-list')}
+            style={styles.button}
+            icon="pencil">
             {appSettings.t('goToShopping')}
           </Button>
         </View>
         <View style={[backgroundStyle, styles.detailsContainer]}>
-          {/* <Button onPress={() => selectPDF()} style={styles.button}>
+          <Button
+            onPress={() => selectPDF()}
+            style={styles.button}
+            icon="file-upload">
             {appSettings.t('scanList')}
-          </Button> */}
+          </Button>
+        </View>
+        <View style={[backgroundStyle, styles.detailsContainer]}>
+          <Button onPress={() => selectPDF()} style={styles.button}>
+            {appSettings.t('menuProposals')}
+          </Button>
         </View>
       </View>
     </ScrollView>
@@ -61,6 +66,25 @@ export const Home = () => {
 // *****************************************************************************************************
 // The rest of the file is to set up a react-navigation and react-native-vector-icons demonstraiton:
 const Tab = createMaterialTopTabNavigator();
+
+// import FilePickerManager from 'react-native-file-picker';
+
+const selectPDF = async () => {
+  try {
+    // FilePickerManager.showFilePicker(response => {
+    //   console.log('Response = ', response);
+    //   if (response.didCancel) {
+    //     console.log('User cancelled file picker');
+    //   } else if (response.error) {
+    //     console.log('FilePickerManager Error: ', response.error);
+    //   } else {
+    //     // this.setState({
+    //     //   file: response,
+    //     // });
+    //   }
+    // });
+  } catch (err) {}
+};
 
 const TopTabNavigator = () => {
   const insets = useSafeAreaInsets();

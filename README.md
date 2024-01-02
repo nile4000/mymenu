@@ -32,6 +32,10 @@ MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch d
 
 #### Development
 
+##### Prerequisites Web
+Node.js: 16.17.0
+Yarn: 1.22.10
+
 (initial) Install the app: `yarn install`
 Run the app: `yarn web`
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
@@ -45,6 +49,11 @@ Build the app: `yarn build-web`
 Use the app `npx serve -s build/`
 
 ### Native
+
+### Prerequisites Android
+SDK-Version: 32
+Build-Tools: 32.0.0
+Android-Emulator: Pixel 3a API 32
 
 1. Start Metro Bundler: `yarn start`
 2. Start the Android app: `yarn android`

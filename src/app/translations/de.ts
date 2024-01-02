@@ -15,7 +15,7 @@ export const german: translation = {
   welcome: 'Willkommen bei MyMenü',
   NotFound: 'Seite nicht gefunden',
   PageNotFoundText: 'Oh, nein! Diese Seite existiert nicht.',
-  gettingStarted: 'Erste Schritte',
+  gettingStarted: 'Home',
   userInfo: 'Profil',
   settings: 'Einstellungen',
 
@@ -24,17 +24,20 @@ export const german: translation = {
   formClose: 'Schliessen',
 
   // shopping
-  shopping: 'Einkaufen',
+  shopping: 'Einkaufszettel',
   shoppingList: 'Meine Einkaufszettel',
-  goToShopping: 'Einkaufen',
-  scanList: 'Einkaufszettel scannen',
+  goToShopping: 'Einkaufszettel bearbeiten',
+  scanList: 'Einkaufszettel einscannen',
+  menuProposals: "Menü Vorschläge",
   goToWine: 'Weine',
   createItems: 'Hinzufügen',
+  sendItems: 'Absenden',
   deleteSelectedItems: 'Löschen',
 
   // article
   article: 'Artikel',
   articleList: 'Meine Artikelliste',
+  createMenu: 'Menü zusammenstellen',
 
   // wine
   wine: 'Wein',

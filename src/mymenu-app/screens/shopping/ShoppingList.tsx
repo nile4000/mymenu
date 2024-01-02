@@ -6,7 +6,7 @@ import auth from '@react-native-firebase/auth';
 import {Checkbox} from 'react-native-paper';
 import {useAppSettings} from 'app/components/AppSettings';
 import ReceiptDetailModal from './ReceiptDetailModal';
-import {Item, Receipt} from 'mymenu-app/interfaces/interfaces';
+import {Receipt} from 'mymenu-app/interfaces/interfaces';
 import {
   getUserIdByFirebaseUID,
   getUserReceipts,
@@ -74,7 +74,6 @@ const ShoppingList = () => {
       .map(id => parseInt(id));
 
     await supabase.from('Receipt').delete().in('id', isToDelete);
-    // Aktualisieren der Liste
     loadItems();
   };
 
@@ -97,10 +96,7 @@ const ShoppingList = () => {
 
   return (
     <View style={styles.container}>
-      <ReceiptDetailModal
-        receipt={selectedReceipt}
-        onClose={closeDetail}
-      />
+      <ReceiptDetailModal receipt={selectedReceipt} onClose={closeDetail} />
       <Headline
         style={[styles.padded, {color: appSettings.currentTheme.colors.text}]}>
         {appSettings.t('shoppingList')}

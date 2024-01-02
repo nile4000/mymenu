@@ -13,7 +13,7 @@ import {getUserReceiptItems} from 'mymenu-app/supabase/getters';
 import {useAppSettings} from 'app/components/AppSettings';
 import {updateItem} from 'mymenu-app/supabase/updaters';
 
-const ReceiptDetailModal = ({receipt, onClose}) => {
+const ReceiptConfirmationModal = ({receipt, onClose}) => {
   const supabase = useSupabase();
   const [items, setItems] = useState<Item[]>([]);
   const theme = useTheme();
@@ -28,19 +28,7 @@ const ReceiptDetailModal = ({receipt, onClose}) => {
     unit: '',
   });
 
-  const addReceiptItem = async id => {
-    const {data, error} = await supabase
-      .from('Item')
-      .insert([
-        {receipt_id: id, name: 'test', price: 0, unit: 'Stk.', quantity: 1},
-      ])
-      .select();
-    if (error) {
-      console.error('Fehler beim Erstellen des Receipt Items:', error);
-    } else {
-      setItems(currentItems => [...currentItems, data[0]]);
-    }
-  };
+  const sendItems = async () => {};
 
   const loadReceiptItems = useCallback(async () => {
     if (receipt) {
@@ -53,7 +41,7 @@ const ReceiptDetailModal = ({receipt, onClose}) => {
   const handleEdit = item => {
     setEditItem(item.id);
     setEditedValues({
-      name: item.name,
+      name: item.name.toString(),
       price: item.price.toString(),
       quantity: item.quantity.toString(),
       unit: item.unit,
@@ -93,10 +81,10 @@ const ReceiptDetailModal = ({receipt, onClose}) => {
       </Headline>
       <View style={styles.buttonContainer}>
         <Button
-          onPress={() => addReceiptItem(receipt.id)}
+          onPress={() => sendItems()}
           style={styles.createButton}
           mode="contained">
-          {appSettings.t('createItems')}
+          {appSettings.t('sendItems')}
         </Button>
         <Button
           mode="text"
@@ -181,19 +169,6 @@ const ReceiptDetailModal = ({receipt, onClose}) => {
           </DataTable.Row>
         ))}
       </DataTable>
-      {/* <Button mode="contained">{appSettings.t('createMenu')}</Button>
-      <DataTable>
-        <DataTable.Header>
-          <DataTable.Title>Typ</DataTable.Title>
-          <DataTable.Title>Link</DataTable.Title>
-          <DataTable.Title>Zutaten</DataTable.Title>
-        </DataTable.Header>
-        <DataTable.Row>
-          <DataTable.Cell>Hauptgericht</DataTable.Cell>
-          <DataTable.Cell>https://www.bettybossi.ch/BinaryContent/UploadedFiles/6IcK3Egmbxc_FREPgtsWFA==2014050814413214.Basmatireis.pdf</DataTable.Cell>
-          <DataTable.Cell>Basmati - Naturaplan Reis, Naturafarm Pouletbrust 2 Stück ca. 250g, Broccoli</DataTable.Cell>
-        </DataTable.Row>
-      </DataTable> */}
     </Modal>
   );
 };
@@ -237,4 +212,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReceiptDetailModal;
+export default ReceiptConfirmationModal;
