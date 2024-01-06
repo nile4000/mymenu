@@ -32,7 +32,7 @@ MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch d
 
 #### Development
 
-##### Prerequisites Web
+#### Prerequisites Web
 Node.js: 16.17.0
 Yarn: 1.22.10
 
@@ -50,7 +50,7 @@ Use the app `npx serve -s build/`
 
 ### Native
 
-### Prerequisites Android
+#### Prerequisites Android
 SDK-Version: 32
 Build-Tools: 32.0.0
 Android-Emulator: Pixel 3a API 32

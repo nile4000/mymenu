@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  quarkus-app:
+    build:
+      context: . # Pfad zum Dockerfile-Verzeichnis
+      dockerfile: src/main/docker/Dockerfile.native
+    ports:
+      - "8080:8080"
+    user: "1001"
