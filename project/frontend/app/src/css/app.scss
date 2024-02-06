@@ -1,0 +1,17 @@
+// app global css in SCSS form
+
+@font-face {
+  font-family: "Playfair Display";
+  src: url("./font/PlayfairDisplay.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.q-toolbar__title {
+  font-family: "Playfair Display", serif;
+  color: $color-text !important;
+}
+
+.q-icon {
+  color: $color-text;
+}

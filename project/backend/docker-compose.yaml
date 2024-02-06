@@ -1,0 +1,13 @@
+version: '3.8'
+name: middleware-pdf-reader
+services:
+  pdf-reader-quarkus:
+    build:
+      context: . # Pfad zum Dockerfile-Verzeichnis
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8080:8080"
+    user: "1001"
+    deploy:
+      restart_policy:
+        condition: on-failure
