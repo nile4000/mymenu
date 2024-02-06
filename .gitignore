@@ -1,0 +1,4 @@
+.vscode
+.quarkus
+project/.vscode
+project/backend/src/main/resources/application.properties
