@@ -37,16 +37,10 @@ nb-configuration.xml
 *.orig
 *.rej
 
-# Quinoa
-node_modules/
-build/
-dist/
-.quinoa/
-dist-ssr
-*.local
 
 # Local environment
 .env
+./src/main/resources/application.properties
 
 # Plugin directory
 /.quarkus/cli/plugins/

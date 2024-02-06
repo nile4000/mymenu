@@ -12,12 +12,7 @@
         />
         <q-toolbar-title> My Menü </q-toolbar-title>
         <div>
-          <q-btn-dropdown
-            unelevated
-            flat
-            color="white"
-            icon="person"
-          >
+          <q-btn-dropdown unelevated flat color="white" icon="person">
             <q-list>
               <q-item class="bg-grey-3">
                 <q-item-title>
@@ -82,6 +77,7 @@ const linksList = [
 ];
 
 import { defineComponent, ref } from "vue";
+import { SessionStorage } from "quasar";
 
 export default defineComponent({
   name: "MainLayout",
@@ -108,6 +104,7 @@ export default defineComponent({
       router
         .push("/auth/login")
         .then(() => {
+          // sessionStorage.clear();
           $q.notify({ message: "Sign Out Success." });
         })
         .catch((error) => console.log("error", error));

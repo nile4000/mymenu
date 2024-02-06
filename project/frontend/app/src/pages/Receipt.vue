@@ -4,7 +4,7 @@
       :rows="rows"
       :columns="columns"
       row-key="UID"
-      selection="single"
+      selection="multiple"
       v-model:selected="selected"
       :filter="filter"
       grid

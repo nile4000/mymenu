@@ -1,4 +1,4 @@
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 /**
  * Returns a promise that resolves with an ID token, if available, that can be verified on a server.
@@ -8,19 +8,22 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 export const getIdToken = () => {
   return new Promise((resolve, reject) => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged( auth, (user) => {
-      unsubscribe() // unsubscribe the observer that we've just created
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe(); // unsubscribe the observer that we've just created
       if (user) {
-          user.getIdToken().then((idToken) => {
-          resolve(idToken)
-        }, () => {
-          resolve(null)
-        })
+        user.getIdToken().then(
+          (idToken) => {
+            resolve(idToken);
+          },
+          () => {
+            resolve(null);
+          }
+        );
       } else {
-        resolve(null)
+        resolve(null);
       }
-    })
+    });
   }).catch((error) => {
-    console.log(error)
-  })
-}
+    console.log(error);
+  });
+};

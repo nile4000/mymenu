@@ -64,7 +64,6 @@ export default defineComponent({
             type: "positive",
             message: "Upload successful!",
           });
-          console.log("Server response:", response);
         } catch (error) {
           this.$q.notify({
             type: "negative",

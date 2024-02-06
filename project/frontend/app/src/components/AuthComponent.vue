@@ -110,7 +110,6 @@ export default defineComponent({
         .catch((error) => console.log("error", error));
     };
     const signInExistingUser = (email, password) => {
-      console.log(email, password);
       const auth = getAuth();
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -121,7 +120,6 @@ export default defineComponent({
         });
     };
     const createUser = (email, password) => {
-      console.log(email, password);
       const auth = getAuth();
       createUserWithEmailAndPassword(auth, email, password)
         .then((auth) => {
