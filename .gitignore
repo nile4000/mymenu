@@ -1,4 +1,2 @@
-.vscode
-.quarkus
-project/.vscode
-project/backend/src/main/resources/application.properties
+project<backend\src\main\resources\application.properties
+project\frontend\app\.firebase
