@@ -1,6 +1,6 @@
 # 🛸 mymenu
 
-MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie React-Native, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Coop-Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
+MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie Quasar, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Coop-Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
 
 ## Funktionen
 

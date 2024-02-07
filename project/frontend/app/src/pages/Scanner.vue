@@ -1,5 +1,6 @@
 <template>
   <q-page class="flex flex-center">
+    <DialogComponent></DialogComponent>
     <div class="q-pa-md">
       <q-uploader
         :url="apiUrl"
@@ -13,17 +14,24 @@
     </div>
   </q-page>
 </template>
-
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import { getAuth } from "firebase/auth";
+import DialogComponent from "../components/DialogComponent.vue";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "ScannerPage",
 
-  computed: {
-    authHeaders() {
-      const auth = getAuth();
+  components: {
+    DialogComponent,
+  },
+
+  setup() {
+    const $q = useQuasar();
+
+    const auth = getAuth();
+    const authHeaders = computed(() => {
       const userId = auth.currentUser ? auth.currentUser.uid : null;
       if (userId) {
         return [{ name: "FirebaseAuthId", value: userId }];
@@ -31,48 +39,60 @@ export default defineComponent({
         console.error("User not logged in");
         return [];
       }
-    },
-  },
+    });
 
-  methods: {
-    onRejected(rejectedEntries) {
-      this.$q.notify({
+    const apiUrl = computed(() => {
+      const apiUrl = process.env.API_URL;
+      return `${apiUrl}/api/extract`;
+    });
+
+    function onRejected(rejectedEntries) {
+      $q.notify({
         type: "negative",
         message: `${rejectedEntries.length} file did not pass validation constraints`,
       });
-    },
-    apiUrl() {
-      const apiUrl = process.env.API_URL;
-      return `${apiUrl}/api/extract`;
-    },
+    }
 
-    onUploaded(event) {
+    function onUploaded(event) {
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);
-
           // Save the extracted data to the session storage
           const now = new Date();
           const datetimeKey = `${now.getFullYear()}-${
             now.getMonth() + 1
           }-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-
           // save with a unique key to avoid overwriting previous data
           sessionStorage.setItem(datetimeKey, JSON.stringify(response));
 
-          this.$q.notify({
-            type: "positive",
-            message: "Upload successful!",
+          $q.dialog({
+            component: DialogComponent,
+            componentProps: {
+              articles: [response.Articles[0]],
+            },
           });
+          // $q.notify({
+          //   type: "positive",
+          //   message: "Upload successful!",
+          // });
         } catch (error) {
-          this.$q.notify({
+          $q.notify({
             type: "negative",
             message: "Failed to parse server response.",
           });
           console.error("Error parsing response:", error);
         }
       }
-    },
+    }
+
+    return {
+      // showModal,
+      // responseData,
+      authHeaders,
+      apiUrl,
+      onRejected,
+      onUploaded,
+    };
   },
 });
 </script>

@@ -6,7 +6,7 @@
     >
       <q-img
         src="../assets/logo.png"
-        style="height: 250px; max-width: 250px"
+        style="max-width: 200px"
       ></q-img>
     </q-header>
     <q-page-container class="page-container full-height">
