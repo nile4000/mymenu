@@ -6,7 +6,7 @@
           flat
           bordered
           title="Esswaren auswählen"
-          :rows="articles"
+          :rows="articles[0]"
           :columns="columns"
           row-key="Name"
           selection="multiple"
@@ -26,14 +26,21 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Abbrechen" color="primary" v-close-popup></q-btn>
-        <q-btn flat label="Speichern" color="primary" v-close-popup></q-btn>
+        <q-btn
+          flat
+          label="Speichern"
+          color="primary"
+          v-close-popup
+          @click="saveSelection"
+        ></q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
-import { defineComponent, ref, toRefs } from "vue";
+import router from "../router";
+import { defineComponent, ref, toRefs, toRaw } from "vue";
 
 const columns = [
   {
@@ -58,21 +65,53 @@ const columns = [
 export default defineComponent({
   name: "DialogComponent",
   props: {
-    // Articles
-    articles: { type: Array, required: true },
+    // articles
+    articles: { type: Array, required: false },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { articles } = toRefs(props);
-    console.log(props.articles);
+    const selected = ref([]);
+
+    const saveSelection = () => {
+      return new Promise((resolve, reject) => {
+        try {
+          emit("save-selection", selected.value);
+          const now = new Date();
+          const datetimeKey = `${now.getFullYear()}-${
+            now.getMonth() + 1
+          }-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+          sessionStorage.setItem(
+            "edb_" + datetimeKey,
+            JSON.stringify(toRaw(selected.value))
+          );
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      })
+        .then(() => {
+          router.push("/food");
+        })
+        .catch((error) => {
+          console.error("Fehler beim Speichern der Auswahl:", error);
+        });
+    };
 
     return {
-      selected: ref([]),
+      selected,
       basic: ref(false),
       fixed: ref(false),
       columns,
       // eslint-disable-next-line vue/no-dupe-keys
       articles,
+      saveSelection,
     };
   },
 });
 </script>
+<style scoped lang="scss">
+.q-table__card .q-table__top,
+.q-table__card .q-table__bottom {
+  background-color: #3fb7935f;
+}
+</style>

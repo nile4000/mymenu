@@ -1,54 +1,24 @@
 <template>
   <div class="q-pa-md">
-    <q-table
-      :rows="rows"
-      :columns="columns"
-      row-key="UID"
-      selection="multiple"
-      v-model:selected="selected"
-      :filter="filter"
-      grid
-      hide-header
-    >
+    <q-table :rows="rows" :columns="columns" grid hide-header>
       <template v-slot:item="props">
-        <div
-          class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
-          :style="props.selected ? 'transform: scale(0.95);' : ''"
-        >
-          <q-card
-            bordered
-            flat
-            :class="
-              props.selected
-                ? $q.dark.isActive
-                  ? 'bg-grey-9'
-                  : 'bg-grey-2'
-                : ''
-            "
-          >
+        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3">
+          <q-card bordered flat>
             <q-card-section class="row items-center justify-between">
-              <q-checkbox
-                dense
-                v-model="props.selected"
-                class="q-mr-md"
-              ></q-checkbox>
-              <div class="flex-grow-1 text-center q-mr-md">
-                {{ props.row.PurchaseDate }}
-              </div>
-              <div class="text-weight-bold q-mr-md">
-                {{ props.row.Total }}.-
+              <div class="flex-grow-1 q-mr-md text-weight-bold">
+                Einkauf vom: {{ props.row.PurchaseDate }}
               </div>
               <q-img
                 src="../assets/coop.png"
                 alt="Coop"
                 style="max-width: 55px"
-                class="q-mr-md"
               />
             </q-card-section>
             <q-separator class="custom-separator"></q-separator>
             <q-list dense class="custom-list">
+              <!-- just show the first 3 articles -->
               <q-item
-                v-for="(article, index) in props.row.Articles"
+                v-for="(article, index) in props.row.Articles.slice(0, 3)"
                 :key="index"
               >
                 <q-item-section>
@@ -58,6 +28,11 @@
               <q-item>
                 <q-item-section>
                   <q-item-label>...</q-item-label>
+                </q-item-section>
+                <q-item-section side bottom>
+                  <q-item-label class="text-weight-bold"
+                    >Total: {{ props.row.Total }}</q-item-label
+                  >
                 </q-item-section>
               </q-item>
             </q-list>
@@ -71,6 +46,17 @@
 <script>
 import { defineComponent, ref, onMounted } from "vue";
 
+const columns = [
+  {
+    name: "PurchaseDate",
+    required: true,
+    label: "Receipt Key",
+    align: "left",
+    field: "PurchaseDate",
+    sortable: true,
+  },
+];
+
 export default defineComponent({
   name: "ReceiptsPage",
 
@@ -79,30 +65,21 @@ export default defineComponent({
     const filter = ref("");
     const selected = ref([]);
 
-    const columns = [
-      {
-        name: "PurchaseDate",
-        required: true,
-        label: "Receipt Key",
-        align: "left",
-        field: "PurchaseDate",
-        sortable: true,
-      },
-    ];
-
     onMounted(() => {
       const allRows = [];
       Object.keys(sessionStorage).forEach((key) => {
-        try {
-          const itemValue = JSON.parse(sessionStorage.getItem(key));
-          const receipt = itemValue;
-          allRows.push({
-            Total: receipt.Total,
-            PurchaseDate: receipt.PurchaseDate,
-            Articles: receipt.Articles,
-          });
-        } catch (e) {
-          console.error("Error parsing session storage item", key, e);
+        if (key.includes("rec")) {
+          try {
+            const itemValue = JSON.parse(sessionStorage.getItem(key));
+            const receipt = itemValue;
+            allRows.push({
+              Total: receipt.Total,
+              PurchaseDate: receipt.PurchaseDate,
+              Articles: receipt.Articles,
+            });
+          } catch (e) {
+            console.error("Error parsing session storage item", key, e);
+          }
         }
       });
       rows.value = allRows;
@@ -119,10 +96,6 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.grid-style-transition {
-  transition: transform 0.28s, background-color 0.28s;
-}
-
 .custom-separator {
   margin-left: 10px;
   margin-right: 10px;
@@ -130,5 +103,27 @@ export default defineComponent({
 
 .custom-list {
   margin-bottom: 5px;
+}
+
+.q-card {
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    cursor: pointer;
+    background-color: #3fb7935f; // Farbe nach Wahl
+    .q-item:last-child {
+      .q-item__label {
+        color: black;
+      }
+    }
+  }
+}
+
+.q-item {
+  &:not(:last-child) {
+    .q-item__label {
+      font-style: italic;
+    }
+  }
 }
 </style>

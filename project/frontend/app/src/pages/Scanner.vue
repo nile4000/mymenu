@@ -22,7 +22,6 @@ import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "ScannerPage",
-
   components: {
     DialogComponent,
   },
@@ -63,18 +62,14 @@ export default defineComponent({
             now.getMonth() + 1
           }-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
           // save with a unique key to avoid overwriting previous data
-          sessionStorage.setItem(datetimeKey, JSON.stringify(response));
+          sessionStorage.setItem("rec_"+datetimeKey, JSON.stringify(response));
 
           $q.dialog({
             component: DialogComponent,
             componentProps: {
-              articles: [response.Articles[0]],
+              articles: [response.Articles],
             },
           });
-          // $q.notify({
-          //   type: "positive",
-          //   message: "Upload successful!",
-          // });
         } catch (error) {
           $q.notify({
             type: "negative",
@@ -86,8 +81,6 @@ export default defineComponent({
     }
 
     return {
-      // showModal,
-      // responseData,
       authHeaders,
       apiUrl,
       onRejected,

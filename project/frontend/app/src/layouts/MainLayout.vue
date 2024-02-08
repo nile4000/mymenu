@@ -74,10 +74,15 @@ const linksList = [
     icon: "receipt",
     link: "/receipt",
   },
+  {
+    title: "Esswaren",
+    caption: "Deine Esswaren",
+    icon: "restaurant",
+    link: "/food",
+  },
 ];
 
 import { defineComponent, ref } from "vue";
-import { SessionStorage } from "quasar";
 
 export default defineComponent({
   name: "MainLayout",
