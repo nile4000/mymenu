@@ -56,13 +56,8 @@ export default defineComponent({
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);
-          // Save the extracted data to the session storage
-          const now = new Date();
-          const datetimeKey = `${now.getFullYear()}-${
-            now.getMonth() + 1
-          }-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
-          // save with a unique key to avoid overwriting previous data
-          sessionStorage.setItem("rec_"+datetimeKey, JSON.stringify(response));
+          const uid = response.UID;
+          sessionStorage.setItem("rec_"+uid, JSON.stringify(response));
 
           $q.dialog({
             component: DialogComponent,

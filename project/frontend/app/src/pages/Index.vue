@@ -82,6 +82,7 @@ export default defineComponent({
 .text-primary {
   color: $positive !important;
   text-decoration: none;
+  font-weight:400;
 }
 
 .text-h5 {

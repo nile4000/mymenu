@@ -62,9 +62,14 @@ export default defineComponent({
         ],
       };
 
-      sessionStorage.setItem("rec_2024-2-8_22-30-46", JSON.stringify(item2));
-      sessionStorage.setItem("rec_2024-2-8_22-30-36", JSON.stringify(item1));
-
+      sessionStorage.setItem(
+        "rec_c32c41a0-eb88-4f66-bb7c-bb782bf9e85d",
+        JSON.stringify(item2)
+      );
+      sessionStorage.setItem(
+        "rec_f0c7e8c3-8330-4d92-899f-04b3ddbf01a9",
+        JSON.stringify(item1)
+      );
     });
   },
 });
