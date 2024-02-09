@@ -19,6 +19,13 @@
                   Eingeloggt als: <br /><b>{{ email }}</b>
                 </q-item-title>
               </q-item>
+              <q-item clickable v-close-popup @click="openHistory">
+                <q-item-section avatar>
+                  <q-item-label
+                    ><q-icon name="history"></q-icon> Verlauf</q-item-label
+                  >
+                </q-item-section>
+              </q-item>
               <q-item clickable v-close-popup @click="logout">
                 <q-item-section>
                   <q-item-label>Ausloggen</q-item-label>
@@ -68,12 +75,12 @@ const linksList = [
     icon: "scanner",
     link: "/scanner",
   },
-  {
-    title: "Deine Belege",
-    caption: "Gescannte Belege",
-    icon: "receipt",
-    link: "/receipt",
-  },
+  // {
+  //   title: "Deine Belege",
+  //   caption: "Gescannte Belege",
+  //   icon: "receipt",
+  //   link: "/receipt",
+  // },
   {
     title: "Esswaren",
     caption: "Deine Esswaren",
@@ -114,6 +121,9 @@ export default defineComponent({
         })
         .catch((error) => console.log("error", error));
     };
+    const openHistory = () => {
+      router.push("/receipt");
+    };
     return {
       essentialLinks: linksList,
       email,
@@ -123,6 +133,7 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       logout,
+      openHistory,
     };
   },
 });

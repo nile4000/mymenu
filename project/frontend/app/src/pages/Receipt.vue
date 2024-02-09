@@ -110,7 +110,11 @@ export default defineComponent({
 
   &:hover {
     cursor: pointer;
-    background-color: #3fb7935f; // Farbe nach Wahl
+    border-color: $positive;
+    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.5);
+    .custom-separator {
+      background-color: $positive;
+    }
     .q-item:last-child {
       .q-item__label {
         color: black;

@@ -38,7 +38,7 @@ public class OpenAiClient {
         this.httpClient = HttpClient.newHttpClient();
     }
 
-    private JsonArray processResponse(String responseBody) {
+    private JsonArray processResponse(String responseBody, String type) {
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {
             JsonObject jsonResponse = jsonReader.readObject();
             String contentString = jsonResponse.getJsonArray("choices")
@@ -49,8 +49,13 @@ public class OpenAiClient {
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
 
-                JsonArray articlesArray = contentJson.getJsonArray("ArticleList");
-                return articlesArray;
+                if (type == "receipt") {
+                    JsonArray receipesArray = contentJson.getJsonArray("ReceiptList");
+                    return receipesArray;
+                } else {
+                    JsonArray articlesArray = contentJson.getJsonArray("ArticleList");
+                    return articlesArray;
+                }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing response", e);
@@ -58,9 +63,14 @@ public class OpenAiClient {
         }
     }
 
-    public JsonArray askQuestion(String question) {
+    public JsonArray askQuestion(String question, String type) {
         try {
-            String payload = payloadBuilder.constructPayload(question);
+            String payload;
+            if (type == "receipt") {
+                payload = payloadBuilder.constructReceiptPayload(question);
+            } else {
+                payload = payloadBuilder.constructPayload(question);
+            }
 
             String key = ConfigProvider.getConfig().getValue("OPENAI_API_KEY", String.class);
 
@@ -76,7 +86,7 @@ public class OpenAiClient {
 
             HttpResponse<String> response = httpClient.send(request,
                     HttpResponse.BodyHandlers.ofString());
-            return processResponse(response.body());
+            return processResponse(response.body(), type);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in askQuestion", e);
             return Json.createArrayBuilder().build(); // Return an empty JsonArray on error

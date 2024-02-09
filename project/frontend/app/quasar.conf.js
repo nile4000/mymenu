@@ -10,6 +10,7 @@
 const ESLintPlugin = require("eslint-webpack-plugin");
 const { configure } = require("quasar/wrappers");
 
+
 module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli/supporting-ts
@@ -44,9 +45,7 @@ module.exports = configure(function (ctx) {
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
       env: {
-        API_URL: ctx.dev
-          ? "http://localhost:8080"
-          : "https://mymenu.fly.dev",
+        API_URL: ctx.dev ? "http://localhost:8080" : "https://mymenu.fly.dev",
       },
 
       // https://v2.quasar.dev/quasar-cli/handling-webpack
@@ -78,7 +77,7 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Notify", "SessionStorage","Dialog"],
+      plugins: ["Notify", "SessionStorage", "Dialog"],
     },
 
     // animations: 'all', // --- includes all animations

@@ -112,7 +112,7 @@ public class PDFExtractionResource {
 
         // Combining the question prefix with the actual content extracted from the PDF
         String fullQuestion = questionPrefix + extractedText;
-        return openAiClient.askQuestion(fullQuestion);
+        return openAiClient.askQuestion(fullQuestion, "article");
     }
 
     private static String getTimestamp() {
