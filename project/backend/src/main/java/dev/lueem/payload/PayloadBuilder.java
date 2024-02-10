@@ -13,7 +13,6 @@ public class PayloadBuilder {
 
         @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-1106")
         private String modelDefault = "gpt-3.5-turbo-1106";
-        private String modelReceipt = "gpt-3.5-turbo-1106";
         // private String modelReceipt = "gpt-4-0125-preview";
 
         public String constructPayload(String question) {
@@ -40,17 +39,7 @@ public class PayloadBuilder {
                                 .add("role", "user")
                                 .add("content", question);
 
-                JsonArrayBuilder messages = Json.createArrayBuilder()
-                                .add(messageUser)
-                                .add(messageSystem);
-
-                JsonObject payload = Json.createObjectBuilder()
-                                .add("model", modelDefault)
-                                .add("messages", messages)
-                                .add("response_format", Json.createObjectBuilder().add("type", "json_object"))
-                                .build();
-
-                return payload.toString();
+                return constructGPTMessages(messageSystem, messageUser);
         }
 
         public String constructReceiptPayload(String question) {
@@ -60,9 +49,9 @@ public class PayloadBuilder {
                 JsonObjectBuilder receipe = Json.createObjectBuilder();
                 receipe.add("Name", "Rezeptname");
                 receipe.add("Ingredients", "Artikel 1, Artikel 2");
-                receipe.add("Instructions", "kurze Anleitung");
-                receipe.add("Servings", "2");
-                receipe.add("PreparationTime", "minutes");
+                receipe.add("Instructions", "Anleitung");
+                receipe.add("Servings", "Personen");
+                receipe.add("PreparationTime", "Minuten");
 
                 receipes.add(receipe);
 
@@ -73,16 +62,21 @@ public class PayloadBuilder {
                 JsonObjectBuilder messageSystem = Json.createObjectBuilder();
                 messageSystem.add("role", "system");
                 messageSystem.add("content", "Output JSON Object in this format: " + receiptModel.toString());
+                
                 JsonObjectBuilder messageUser = Json.createObjectBuilder()
                                 .add("role", "user")
                                 .add("content", question);
 
+                return constructGPTMessages(messageSystem, messageUser);
+        }
+
+        private String constructGPTMessages(JsonObjectBuilder messageSystem, JsonObjectBuilder messageUser) {
                 JsonArrayBuilder messages = Json.createArrayBuilder()
                                 .add(messageUser)
                                 .add(messageSystem);
 
                 JsonObject payload = Json.createObjectBuilder()
-                                .add("model", modelReceipt)
+                                .add("model", modelDefault)
                                 .add("messages", messages)
                                 .add("response_format", Json.createObjectBuilder().add("type", "json_object"))
                                 .build();

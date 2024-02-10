@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -12,13 +13,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import jakarta.json.stream.JsonParsingException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -54,19 +54,11 @@ public class PDFExtractionResource {
     }
 
     private String cleanUpContent(String content) {
-        StringBuilder cleaned = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new StringReader(content))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    cleaned.append(line.trim()).append(System.lineSeparator());
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error cleaning content", e);
-        }
-        return cleaned.toString().trim();
+        return Arrays.stream(content.split(System.lineSeparator()))
+                .filter(line -> !line.trim().isEmpty())
+                .collect(Collectors.joining(System.lineSeparator())).trim();
     }
+
 
     private static String extractArticlesUntilTotal(String receipt) {
         int indexOfTotal = receipt.indexOf("Total CHF");
@@ -126,7 +118,6 @@ public class PDFExtractionResource {
 
     private JsonArray getAnswerOpenAI(String extractedText) {
         String questionPrefix = QUESTION_PREFIX;
-
         // Combining the question prefix with the actual content extracted from the PDF
         String fullQuestion = questionPrefix + extractedText;
         return openAiClient.askQuestion(fullQuestion, "article");

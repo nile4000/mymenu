@@ -21,7 +21,6 @@ public class AiRequestResource {
 
     private JsonArray getAnswerOpenAI(JsonObject request) {
         String questionPrefix = QUESTION_PREFIX + request.toString();
-
         return openAiClient.askQuestion(questionPrefix, "receipt");
     }
 
