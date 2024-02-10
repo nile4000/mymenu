@@ -68,7 +68,7 @@ export default defineComponent({
     onMounted(() => {
       const allRows = [];
       Object.keys(sessionStorage).forEach((key) => {
-        if (key.includes("rec")) {
+        if (key.includes("receipt")) {
           try {
             const itemValue = JSON.parse(sessionStorage.getItem(key));
             const receipt = itemValue;

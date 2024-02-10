@@ -44,7 +44,6 @@ const columns = [
     sortable: true,
   },
   { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
-  { name: "Discount", label: "Aktion", field: "Discount" },
 ];
 
 export default defineComponent({
@@ -61,15 +60,17 @@ export default defineComponent({
     onMounted(() => {
       const allArticles = [];
       Object.keys(sessionStorage).forEach((key) => {
-        if (key.includes("rec")) {
+        if (key.includes("food")) {
+          const rawValue = sessionStorage.getItem(key);
           try {
-            const itemValue = JSON.parse(sessionStorage.getItem(key));
-            itemValue.Articles.forEach((article) => allArticles.push(article));
+            const itemValue = JSON.parse(rawValue);
+            itemValue.forEach((article) => allArticles.push(article));
           } catch (e) {
             console.error("Error parsing session storage item", key, e);
           }
         }
       });
+
       rows.value = toRaw(allArticles);
     });
 

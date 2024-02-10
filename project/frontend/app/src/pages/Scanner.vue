@@ -28,8 +28,8 @@ export default defineComponent({
 
   setup() {
     const $q = useQuasar();
-
     const auth = getAuth();
+
     const authHeaders = computed(() => {
       const userId = auth.currentUser ? auth.currentUser.uid : null;
       if (userId) {
@@ -57,12 +57,12 @@ export default defineComponent({
         try {
           const response = JSON.parse(event.xhr.responseText);
           const uid = response.UID;
-          sessionStorage.setItem("rec_"+uid, JSON.stringify(response));
+          sessionStorage.setItem("receipt_"+uid, JSON.stringify(response));
 
           $q.dialog({
             component: DialogComponent,
             componentProps: {
-              articles: [response.Articles],
+              response: [response],
             },
           });
         } catch (error) {

@@ -17,7 +17,7 @@ public class AiRequestResource {
     @Inject
     OpenAiClient openAiClient;
 
-    private static final String QUESTION_PREFIX = "Generiere mit den folgenden Lebensmittelartikeln ein sinnvolles Rezept im JSON-Format. Schlag andere Zutaten vor wenn es nicht passt:\n";
+    private static final String QUESTION_PREFIX = "Erstelle ein JSON-Rezept mit den unten aufgeführten Zutaten. Bei Unstimmigkeiten empfehle passende alternative Zutaten.\n";
 
     private JsonArray getAnswerOpenAI(JsonObject request) {
         String questionPrefix = QUESTION_PREFIX + request.toString();

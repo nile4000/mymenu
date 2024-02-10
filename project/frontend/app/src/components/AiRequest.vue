@@ -1,8 +1,9 @@
 <template>
-  <div>
-    <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
-    <div v-if="recipe">
-      <q-card class="q-ma-md">
+  <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
+  <div v>
+    <q-card class="q-ma-md">
+      <q-inner-loading class="card-example" :showing="isLoading" label="Lädt.."></q-inner-loading>
+      <div v-if="!isLoading && recipe">
         <q-card-section>
           <div class="text-h6">{{ recipe.Name }}</div>
         </q-card-section>
@@ -16,8 +17,8 @@
           <div><b>Portionen:</b> {{ recipe.Servings }}</div>
           <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
         </q-card-section>
-      </q-card>
-    </div>
+      </div>
+    </q-card>
   </div>
 </template>
 
@@ -36,7 +37,8 @@ export default defineComponent({
   },
   data() {
     return {
-      recipe: null, // Speichert das Rezept nach dem Laden
+      recipe: null,
+      isLoading: false,
     };
   },
   methods: {
@@ -45,10 +47,12 @@ export default defineComponent({
     },
 
     async sendRequest() {
+      this.isLoading = true;
       let articleNames = this.prepareArticles(this.selectedItems);
       try {
+        const apiUrl = process.env.API_URL;
         const response = await axios.post(
-          "http://localhost:8080/api/ai-request",
+          `${apiUrl}/api/ai-request`,
           {
             articleNames,
           },
@@ -61,11 +65,19 @@ export default defineComponent({
           }
         );
 
-        this.recipe = response.data[0]; // Nehme das erste Rezept aus der Antwort
+        this.recipe = response.data[0];
       } catch (error) {
         console.error("Fehler beim Senden der Anfrage:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
   },
 });
 </script>
+<style scoped>
+.card-example {
+  max-width: 400px;
+  margin: 0 auto;
+}
+</style>

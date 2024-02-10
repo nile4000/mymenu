@@ -6,7 +6,7 @@
           flat
           bordered
           title="Esswaren auswählen"
-          :rows="articles[0]"
+          :rows="articles"
           :columns="columns"
           row-key="Name"
           selection="multiple"
@@ -40,7 +40,7 @@
 
 <script>
 import router from "../router";
-import { defineComponent, ref, toRefs, toRaw } from "vue";
+import { defineComponent, ref, computed, toRaw } from "vue";
 
 const columns = [
   {
@@ -65,23 +65,20 @@ const columns = [
 export default defineComponent({
   name: "DialogComponent",
   props: {
-    // articles
-    articles: { type: Array, required: false },
+    response: { type: Object, required: false },
   },
   setup(props, { emit }) {
-    const { articles } = toRefs(props);
     const selected = ref([]);
+
+    const articles = computed(() => props.response[0]?.Articles || []);
 
     const saveSelection = () => {
       return new Promise((resolve, reject) => {
         try {
-          emit("save-selection", selected.value);
-          const now = new Date();
-          const datetimeKey = `${now.getFullYear()}-${
-            now.getMonth() + 1
-          }-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+          emit("save-selection");
+          const uid = props.response[0]?.UID || 0;
           sessionStorage.setItem(
-            "edb_" + datetimeKey,
+            "food_" + uid,
             JSON.stringify(toRaw(selected.value))
           );
           resolve();
@@ -102,7 +99,6 @@ export default defineComponent({
       basic: ref(false),
       fixed: ref(false),
       columns,
-      // eslint-disable-next-line vue/no-dupe-keys
       articles,
       saveSelection,
     };
