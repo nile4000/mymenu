@@ -9,8 +9,15 @@
                 Einkauf vom: {{ props.row.PurchaseDate }}
               </div>
               <q-img
+                v-if="props.row.Corp === 'Coop'"
                 src="../assets/coop.png"
                 alt="Coop"
+                style="max-width: 55px"
+              />
+              <q-img
+                v-if="props.row.Corp === 'Migros'"
+                src="../assets/migros.png"
+                alt="Migros"
                 style="max-width: 55px"
               />
             </q-card-section>
@@ -76,6 +83,7 @@ export default defineComponent({
               Total: receipt.Total,
               PurchaseDate: receipt.PurchaseDate,
               Articles: receipt.Articles,
+              Corp: receipt.Corp,
             });
           } catch (e) {
             console.error("Error parsing session storage item", key, e);

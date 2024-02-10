@@ -40,7 +40,7 @@
               <q-icon name="file_download"></q-icon>
             </q-item-section>
             <q-item-section>
-              Laden Sie die gewünschten Coop-Einkaufsbelege (PDF) auf Ihr Gerät.
+              Laden Sie die gewünschten Coop oder Migros Einkaufsbelege (PDF) auf Ihr Gerät.
             </q-item-section>
           </q-item>
           <q-item dense>

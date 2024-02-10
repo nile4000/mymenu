@@ -16,7 +16,9 @@ import java.util.regex.Pattern;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.stream.JsonParsingException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -94,8 +96,23 @@ public class PDFExtractionResource {
         if (matcher.find()) {
             return matcher.group(0);
         }
-        // fallback to current date
         return getTimestamp();
+    }
+
+    private static String extractCorp(String text) {
+        Pattern coopPattern = Pattern.compile("Coop", Pattern.CASE_INSENSITIVE);
+        Matcher coopMatcher = coopPattern.matcher(text);
+
+        Pattern migrosPattern = Pattern.compile("Migros", Pattern.CASE_INSENSITIVE);
+        Matcher migrosMatcher = migrosPattern.matcher(text);
+
+        if (coopMatcher.find()) {
+            return "Coop";
+        } else if (migrosMatcher.find()) {
+            return "Migros";
+        } else {
+            throw new IllegalArgumentException("Neither Coop nor Migros found in text.");
+        }
     }
 
     static String getText(File pdfFile) {
@@ -136,7 +153,7 @@ public class PDFExtractionResource {
                         try (InputStream inputStream = value.getFileItem().getInputStream()) {
                             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                             pdfFile = tempFile;
-                            return pdfFile; // Return the extracted PDF file
+                            return pdfFile;
                         } catch (IOException e) {
                             LOGGER.log(Level.SEVERE, "Error copying file", e);
                             throw new RuntimeException("Error copying file", e);
@@ -175,18 +192,20 @@ public class PDFExtractionResource {
             // testing purpose
             // System.out.println("ext");
             // System.out.println(cleanedContent);
-            // JsonArray articlesJson = null;
+            // JsonArrayBuilder articlesJson = Json.createArrayBuilder();
+            // articlesJson.add(Json.createObjectBuilder()
+            // .add("Name", "Test")).build();
 
             // ask openai
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
 
             try {
+                String corp = extractCorp(cleanedContent);
                 UUID uid = UUID.randomUUID();
-                // ToDo: read out Corp name
                 JsonObject jsonResponse = Json.createObjectBuilder()
                         .add("UID", uid.toString())
                         .add("PurchaseDate", extractDate)
-                        .add("Corp", "Coop")
+                        .add("Corp", corp)
                         .add("Total", extractTotal)
                         .add("Articles", articlesJson)
                         .build();
