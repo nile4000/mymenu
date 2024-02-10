@@ -10,7 +10,7 @@
       selection="multiple"
       v-model:selected="selected"
     >
-      <template v-slot:bottom>
+      <template v-slot:top>
         <AiRequest :selectedItems="selected"></AiRequest>
       </template>
       <template v-slot:header-selection="scope">
