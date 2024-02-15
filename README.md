@@ -2,6 +2,10 @@
 
 MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie einer Full-Stack-Architektur, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
 
+## Showcase
+
+<https://mymenu-bdf37.firebaseapp.com/>
+
 ## Funktionen
 
 1. Einkaufsbeleg-Scannen: Registrierte Benutzer können ihren Coop oder Migros Einkaufsbeleg über ihr Mobilgerät einscannen. Die Applikation unterstützt die Einlesung von Belegen als PDF-Datei.
