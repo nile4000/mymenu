@@ -35,12 +35,12 @@ import dev.lueem.ai.OpenAiClient;
 import dev.lueem.extract.PDFLayoutTextStripper;
 
 @Path("/api")
-public class PDFExtractionResource {
+public class ExtractionResource {
 
     @Inject
     OpenAiClient openAiClient;
 
-    private static final Logger LOGGER = Logger.getLogger(PDFExtractionResource.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExtractionResource.class.getName());
 
     private static final String PDF_TEMP_PREFIX = "uploaded";
     private static final String PDF_TEMP_SUFFIX = ".pdf";
@@ -166,7 +166,6 @@ public class PDFExtractionResource {
     public Response extractArticlesFromPdf(MultipartFormDataInput input) {
 
         try {
-            // extract pdf from multipart
             File pdfFile = extractPdfFromMultipart(input);
 
             if (pdfFile == null) {

@@ -6,37 +6,29 @@ import java.net.http.HttpResponse;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-
 import java.io.StringReader;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import dev.lueem.payload.*;
+import dev.lueem.payload.PayloadBuilder;
 
 @ApplicationScoped
 public class OpenAiClient {
 
+    private static final Logger LOGGER = Logger.getLogger(OpenAiClient.class.getName());
+
     @Inject
     private PayloadBuilder payloadBuilder;
 
-    private static final Logger LOGGER = Logger.getLogger(OpenAiClient.class.getName());
-
     @ConfigProperty(name = "OPENAI_API_KEY")
-    private String openaiKey = "";
+    private String openaiKey;
 
-    private final HttpClient httpClient;
-
-    public OpenAiClient() {
-        this.httpClient = HttpClient.newHttpClient();
-    }
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     private JsonArray processResponse(String responseBody, String type) {
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {
@@ -48,14 +40,7 @@ public class OpenAiClient {
 
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
-
-                if (type == "receipt") {
-                    JsonArray receipesArray = contentJson.getJsonArray("ReceiptList");
-                    return receipesArray;
-                } else {
-                    JsonArray articlesArray = contentJson.getJsonArray("ArticleList");
-                    return articlesArray;
-                }
+                return contentJson.getJsonArray(type.equals("receipt") ? "ReceiptList" : "ArticleList");
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing response", e);
@@ -65,27 +50,19 @@ public class OpenAiClient {
 
     public JsonArray askQuestion(String question, String type) {
         try {
-            String payload;
-            if (type == "receipt") {
-                payload = payloadBuilder.constructReceiptPayload(question);
-            } else {
-                payload = payloadBuilder.constructPayload(question);
-            }
+            String payload = type.equals("receipt") ? payloadBuilder.constructReceiptPayload(question) : payloadBuilder.constructPayload(question);
 
-            String key = ConfigProvider.getConfig().getValue("OPENAI_API_KEY", String.class);
-
-            if (key == null || key.trim().isEmpty()) {
+            if (openaiKey == null || openaiKey.trim().isEmpty()) {
                 throw new IllegalArgumentException("API KEY is not set");
             }
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + key)
+                    .header("Authorization", "Bearer " + openaiKey)
                     .POST(HttpRequest.BodyPublishers.ofString(payload))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request,
-                    HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             return processResponse(response.body(), type);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in askQuestion", e);

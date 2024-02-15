@@ -20,6 +20,7 @@ public class AiRequestResource {
     private static final String QUESTION_PREFIX = "Erstelle ein JSON-Rezept mit den unten aufgeführten Zutaten. Bei Unstimmigkeiten empfehle passende alternative Zutaten.\n";
 
     private JsonArray getAnswerOpenAI(JsonObject request) {
+        // Combining the question prefix with the chosen articles in the frontend
         String questionPrefix = QUESTION_PREFIX + request.toString();
         return openAiClient.askQuestion(questionPrefix, "receipt");
     }
