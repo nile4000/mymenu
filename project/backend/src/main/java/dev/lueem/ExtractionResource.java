@@ -5,15 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.json.Json;
@@ -33,6 +29,7 @@ import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 
 import dev.lueem.ai.OpenAiClient;
 import dev.lueem.extract.PDFLayoutTextStripper;
+import dev.lueem.extract.TextUtils;
 
 @Path("/api")
 public class ExtractionResource {
@@ -40,71 +37,18 @@ public class ExtractionResource {
     @Inject
     OpenAiClient openAiClient;
 
-    private static final Logger LOGGER = Logger.getLogger(ExtractionResource.class.getName());
+    @Inject
+    TextUtils textUtils;
 
+    private static final Logger LOGGER = Logger.getLogger(ExtractionResource.class.getName());
     private static final String PDF_TEMP_PREFIX = "uploaded";
     private static final String PDF_TEMP_SUFFIX = ".pdf";
     private static final String FILE_REASON_HEADER = "Reason";
-
     // state your prompt here
     private static final String QUESTION_PREFIX = "Extract articles and return a list in a valid JSON format: Name, Price, Quantity, Discount (or 0 if none) from the given receipt.\n";
 
     private Response createBadRequestResponse(String reason) {
         return Response.status(Status.BAD_REQUEST).header(FILE_REASON_HEADER, reason).build();
-    }
-
-    private String cleanUpContent(String content) {
-        return Arrays.stream(content.split(System.lineSeparator()))
-                .filter(line -> !line.trim().isEmpty())
-                .collect(Collectors.joining(System.lineSeparator())).trim();
-    }
-
-
-    private static String extractArticlesUntilTotal(String receipt) {
-        int indexOfTotal = receipt.indexOf("Total CHF");
-        if (indexOfTotal != -1) {
-            return receipt.substring(0, indexOfTotal).trim();
-        }
-        return receipt;
-    }
-
-    public static String extractTotal(String receipt) {
-        String pattern = "Total CHF (\\d+\\.\\d{2})";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(receipt);
-
-        if (m.find()) {
-            return m.group(1);
-        } else {
-            return "0.00";
-        }
-    }
-
-    private static String extractDate(String text) {
-        String datumRegex = "\\b\\d{2}\\.\\d{2}\\.\\d{2}\\b";
-        Pattern pattern = Pattern.compile(datumRegex);
-        Matcher matcher = pattern.matcher(text);
-
-        if (matcher.find()) {
-            return matcher.group(0);
-        }
-        return getTimestamp();
-    }
-
-    private static String extractCorp(String text) {
-        Pattern coopPattern = Pattern.compile("Coop", Pattern.CASE_INSENSITIVE);
-        Matcher coopMatcher = coopPattern.matcher(text);
-
-        Pattern migrosPattern = Pattern.compile("Migros", Pattern.CASE_INSENSITIVE);
-        Matcher migrosMatcher = migrosPattern.matcher(text);
-
-        if (coopMatcher.find()) {
-            return "Coop";
-        } else if (migrosMatcher.find()) {
-            return "Migros";
-        } else {
-            throw new IllegalArgumentException("Neither Coop nor Migros found in text.");
-        }
     }
 
     static String getText(File pdfFile) {
@@ -174,10 +118,10 @@ public class ExtractionResource {
 
             // extract text
             String documentContent = getText(pdfFile);
-            String cleanedContent = cleanUpContent(documentContent);
-            String extractTotal = extractTotal(cleanedContent);
-            String extractDate = extractDate(cleanedContent);
-            String cuttedEnd = extractArticlesUntilTotal(cleanedContent);
+            String cleanedContent = textUtils.cleanUpContent(documentContent);
+            String extractTotal = textUtils.extractTotal(cleanedContent);
+            String extractDate = textUtils.extractDate(cleanedContent);
+            String cuttedEnd = textUtils.extractArticlesUntilTotal(cleanedContent);
 
             // testing purpose
             // System.out.println("ext");
@@ -190,7 +134,7 @@ public class ExtractionResource {
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
 
             try {
-                String corp = extractCorp(cleanedContent);
+                String corp = textUtils.extractCorp(cleanedContent);
                 UUID uid = UUID.randomUUID();
                 JsonObject jsonResponse = Json.createObjectBuilder()
                         .add("UID", uid.toString())
