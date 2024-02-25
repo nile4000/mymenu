@@ -17,18 +17,18 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import dev.lueem.payload.PayloadBuilder;
 
+
 @ApplicationScoped
 public class OpenAiClient {
-
-    private static final Logger LOGGER = Logger.getLogger(OpenAiClient.class.getName());
-
-    @Inject
-    private PayloadBuilder payloadBuilder;
 
     @ConfigProperty(name = "OPENAI_API_KEY")
     private String openaiKey;
 
+    private static final Logger LOGGER = Logger.getLogger(OpenAiClient.class.getName());
     private final HttpClient httpClient = HttpClient.newHttpClient();
+
+    @Inject
+    private PayloadBuilder payloadBuilder;
 
     private JsonArray processResponse(String responseBody, String type) {
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {
@@ -50,7 +50,9 @@ public class OpenAiClient {
 
     public JsonArray askQuestion(String question, String type) {
         try {
-            String payload = type.equals("receipt") ? payloadBuilder.constructReceiptPayload(question) : payloadBuilder.constructPayload(question);
+            String payload = type.equals("receipt") ? payloadBuilder.constructReceiptPayload(question)
+                    : payloadBuilder.constructPayload(question);
+            
 
             if (openaiKey == null || openaiKey.trim().isEmpty()) {
                 throw new IllegalArgumentException("API KEY is not set");

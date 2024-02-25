@@ -1,7 +1,5 @@
 package dev.lueem.payload;
 
-import java.util.Map;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,63 +13,64 @@ public class PayloadBuilder {
 
         @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-1106")
         private String modelDefault = "gpt-3.5-turbo-1106";
-        // private String modelDefault = "gpt-4-0125-preview";
+        // private String modelReceipt = "gpt-4-0125-preview";
 
-        private Map<String, String> articleData = Map.of(
-                        "Name", "QP Früchtequark Erdbeer 2x125g",
-                        "Price", "1.2",
-                        "Quantity", "1",
-                        "Discount", "0.0");
+        private JsonObject getArticleModel() {
+                JsonObjectBuilder article = Json.createObjectBuilder()
+                                .add("Name", "QP Früchtequark Erdbeer 2x125g")
+                                .add("Price", 1.2)
+                                .add("Quantity", 1)
+                                .add("Discount", 0.0);
 
-        private Map<String, String> receiptData = Map.of(
-                        "Name", "Rezeptname",
-                        "Ingredients", "Artikel 1, Artikel 2",
-                        "Instructions", "kurze Anleitung",
-                        "Servings", "2",
-                        "PreparationTime", "minutes");
-
-        private String getArticleModel() {
-                return createSampleModel(articleData).toString();
+                return Json.createObjectBuilder()
+                                .add("ArticleList", Json.createArrayBuilder()
+                                                .add(article))
+                                .build();
         }
 
-        private String getReceiptModel() {
-                return createSampleModel(receiptData).toString();
-        }
+        private JsonObject getReceiptModel() {
+                JsonObjectBuilder receipt = Json.createObjectBuilder()
+                                .add("Name", "Rezeptname")
+                                .add("Ingredients", "Artikel 1, Artikel 2")
+                                .add("Instructions", "Anleitung")
+                                .add("Servings", "Personen")
+                                .add("PreparationTime", "Minuten");
 
-        private JsonObject createSampleModel(Map<String, String> data) {
-                JsonArrayBuilder elements = Json.createArrayBuilder();
-                JsonObjectBuilder element = Json.createObjectBuilder();
-                for (Map.Entry<String, String> entry : data.entrySet()) {
-                        element.add(entry.getKey(), entry.getValue());
-                }
-                elements.add(element);
-
-                return Json.createObjectBuilder().add("List", elements).build();
+                return Json.createObjectBuilder()
+                                .add("ReceiptList", Json.createArrayBuilder()
+                                                .add(receipt))
+                                .build();
         }
 
         public String constructPayload(String question) {
 
                 // Create the sample json payload
-                String articleModel = getArticleModel();
+                JsonObject articleModel = getArticleModel();
+
                 JsonObjectBuilder messageSystem = Json.createObjectBuilder();
                 messageSystem.add("role", "system");
-                messageSystem.add("content", "Output JSON Object in this format: " + articleModel);
+                messageSystem.add("content", "Output JSON Object in this format: " + articleModel.toString());
+
                 JsonObjectBuilder messageUser = Json.createObjectBuilder()
                                 .add("role", "user")
                                 .add("content", question);
+
                 return constructGPTMessages(messageSystem, messageUser);
         }
 
         public String constructReceiptPayload(String question) {
 
                 // Create the sample json payload
-                String receiptModel = getReceiptModel();
+                JsonObject receiptModel = getReceiptModel();
+
                 JsonObjectBuilder messageSystem = Json.createObjectBuilder();
                 messageSystem.add("role", "system");
-                messageSystem.add("content", "Output JSON Object in this format: " + receiptModel);
+                messageSystem.add("content", "Output JSON Object in this format: " + receiptModel.toString());
+
                 JsonObjectBuilder messageUser = Json.createObjectBuilder()
                                 .add("role", "user")
                                 .add("content", question);
+
                 return constructGPTMessages(messageSystem, messageUser);
         }
 
@@ -87,4 +86,5 @@ public class PayloadBuilder {
                                 .build();
                 return payload.toString();
         }
+
 }
