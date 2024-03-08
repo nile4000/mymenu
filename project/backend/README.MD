@@ -1,8 +1,17 @@
 # Quarkus-PDF-Extract Projekt
 
-## pdfbox Übersicht
+## Middleware Übersicht
 
-- Konversion von Dokumenten.
+- Auslesen von Text aus PDFs
+- Extrahieren von bestimmten Textstellen und Metadaten
+- [PDFBox](https://pdfbox.apache.org/)
+
+- API Anfragen senden und empfangen
+- [ChatGPT](https://chat.openai.com/)
+
+- Speichern von Daten in einer Datenbank
+- Coming soon...
+
 
 ### Start development
 
