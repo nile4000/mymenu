@@ -14,6 +14,10 @@ quarkus dev
 ./mvnw compile quarkus:dev
 ```
 
+### Testen
+
+<http://localhost:8080/q/swagger-ui/#>
+
 ## Deployment auf fly.io, build package first
 
 ```shell
