@@ -1,25 +1,27 @@
 <template>
-  <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
-  <div v>
-    <q-card class="q-ma-md">
-      <q-inner-loading class="card-example" :showing="isLoading" label="Lädt.."></q-inner-loading>
-      <div v-if="!isLoading && recipe">
-        <q-card-section>
-          <div class="text-h6">{{ recipe.Name }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Zutaten:</b> {{ recipe.Ingredients }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Zubereitung:</b> {{ recipe.Instructions }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Portionen:</b> {{ recipe.Servings }}</div>
-          <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
-        </q-card-section>
-      </div>
-    </q-card>
-  </div>
+  <q-card class="q-ma-md">
+    <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
+    <q-inner-loading
+      class="card-example"
+      :showing="isLoading"
+      label="Lädt.."
+    ></q-inner-loading>
+    <div v-if="!isLoading && recipe">
+      <q-card-section>
+        <div class="text-h6">{{ recipe.Name }}</div>
+      </q-card-section>
+      <q-card-section>
+        <div><b>Zutaten:</b> {{ recipe.Ingredients }}</div>
+      </q-card-section>
+      <q-card-section>
+        <div><b>Zubereitung:</b> {{ recipe.Instructions }}</div>
+      </q-card-section>
+      <q-card-section>
+        <div><b>Portionen:</b> {{ recipe.Servings }}</div>
+        <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
+      </q-card-section>
+    </div>
+  </q-card>
 </template>
 
 <script>

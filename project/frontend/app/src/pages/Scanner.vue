@@ -1,16 +1,16 @@
 <template>
   <div class="q-pa-md">
     <DialogComponent></DialogComponent>
-    <div class="q-pa-md">
-      <q-uploader
-        :url="apiUrl"
-        label="PDFs hochladen"
-        accept=".pdf"
-        :headers="authHeaders"
-        @rejected="onRejected"
-        @uploaded="onUploaded"
-      ></q-uploader>
-    </div>
+    <q-uploader
+      :url="apiUrl"
+      label="PDFs hochladen"
+      accept=".pdf"
+      icon="scanner"
+      style="width: 100%"
+      :headers="authHeaders"
+      @rejected="onRejected"
+      @uploaded="onUploaded"
+    ></q-uploader>
   </div>
 </template>
 <script>
@@ -56,7 +56,7 @@ export default defineComponent({
         try {
           const response = JSON.parse(event.xhr.responseText);
           const uid = response.UID || 0;
-          sessionStorage.setItem("receipt_"+uid, JSON.stringify(response));
+          sessionStorage.setItem("receipt_" + uid, JSON.stringify(response));
 
           $q.dialog({
             component: DialogComponent,

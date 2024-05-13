@@ -2,14 +2,6 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="directions"
-          aria-label="directions"
-          @click="toggleLeftDrawer"
-        />
         <q-toolbar-title> My Menü </q-toolbar-title>
         <div>
           <q-btn-dropdown unelevated flat color="white">
@@ -36,53 +28,6 @@
         </div>
       </q-toolbar>
     </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered :width="400">
-      <q-list padding>
-        <q-expansion-item
-          v-for="store in stores"
-          :key="store.name"
-          expand-separator
-          :label="'Einkaufsbelege bei ' + store.name + ' abrufen'"
-        >
-          <q-card class="q-ma-md my-card">
-            <q-card-section>
-              <q-list bordered separator>
-                <q-item
-                  dense
-                  v-for="step in store.steps"
-                  :key="step.description"
-                >
-                  <q-item-section side>
-                    <q-icon :name="step.icon"></q-icon>
-                  </q-item-section>
-                  <q-item-section>
-                    <span v-if="step.url">
-                      <a
-                        class="text-primary"
-                        :href="step.url"
-                        target="_blank"
-                        >{{ step.description }}</a
-                      >
-                    </span>
-                    <span v-else>{{ step.description }}</span>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
-      <!-- <q-list>
-        <q-item-label header></q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list> -->
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -162,7 +107,7 @@ export default defineComponent({
           {
             icon: "scanner",
             description:
-              "Navigieren Sie in der MyMenu App zum Scanner und laden Sie die PDFs hoch.",
+              "Navigieren Sie in der MyMenu App zum laden Sie die PDFs hoch.",
           },
         ],
       },
@@ -187,7 +132,7 @@ export default defineComponent({
           {
             icon: "scanner",
             description:
-              "Navigieren Sie in der MyMenu App zum Scanner und laden Sie die PDFs hoch.",
+              "Navigieren Sie in der MyMenu App laden Sie die PDFs hoch.",
           },
         ],
       },
