@@ -1,18 +1,17 @@
 <template>
-  <q-page class="flex flex-center">
+  <div class="q-pa-md">
     <DialogComponent></DialogComponent>
     <div class="q-pa-md">
       <q-uploader
         :url="apiUrl"
         label="PDFs hochladen"
-        style="max-width: 600px"
         accept=".pdf"
         :headers="authHeaders"
         @rejected="onRejected"
         @uploaded="onUploaded"
       ></q-uploader>
     </div>
-  </q-page>
+  </div>
 </template>
 <script>
 import { defineComponent, computed } from "vue";
@@ -31,7 +30,7 @@ export default defineComponent({
     const auth = getAuth();
 
     const authHeaders = computed(() => {
-      const userId = auth.currentUser ? auth.currentUser.uid : null;
+      const userId = auth.currentUser ? auth.currentUser.uid : 0;
       if (userId) {
         return [{ name: "FirebaseAuthId", value: userId }];
       } else {
@@ -56,7 +55,7 @@ export default defineComponent({
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);
-          const uid = response.UID;
+          const uid = response.UID || 0;
           sessionStorage.setItem("receipt_"+uid, JSON.stringify(response));
 
           $q.dialog({

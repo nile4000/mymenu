@@ -60,7 +60,6 @@ export default defineComponent({
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
-              Firebaseauthid: getAuth().currentUser.uid || null,
             },
           }
         );

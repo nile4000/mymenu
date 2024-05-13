@@ -12,7 +12,7 @@ import jakarta.json.JsonObjectBuilder;
 public class PayloadBuilder {
 
         @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-1106")
-        private String modelDefault = "gpt-3.5-turbo-1106";
+        private String modelDefault = "gpt-4o";
         // private String modelReceipt = "gpt-4-0125-preview";
 
         private JsonObject getArticleModel() {

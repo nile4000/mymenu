@@ -2,26 +2,27 @@ const routes = [
   {
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
+    meta: { requiresAuth: false },
     children: [
       {
         path: "",
         component: () => import("pages/Index.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: false },
       },
       {
         path: "scanner",
         component: () => import("pages/Scanner.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: false },
       },
       {
         path: "receipt",
         component: () => import("pages/Receipt.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: false },
       },
       {
         path: "food",
         component: () => import("src/pages/Food.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: false },
       },
     ],
   },
@@ -59,10 +60,10 @@ const routes = [
   // },
   // Always leave this as last one,
   // but you can also remove it
-  // {
-  //   path: "/:catchAll(.*)*",
-  //   component: () => import("pages/Error404.vue"),
-  // },
+  {
+    path: "/:catchAll(.*)*",
+    component: () => import("pages/Error404.vue"),
+  },
 ];
 
 export default routes;
