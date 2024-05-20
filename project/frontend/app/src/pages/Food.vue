@@ -23,8 +23,9 @@
     </q-table>
   </div>
 </template>
+
 <script>
-import { defineComponent, ref, onMounted, toRaw } from "vue";
+import { defineComponent, ref, onMounted, toRaw, reactive } from "vue";
 import AiRequest from "../components/AiRequest.vue";
 
 const columns = [
@@ -55,9 +56,10 @@ export default defineComponent({
   setup() {
     const tableRef = ref();
     const selected = ref([]);
-    const rows = ref([]);
+    const rows = reactive([]); // Make rows reactive
 
-    onMounted(() => {
+    // Funktion, um die Daten der Tabelle zu aktualisieren
+    function updateTableData() {
       const allArticles = [];
       Object.keys(sessionStorage).forEach((key) => {
         if (key.includes("food")) {
@@ -71,7 +73,12 @@ export default defineComponent({
         }
       });
 
-      rows.value = toRaw(allArticles);
+      Object.assign(rows, toRaw(allArticles));
+    }
+
+    onMounted(() => {
+      updateTableData(); // initial ausführen
+      setInterval(updateTableData, 1000); // alle 1 Sekunde wiederholen
     });
 
     return {

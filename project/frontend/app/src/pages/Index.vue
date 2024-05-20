@@ -1,13 +1,13 @@
 <template>
   <q-page>
-    <q-list padding bordered class="rounded-borders">
+    <q-list padding bordered class="rounded-borders q-ma-md">
       <q-expansion-item
         v-for="store in stores"
         :key="store.name"
         expand-separator
         :label="'Anleitung: Einkaufsbelege bei ' + store.name + ' abrufen'"
       >
-        <q-card class="q-ma-md my-card">
+        <q-card class="my-card">
           <q-card-section>
             <q-list bordered separator class="rounded-borders">
               <q-item dense v-for="step in store.steps" :key="step.description">
