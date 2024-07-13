@@ -13,7 +13,7 @@
     "deploy": "firebase deploy"
   },
   "dependencies": {
-    "@quasar/app-webpack": "^3.12.3",
+    "@quasar/app-webpack": "^3.13.2",
     "@quasar/cli": "^2.3.0",
     "@quasar/extras": "^1.16.9",
     "axios": "^1.6.7",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
-    "@quasar/app-webpack": "^3.12.3",
+    "@quasar/app-webpack": "^3.13.2",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^7.0.0",
