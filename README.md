@@ -1,4 +1,4 @@
-# 🛸 mymenu
+# 🛸 MyMenu
 
 MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie einer Full-Stack-Architektur, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
 
