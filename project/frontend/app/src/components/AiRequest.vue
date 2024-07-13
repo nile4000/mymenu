@@ -36,7 +36,7 @@
 
 <script>
 import axios from "axios";
-import { getAuth } from "firebase/auth";
+// import { getAuth } from "firebase/auth";
 import { defineComponent } from "vue";
 
 export default defineComponent({
