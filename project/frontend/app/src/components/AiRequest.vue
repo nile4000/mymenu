@@ -1,11 +1,21 @@
 <template>
   <q-card class="q-ma-md">
-    <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
+    <transition name="fade">
+      <q-btn
+        color="secondary"
+        label="Menü erstellen"
+        icon="menu_book"
+        @click="sendRequest"
+        v-ripple
+      ></q-btn>
+    </transition>
     <q-inner-loading
       class="card-example"
       :showing="isLoading"
-      label="Lädt.."
+      label="Lädt"
     ></q-inner-loading>
+  </q-card>
+  <q-card class="q-ma-md">
     <div v-if="!isLoading && recipe">
       <q-card-section>
         <div class="text-h6">{{ recipe.Name }}</div>
@@ -80,5 +90,14 @@ export default defineComponent({
 .card-example {
   max-width: 400px;
   margin: 0 auto;
+}
+.button-loading-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+}
+::v-deep .q-icon {
+  color: white !important;
 }
 </style>

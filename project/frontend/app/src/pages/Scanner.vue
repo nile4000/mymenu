@@ -83,3 +83,8 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+::v-deep .q-icon {
+  color: white !important;
+}
+</style>

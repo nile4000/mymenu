@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex q-pa-md justify-center items-center">
-    <q-card style="width: 100%; max-width: 500px" class="">
+    <q-card style="width: 100%; max-width: 500px">
       <q-tabs
         v-model="tab"
         dense

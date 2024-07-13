@@ -2,7 +2,11 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title> My Menü </q-toolbar-title>
+        <q-toolbar-title>
+          <q-avatar square size="36px" class="q-mr-sm">
+            <img src="../assets/logo.png" alt="Logo" /> </q-avatar
+          >My Menü
+        </q-toolbar-title>
         <div>
           <q-btn-dropdown unelevated flat color="white">
             <q-list>
@@ -84,59 +88,6 @@ export default defineComponent({
     const name = ref("");
     const $q = useQuasar();
     const auth = getAuth();
-    const stores = ref([
-      {
-        name: "Coop",
-        steps: [
-          {
-            icon: "login",
-            description:
-              "Besuchen Sie die Supercard-Webseite und loggen Sie sich ein.",
-            url: "https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html",
-          },
-          {
-            icon: "map",
-            description:
-              "Navigieren Sie zu 'App & Digitale Services' > 'Meine Einkäufe'.",
-          },
-          {
-            icon: "file_download",
-            description:
-              "Laden Sie die gewünschten Coop Einkaufsbelege (PDF) auf Ihr Gerät.",
-          },
-          {
-            icon: "scanner",
-            description:
-              "Navigieren Sie in der MyMenu App zum laden Sie die PDFs hoch.",
-          },
-        ],
-      },
-      {
-        name: "Migros",
-        steps: [
-          {
-            icon: "login",
-            description:
-              "Besuchen Sie die Migros-Webseite und loggen Sie sich ein.",
-            url: "https://cumulus.migros.ch/de/konto/kassenbons.html",
-          },
-          {
-            icon: "map",
-            description: "Navigieren Sie zu 'Cumulus Konto' > 'Kassenbons'.",
-          },
-          {
-            icon: "file_download",
-            description:
-              "Laden Sie die gewünschten Migros Einkaufsbelege (PDF) auf Ihr Gerät.",
-          },
-          {
-            icon: "scanner",
-            description:
-              "Navigieren Sie in der MyMenu App laden Sie die PDFs hoch.",
-          },
-        ],
-      },
-    ]);
     // if we want to get the user details, this is how its done
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -158,7 +109,6 @@ export default defineComponent({
       router.push("/receipt");
     };
     return {
-      stores,
       email,
       name,
       leftDrawerOpen,

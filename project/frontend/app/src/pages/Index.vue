@@ -2,10 +2,11 @@
   <q-page>
     <q-list padding bordered class="rounded-borders q-ma-md">
       <q-expansion-item
+        icon="help"
         v-for="store in stores"
         :key="store.name"
         expand-separator
-        :label="'Anleitung: Einkaufsbelege bei ' + store.name + ' abrufen'"
+        :label="'Einkaufsbelege bei ' + store.name + ' abrufen'"
       >
         <q-card class="my-card">
           <q-card-section>
@@ -16,9 +17,11 @@
                 </q-item-section>
                 <q-item-section>
                   <span v-if="step.url">
+                    <span>{{ getPrefix(step.description) }}</span>
                     <a class="text-primary" :href="step.url" target="_blank">{{
-                      step.description
+                      getLinkText(step.description)
                     }}</a>
+                    <span>{{ getSuffix(step.description) }}</span>
                   </span>
                   <span v-else>{{ step.description }}</span>
                 </q-item-section>
@@ -32,6 +35,7 @@
     <FoodPage></FoodPage>
   </q-page>
 </template>
+
 
 <script>
 import { defineComponent, ref } from "vue";
@@ -99,8 +103,26 @@ export default defineComponent({
       },
     ]);
 
+    const getPrefix = (description) => {
+      const match = description.match(/^(.*?)(Supercard-Webseite|Migros-Webseite)/);
+      return match ? match[1] : '';
+    };
+
+    const getLinkText = (description) => {
+      const match = description.match(/(Supercard-Webseite|Migros-Webseite)/);
+      return match ? match[1] : '';
+    };
+
+    const getSuffix = (description) => {
+      const match = description.match(/(Supercard-Webseite|Migros-Webseite)(.*)$/);
+      return match ? match[2] : '';
+    };
+
     return {
       stores,
+      getPrefix,
+      getLinkText,
+      getSuffix,
     };
   },
 });

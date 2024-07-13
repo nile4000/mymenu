@@ -147,7 +147,7 @@ export default defineComponent({
 </script>
 <style scoped>
 .text-h5 {
-  font-family: "Playfair Display", serif;
+  font-family: "Roboto", serif;
 }
 
 .img-margin {
