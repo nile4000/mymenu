@@ -10,7 +10,7 @@
           :columns="columns"
           row-key="Name"
           selection="multiple"
-          v-model:selected="selected"
+          v-model="selected"
         >
           <template v-slot:header-selection="scope">
             <q-toggle v-model="scope.selected"></q-toggle>

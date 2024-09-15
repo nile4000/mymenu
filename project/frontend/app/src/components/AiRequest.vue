@@ -1,8 +1,12 @@
 <template>
-  <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
-  <div v>
+  <div>
+    <q-btn color="positive" label="Menü erstellen" @click="sendRequest"></q-btn>
     <q-card class="q-ma-md">
-      <q-inner-loading class="card-example" :showing="isLoading" label="Lädt.."></q-inner-loading>
+      <q-inner-loading
+        class="card-example"
+        :showing="isLoading"
+        label="Lädt.."
+      ></q-inner-loading>
       <div v-if="!isLoading && recipe">
         <q-card-section>
           <div class="text-h6">{{ recipe.Name }}</div>
@@ -24,7 +28,6 @@
 
 <script>
 import axios from "axios";
-import { getAuth } from "firebase/auth";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -60,7 +63,7 @@ export default defineComponent({
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
-              Firebaseauthid: getAuth().currentUser.uid || null,
+              // Firebaseauthid: getAuth().currentUser.uid || null,
             },
           }
         );

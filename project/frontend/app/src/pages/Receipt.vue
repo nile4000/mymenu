@@ -50,10 +50,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Receipt } from "../helpers/interfaces/receipt.interface";
+import { Column } from "../helpers/interfaces/column.interface";
 import { defineComponent, ref, onMounted } from "vue";
 
-const columns = [
+// Defining the columns
+const columns: Column[] = [
   {
     name: "PurchaseDate",
     required: true,
@@ -68,23 +71,21 @@ export default defineComponent({
   name: "ReceiptsPage",
 
   setup() {
-    const rows = ref([]);
-    const filter = ref("");
-    const selected = ref([]);
+    // Define rows as an array of Receipt objects
+    const rows = ref<Receipt[]>([]);
+    const filter = ref<string>("");
+    const selected = ref<string[]>([]);
 
     onMounted(() => {
-      const allRows = [];
+      const allRows: Receipt[] = [];
       Object.keys(sessionStorage).forEach((key) => {
         if (key.includes("receipt")) {
           try {
-            const itemValue = JSON.parse(sessionStorage.getItem(key));
-            const receipt = itemValue;
-            allRows.push({
-              Total: receipt.Total,
-              PurchaseDate: receipt.PurchaseDate,
-              Articles: receipt.Articles,
-              Corp: receipt.Corp,
-            });
+            const itemValue = sessionStorage.getItem(key);
+            if (itemValue) {
+              const receipt: Receipt = JSON.parse(itemValue);
+              allRows.push(receipt);
+            }
           } catch (e) {
             console.error("Error parsing session storage item", key, e);
           }

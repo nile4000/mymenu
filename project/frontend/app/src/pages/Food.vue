@@ -8,7 +8,7 @@
       :columns="columns"
       row-key="Name"
       selection="multiple"
-      v-model:selected="selected"
+      v-model="selected"
     >
       <template v-slot:top>
         <AiRequest :selectedItems="selected"></AiRequest>
@@ -23,11 +23,13 @@
     </q-table>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, ref, onMounted, toRaw } from "vue";
 import AiRequest from "../components/AiRequest.vue";
+import { Article } from "../helpers/interfaces/article.interface";
+import { Column } from "../helpers/interfaces/column.interface";
 
-const columns = [
+const columns: Column[] = [
   {
     name: "Name",
     required: true,
@@ -53,32 +55,35 @@ export default defineComponent({
   },
 
   setup() {
-    const tableRef = ref();
-    const selected = ref([]);
-    const rows = ref([]);
+    // Define rows as an array of Article objects
+    const rows = ref<Article[]>([]);
+    const selected = ref<Article[]>([]); // Selection is an array of Article objects
 
+    // onMounted lifecycle hook
     onMounted(() => {
-      const allArticles = [];
+      const allArticles: Article[] = [];
       Object.keys(sessionStorage).forEach((key) => {
         if (key.includes("food")) {
           const rawValue = sessionStorage.getItem(key);
           try {
-            const itemValue = JSON.parse(rawValue);
-            itemValue.forEach((article) => allArticles.push(article));
+            if (rawValue) {
+              const itemValue: Article[] = JSON.parse(rawValue);
+              itemValue.forEach((article) => allArticles.push(article));
+            }
           } catch (e) {
             console.error("Error parsing session storage item", key, e);
           }
         }
       });
 
+      // Set the rows to the parsed articles
       rows.value = toRaw(allArticles);
     });
 
     return {
-      tableRef,
-      selected,
       columns,
       rows,
+      selected,
     };
   },
 });

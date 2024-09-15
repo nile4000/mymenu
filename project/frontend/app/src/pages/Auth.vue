@@ -31,13 +31,13 @@
   </q-page>
 </template>
 
-<script>
-import AuthComponent from "components/AuthComponent";
+<script lang="ts">
+// import AuthComponent from "components/AuthComponent";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  name: "Auth",
-  components: { AuthComponent },
+  name: "AuthComp",
+  // components: { AuthComponent },
   setup() {
     const tab = ref("login");
     return {

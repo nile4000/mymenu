@@ -59,6 +59,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.sourceforge.tess4j</groupId>
+      <artifactId>tess4j</artifactId>
+      <version>5.7.0</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -94,6 +99,9 @@
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
             <maven.home>${maven.home}</maven.home>
           </systemPropertyVariables>
+          <environmentVariables>
+            <TESSDATA_PREFIX>${basedir}/src/test/resources/test-tessdata</TESSDATA_PREFIX>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -111,6 +119,9 @@
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                 <maven.home>${maven.home}</maven.home>
               </systemPropertyVariables>
+              <environmentVariables>
+                <TESSDATA_PREFIX>${basedir}/src/test/resources/test-tessdata</TESSDATA_PREFIX>
+              </environmentVariables>
             </configuration>
           </execution>
         </executions>

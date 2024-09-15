@@ -27,6 +27,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.jboss.resteasy.reactive.server.multipart.FormValue;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 import dev.lueem.ai.OpenAiClient;
 import dev.lueem.extract.PDFLayoutTextStripper;
 import dev.lueem.extract.TextUtils;
@@ -51,11 +54,24 @@ public class ExtractionResource {
         return Response.status(Status.BAD_REQUEST).header(FILE_REASON_HEADER, reason).build();
     }
 
-    static String getText(File pdfFile) {
+    static String getTextPDF(File pdfFile) {
         try (PDDocument doc = Loader.loadPDF(pdfFile)) {
             return new PDFLayoutTextStripper().getText(doc);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error loading PDF", e);
+            return null;
+        }
+    }
+
+    static String getTextImage(File imageFile) {
+        ITesseract tesseract = new Tesseract();
+        try {
+            // load data for German
+            tesseract.setDatapath("../../../../../test/resources/test-tessdata/deu.traineddata");
+            String result = tesseract.doOCR(imageFile);
+            return result;
+        } catch (TesseractException e) {
+            LOGGER.log(Level.SEVERE, "Error processing image with Tesseract", e);
             return null;
         }
     }
@@ -117,7 +133,12 @@ public class ExtractionResource {
             }
 
             // extract text
-            String documentContent = getText(pdfFile);
+            // ToDo: check if the file is a PDF or an image
+            String documentContent = getTextPDF(pdfFile);
+            if (documentContent == null) {
+                // try to extract text from image
+                documentContent = getTextImage(pdfFile);
+            }
             String cleanedContent = textUtils.cleanUpContent(documentContent);
             String extractTotal = textUtils.extractTotal(cleanedContent);
             String extractDate = textUtils.extractDate(cleanedContent);
