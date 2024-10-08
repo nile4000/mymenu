@@ -42,9 +42,8 @@
 <script>
 import router from "../router";
 import { useQuasar } from "quasar";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+// import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-import EssentialLink from "components/EssentialLink.vue";
 
 // const linksList = [
 //   {
@@ -87,16 +86,16 @@ export default defineComponent({
     const email = ref("");
     const name = ref("");
     const $q = useQuasar();
-    const auth = getAuth();
+    // const auth = getAuth();
     // if we want to get the user details, this is how its done
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        email.value = user.email;
-        name.value = user.displayName;
-      }
-    });
+    // onAuthStateChanged(auth, (user) => {
+    //   if (user) {
+    //     email.value = user.email;
+    //     name.value = user.displayName;
+    //   }
+    // });
     const logout = () => {
-      getAuth().signOut();
+      // getAuth().signOut();
       router
         .push("/auth/login")
         .then(() => {

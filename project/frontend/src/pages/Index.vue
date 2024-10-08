@@ -37,7 +37,7 @@
 </template>
 
 
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import ScannerPage from "./Scanner.vue";
 import FoodPage from "./Food.vue";
@@ -103,17 +103,17 @@ export default defineComponent({
       },
     ]);
 
-    const getPrefix = (description) => {
+    const getPrefix = (description: any) => {
       const match = description.match(/^(.*?)(Supercard-Webseite|Migros-Webseite)/);
       return match ? match[1] : '';
     };
 
-    const getLinkText = (description) => {
+    const getLinkText = (description: any) => {
       const match = description.match(/(Supercard-Webseite|Migros-Webseite)/);
       return match ? match[1] : '';
     };
 
-    const getSuffix = (description) => {
+    const getSuffix = (description: any) => {
       const match = description.match(/(Supercard-Webseite|Migros-Webseite)(.*)$/);
       return match ? match[2] : '';
     };

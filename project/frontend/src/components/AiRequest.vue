@@ -1,42 +1,43 @@
 <template>
-  <q-card class="q-ma-md">
-    <transition name="fade">
-      <q-btn
-        color="secondary"
-        label="Menü erstellen"
-        icon="menu_book"
-        @click="sendRequest"
-        v-ripple
-      ></q-btn>
-    </transition>
-    <q-inner-loading
-      class="card-example"
-      :showing="isLoading"
-      label="Lädt"
-    ></q-inner-loading>
-  </q-card>
-  <q-card class="q-ma-md">
-    <div v-if="!isLoading && recipe">
-      <q-card-section>
-        <div class="text-h6">{{ recipe.Name }}</div>
-      </q-card-section>
-      <q-card-section>
-        <div><b>Zutaten:</b> {{ recipe.Ingredients }}</div>
-      </q-card-section>
-      <q-card-section>
-        <div><b>Zubereitung:</b> {{ recipe.Instructions }}</div>
-      </q-card-section>
-      <q-card-section>
-        <div><b>Portionen:</b> {{ recipe.Servings }}</div>
-        <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
-      </q-card-section>
-    </div>
-  </q-card>
+  <div>
+    <q-card class="q-ma-md">
+      <transition name="fade">
+        <q-btn
+          color="secondary"
+          label="Menü erstellen"
+          icon="menu_book"
+          @click="sendRequest"
+          v-ripple
+        ></q-btn>
+      </transition>
+      <q-inner-loading
+        class="card-example"
+        :showing="isLoading"
+        label="Lädt"
+      ></q-inner-loading>
+    </q-card>
+    <q-card class="q-ma-md">
+      <div v-if="!isLoading && recipe">
+        <q-card-section>
+          <div class="text-h6">{{ recipe.Name }}</div>
+        </q-card-section>
+        <q-card-section>
+          <div><b>Zutaten:</b> {{ recipe.Ingredients }}</div>
+        </q-card-section>
+        <q-card-section>
+          <div><b>Zubereitung:</b> {{ recipe.Instructions }}</div>
+        </q-card-section>
+        <q-card-section>
+          <div><b>Portionen:</b> {{ recipe.Servings }}</div>
+          <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
+        </q-card-section>
+      </div>
+    </q-card>
+  </div>
 </template>
 
 <script>
 import axios from "axios";
-// import { getAuth } from "firebase/auth";
 import { defineComponent } from "vue";
 
 export default defineComponent({

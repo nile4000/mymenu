@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div>
     <div class="full-width col">
       <div class="full-width q-pa-lg">
@@ -153,4 +153,4 @@ export default defineComponent({
 .img-margin {
   margin: 1px 1px 1px 6px;
 }
-</style>
+</style> -->

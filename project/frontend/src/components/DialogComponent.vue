@@ -38,9 +38,8 @@
   </q-dialog>
 </template>
 
-<script>
-import router from "../router";
-import { defineComponent, ref, computed, toRaw } from "vue";
+<script lang="ts">
+import { defineComponent, ref, computed, toRaw, PropType } from "vue";
 
 const columns = [
   {
@@ -62,21 +61,29 @@ const columns = [
   { name: "Discount", label: "Aktion", field: "Discount" },
 ];
 
+interface ResponseItem {
+  UID: string;
+  Articles: any[]; // Replace 'any[]' with the actual type of Articles
+  // Add other properties if necessary
+}
+
 export default defineComponent({
-  name: "DialogComponent",
   props: {
-    response: { type: Object, required: false },
+    response: {
+      type: Array as PropType<ResponseItem[]>,
+      required: true, // Mark the prop as required
+    },
   },
   setup(props, { emit }) {
     const selected = ref([]);
 
-    const articles = computed(() => props.response[0]?.Articles || []);
+    const articles = computed(() => props.response[0].Articles);
 
     const saveSelection = () => {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         try {
           emit("save-selection");
-          const uid = props.response[0]?.UID || 0;
+          const uid = props.response[0].UID || "";
           sessionStorage.setItem(
             "food_" + uid,
             JSON.stringify(toRaw(selected.value))
@@ -85,17 +92,13 @@ export default defineComponent({
         } catch (error) {
           reject(error);
         }
-      })
-        .catch((error) => {
-          console.error("Fehler beim Speichern der Auswahl:", error);
-        });
+      }).catch((error) => {
+        console.error("Error saving selection:", error);
+      });
     };
 
     return {
       selected,
-      basic: ref(false),
-      fixed: ref(false),
-      columns,
       articles,
       saveSelection,
     };

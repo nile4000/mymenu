@@ -36,7 +36,7 @@
 
 <script>
 import { defineComponent, reactive } from "vue";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+// import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useQuasar } from "quasar";
 
 export default defineComponent({

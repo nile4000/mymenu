@@ -1,19 +1,17 @@
 import { boot } from "quasar/wrappers";
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCdFPyGbaC3lQv_uid-bx5vcVDLRyiIYUk",
-//   authDomain: "mymenu-bdf37.firebaseapp.com",
-//   projectId: "mymenu-bdf37",
-//   storageBucket: "mymenu-bdf37.appspot.com",
-//   messagingSenderId: "343475080236",
-//   appId: "1:343475080236:web:c37379f45b9ce915509589",
-//   measurementId: "G-Z838G5N852"
-// };
+const firebaseConfig = {
+  apiKey: "AIzaSyCdFPyGbaC3lQv_uid-bx5vcVDLRyiIYUk",
+  authDomain: "mymenu-bdf37.firebaseapp.com",
+  projectId: "mymenu-bdf37",
+  storageBucket: "mymenu-bdf37.appspot.com",
+  messagingSenderId: "343475080236",
+  appId: "1:343475080236:web:c37379f45b9ce915509589",
+  measurementId: "G-Z838G5N852"
+};
 
-export default boot(({ router, app }) => {
-  initializeApp(firebaseConfig);
+export default boot(() => {
+  // initializeApp(firebaseConfig);
   // const auth = getAuth();
 
   // This code has been commented out to disable the auth guard on startup
@@ -42,7 +40,7 @@ export default boot(({ router, app }) => {
   // });
 
   // Simply navigate without auth checks
-  router.beforeEach((to, from, next) => {
-    next();
-  });
+  // router.beforeEach((to, from, next) => {
+  //   next();
+  // });
 });

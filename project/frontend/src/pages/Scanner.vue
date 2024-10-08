@@ -13,9 +13,8 @@
     ></q-uploader>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, computed } from "vue";
-import { getAuth } from "firebase/auth";
 import DialogComponent from "../components/DialogComponent.vue";
 import { useQuasar } from "quasar";
 
@@ -27,16 +26,17 @@ export default defineComponent({
 
   setup() {
     const $q = useQuasar();
-    const auth = getAuth();
+    // const auth = getAuth();
 
     const authHeaders = computed(() => {
-      const userId = auth.currentUser ? auth.currentUser.uid : 0;
-      if (userId) {
-        return [{ name: "FirebaseAuthId", value: userId }];
-      } else {
-        console.error("User not logged in");
-        return [];
-      }
+      // const userId = auth.currentUser ? auth.currentUser.uid : 0;
+      // if (userId) {
+      //   return [{ name: "FirebaseAuthId", value: userId }];
+      // } else {
+      //   console.error("User not logged in");
+      //   return [];
+      // }
+      return []
     });
 
     const apiUrl = computed(() => {
@@ -44,14 +44,14 @@ export default defineComponent({
       return `${apiUrl}/api/extract`;
     });
 
-    function onRejected(rejectedEntries) {
+    function onRejected(rejectedEntries : any) {
       $q.notify({
         type: "negative",
         message: `${rejectedEntries.length} file did not pass validation constraints`,
       });
     }
 
-    function onUploaded(event) {
+    function onUploaded(event: any) {
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);

@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, ref, onMounted, toRaw, reactive } from "vue";
 import AiRequest from "../components/AiRequest.vue";
 import { Article } from "../helpers/interfaces/article.interface";
@@ -56,13 +56,12 @@ export default defineComponent({
   },
 
   setup() {
-    const tableRef = ref();
     const selected = ref([]);
     const rows = reactive([]); // Make rows reactive
 
     // Funktion, um die Daten der Tabelle zu aktualisieren
     function updateTableData() {
-      const allArticles = [];
+      const allArticles: Article[] = [];
       Object.keys(sessionStorage).forEach((key) => {
         if (key.includes("food")) {
           const rawValue = sessionStorage.getItem(key);
