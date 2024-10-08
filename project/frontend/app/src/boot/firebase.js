@@ -1,7 +1,6 @@
-// import { boot } from "quasar/wrappers";
-// // import firebase from 'firebase'
-// import { initializeApp, getCurrentUser } from "firebase/app";
-// import { getAuth } from "firebase/auth";
+import { boot } from "quasar/wrappers";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 // const firebaseConfig = {
 //   apiKey: "AIzaSyCdFPyGbaC3lQv_uid-bx5vcVDLRyiIYUk",
@@ -13,35 +12,37 @@
 //   measurementId: "G-Z838G5N852"
 // };
 
-// // "async" is optional;
-// // more info on params: https://v2.quasar.dev/quasar-cli/boot-files
-// export default boot(async ({ router, app }) => {
-//   initializeApp(firebaseConfig);
-//   const auth = getAuth();
-//   router.beforeEach((to, from, next) => {
-//     return new Promise((resolve, reject) => {
-//       const unsubscribe = auth.onAuthStateChanged(function (user) {
-//         unsubscribe();
-//         if (!user && to.path != "/auth/login") {
-//           next("/auth/login");
-//         } else if (user) {
-//           // if (!user.emailVerified && to.path != "/auth/verifyEmail" && to.path != "/auth/completeAccount") {
-//           //   next("/auth/verifyEmail");
-//           // } else
-//           if (
-//             to.path == "/auth/login" ||
-//             to.path == "/auth/verifyEmail" ||
-//             to.path == "/auth/completeAccount"
-//           ) {
-//             next("/");
-//           } else {
-//             next();
-//           }
-//         } else {
-//           next();
-//         }
-//         resolve(user);
-//       }, reject);
-//     });
-//   });
-// });
+export default boot(({ router, app }) => {
+  initializeApp(firebaseConfig);
+  // const auth = getAuth();
+
+  // This code has been commented out to disable the auth guard on startup
+  // router.beforeEach((to, from, next) => {
+  //   return new Promise((resolve, reject) => {
+  //     const unsubscribe = auth.onAuthStateChanged(function (user) {
+  //       unsubscribe();
+  //       if (!user && to.path != "/auth/login") {
+  //         next("/auth/login");
+  //       } else if (user) {
+  //         if (
+  //           to.path == "/auth/login" ||
+  //           to.path == "/auth/verifyEmail" ||
+  //           to.path == "/auth/completeAccount"
+  //         ) {
+  //           next("/");
+  //         } else {
+  //           next();
+  //         }
+  //       } else {
+  //         next();
+  //       }
+  //       resolve(user);
+  //     }, reject);
+  //   });
+  // });
+
+  // Simply navigate without auth checks
+  router.beforeEach((to, from, next) => {
+    next();
+  });
+});

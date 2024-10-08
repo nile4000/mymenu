@@ -2,23 +2,19 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-        <q-toolbar-title> My Menü </q-toolbar-title>
+        <q-toolbar-title>
+          <q-avatar square size="36px" class="q-mr-sm">
+            <img src="../assets/logo.png" alt="Logo" /> </q-avatar
+          >My Menü
+        </q-toolbar-title>
         <div>
-          <q-btn-dropdown unelevated flat color="white" icon="person">
+          <q-btn-dropdown unelevated flat color="white">
             <q-list>
-              <q-item class="bg-grey-3">
+              <!-- <q-item class="bg-grey-3">
                 <q-item-title>
                   Eingeloggt als: <br /><b>{{ email }}</b>
                 </q-item-title>
-              </q-item>
+              </q-item> -->
               <q-item clickable v-close-popup @click="openHistory">
                 <q-item-section avatar>
                   <q-item-label
@@ -26,28 +22,16 @@
                   >
                 </q-item-section>
               </q-item>
-              <q-item clickable v-close-popup @click="logout">
+              <!-- <q-item clickable v-close-popup @click="logout">
                 <q-item-section>
                   <q-item-label>Ausloggen</q-item-label>
                 </q-item-section>
-              </q-item>
+              </q-item> -->
             </q-list>
           </q-btn-dropdown>
         </div>
       </q-toolbar>
     </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header></q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -62,41 +46,41 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import EssentialLink from "components/EssentialLink.vue";
 
-const linksList = [
-  {
-    title: "Home",
-    caption: "Willkommen",
-    icon: "home",
-    link: "/",
-  },
-  {
-    title: "Erfassung",
-    caption: "Dokumente Erfassung",
-    icon: "scanner",
-    link: "/scanner",
-  },
-  // {
-  //   title: "Deine Belege",
-  //   caption: "Gescannte Belege",
-  //   icon: "receipt",
-  //   link: "/receipt",
-  // },
-  {
-    title: "Esswaren",
-    caption: "Deine Esswaren",
-    icon: "restaurant",
-    link: "/food",
-  },
-];
+// const linksList = [
+//   {
+//     title: "Home",
+//     caption: "Willkommen",
+//     icon: "home",
+//     link: "/",
+//   },
+//   {
+//     title: "Erfassung",
+//     caption: "Dokumente Erfassung",
+//     icon: "scanner",
+//     link: "/scanner",
+//   },
+//   // {
+//   //   title: "Deine Belege",
+//   //   caption: "Gescannte Belege",
+//   //   icon: "receipt",
+//   //   link: "/receipt",
+//   // },
+//   {
+//     title: "Esswaren",
+//     caption: "Deine Esswaren",
+//     icon: "restaurant",
+//     link: "/food",
+//   },
+// ];
 
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "MainLayout",
 
-  components: {
-    EssentialLink,
-  },
+  // components: {
+  //   // EssentialLink,
+  // },
 
   setup() {
     const leftDrawerOpen = ref(false);
@@ -125,7 +109,6 @@ export default defineComponent({
       router.push("/receipt");
     };
     return {
-      essentialLinks: linksList,
       email,
       name,
       leftDrawerOpen,

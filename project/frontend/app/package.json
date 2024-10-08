@@ -13,7 +13,6 @@
     "deploy": "firebase deploy"
   },
   "dependencies": {
-    "@quasar/app-webpack": "^3.12.3",
     "@quasar/cli": "^2.3.0",
     "@quasar/extras": "^1.16.9",
     "axios": "^1.6.7",
@@ -21,16 +20,17 @@
     "firebase": "^9.0.2",
     "mymenu": "file:",
     "quasar": "2.14.3",
+    "typescript-eslint": "^7.16.0",
     "vue": "3.4.15",
+    "vue-router": "^4.4.0",
     "vuex": "^4.0.1"
   },
   "devDependencies": {
-    "@quasar/app-webpack": "^3.12.3",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
-    "eslint": "^8.57.0",
+    "@babel/eslint-parser": "^7.13.14",
+    "@quasar/app-webpack": "^3.13.2",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-vue": "^9.28.0",
+    "eslint-plugin-vue": "^7.20.0",
     "eslint-webpack-plugin": "^2.4.0",
     "prettier": "^2.5.1",
     "sass-migrator": "^1.8.1",

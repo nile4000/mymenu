@@ -86,9 +86,6 @@ export default defineComponent({
           reject(error);
         }
       })
-        .then(() => {
-          router.push("/food");
-        })
         .catch((error) => {
           console.error("Fehler beim Speichern der Auswahl:", error);
         });
