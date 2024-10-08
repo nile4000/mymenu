@@ -3,3 +3,7 @@ project/frontend/app/.firebase
 project/backend/.env
 project/firebase
 project/.firebase
+.github
+.quarkus/cli/plugins
+.vscode
+.DS_Store
