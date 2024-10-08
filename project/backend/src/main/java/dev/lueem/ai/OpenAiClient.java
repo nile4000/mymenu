@@ -17,7 +17,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import dev.lueem.payload.PayloadBuilder;
 
-
 @ApplicationScoped
 public class OpenAiClient {
 
@@ -33,10 +32,17 @@ public class OpenAiClient {
     private JsonArray processResponse(String responseBody, String type) {
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {
             JsonObject jsonResponse = jsonReader.readObject();
-            String contentString = jsonResponse.getJsonArray("choices")
-                    .getJsonObject(0)
-                    .getJsonObject("message")
-                    .getString("content");
+            JsonArray choices = jsonResponse.getJsonArray("choices");
+            if (choices == null || choices.isEmpty()) {
+                throw new RuntimeException("No choices found in the response.");
+            }
+            JsonObject message = choices.getJsonObject(0).getJsonObject("message");
+            if (message == null) {
+                throw new RuntimeException("No message found in the first choice.");
+            }
+            String contentString = message.getString("content");
+
+            LOGGER.info("Content received from OpenAI: " + contentString);
 
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
@@ -50,13 +56,13 @@ public class OpenAiClient {
 
     public JsonArray askQuestion(String question, String type) {
         try {
-            String payload = type.equals("receipt") ? payloadBuilder.constructReceiptPayload(question)
-                    : payloadBuilder.constructPayload(question);
-            
+            String payload = payloadBuilder.constructPayload(question, type);
+            LOGGER.info("Payload sent to OpenAI: " + payload);
 
             if (openaiKey == null || openaiKey.trim().isEmpty()) {
                 throw new IllegalArgumentException("API KEY is not set");
             }
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                     .header("Content-Type", "application/json")
@@ -65,6 +71,8 @@ public class OpenAiClient {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            LOGGER.info("Response from OpenAI: " + response.body());
+
             return processResponse(response.body(), type);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in askQuestion", e);

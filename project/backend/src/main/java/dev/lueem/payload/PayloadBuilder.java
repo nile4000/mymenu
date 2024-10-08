@@ -6,85 +6,62 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 @ApplicationScoped
 public class PayloadBuilder {
 
-        @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-1106")
-        private String modelDefault = "gpt-3.5-turbo-1106";
-        // private String modelReceipt = "gpt-4-0125-preview";
+    @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-4")
+    private String modelDefault;
 
-        private JsonObject getArticleModel() {
-                JsonObjectBuilder article = Json.createObjectBuilder()
-                                .add("Name", "QP Früchtequark Erdbeer 2x125g")
-                                .add("Price", 1.2)
-                                .add("Quantity", 1)
-                                .add("Discount", 0.0);
-
-                return Json.createObjectBuilder()
-                                .add("ArticleList", Json.createArrayBuilder()
-                                                .add(article))
-                                .build();
+    private JsonObject getModel(String type) {
+        if ("receipt".equalsIgnoreCase(type)) {
+            return Json.createObjectBuilder()
+                    .add("Name", "Rezeptname")
+                    .add("ReceiptList", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                            .add("Ingredients", "Artikel 1, Artikel 2")
+                            .add("Instructions", "Anleitung")
+                            .add("Servings", "Personen")
+                            .add("PreparationTime", "Minuten")))
+                    .build();
+        } else { // Default to article model
+            return Json.createObjectBuilder()
+                    .add("Name", "QP Früchtequark Erdbeer 2x125g")
+                    .add("ArticleList", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                            .add("Price", 1.2)
+                            .add("Quantity", 1)
+                            .add("Discount", 0.0)))
+                    .build();
         }
+    }
 
-        private JsonObject getReceiptModel() {
-                JsonObjectBuilder receipt = Json.createObjectBuilder()
-                                .add("Name", "Rezeptname")
-                                .add("Ingredients", "Artikel 1, Artikel 2")
-                                .add("Instructions", "Anleitung")
-                                .add("Servings", "Personen")
-                                .add("PreparationTime", "Minuten");
+    public String constructPayload(String question, String type) {
+        JsonObject model = getModel(type);
+        String systemContent = "You are an assistant that provides information in JSON format. Please adhere strictly to the following structure: " + model.toString();
+        return constructGPTMessages(question, systemContent);
+    }
 
-                return Json.createObjectBuilder()
-                                .add("ReceiptList", Json.createArrayBuilder()
-                                                .add(receipt))
-                                .build();
-        }
+    private String constructGPTMessages(String userContent, String systemContent) {
+        JsonObject messageSystem = Json.createObjectBuilder()
+                .add("role", "system")
+                .add("content", systemContent)
+                .build();
 
-        public String constructPayload(String question) {
+        JsonObject messageUser = Json.createObjectBuilder()
+                .add("role", "user")
+                .add("content", userContent)
+                .build();
 
-                // Create the sample json payload
-                JsonObject articleModel = getArticleModel();
+        JsonArrayBuilder messages = Json.createArrayBuilder()
+                .add(messageSystem)
+                .add(messageUser);
 
-                JsonObjectBuilder messageSystem = Json.createObjectBuilder();
-                messageSystem.add("role", "system");
-                messageSystem.add("content", "Output JSON Object in this format: " + articleModel.toString());
+        JsonObject payload = Json.createObjectBuilder()
+                .add("model", modelDefault)
+                .add("messages", messages)
+                .build();
 
-                JsonObjectBuilder messageUser = Json.createObjectBuilder()
-                                .add("role", "user")
-                                .add("content", question);
-
-                return constructGPTMessages(messageSystem, messageUser);
-        }
-
-        public String constructReceiptPayload(String question) {
-
-                // Create the sample json payload
-                JsonObject receiptModel = getReceiptModel();
-
-                JsonObjectBuilder messageSystem = Json.createObjectBuilder();
-                messageSystem.add("role", "system");
-                messageSystem.add("content", "Output JSON Object in this format: " + receiptModel.toString());
-
-                JsonObjectBuilder messageUser = Json.createObjectBuilder()
-                                .add("role", "user")
-                                .add("content", question);
-
-                return constructGPTMessages(messageSystem, messageUser);
-        }
-
-        private String constructGPTMessages(JsonObjectBuilder messageSystem, JsonObjectBuilder messageUser) {
-                JsonArrayBuilder messages = Json.createArrayBuilder()
-                                .add(messageUser)
-                                .add(messageSystem);
-
-                JsonObject payload = Json.createObjectBuilder()
-                                .add("model", modelDefault)
-                                .add("messages", messages)
-                                .add("response_format", Json.createObjectBuilder().add("type", "json_object"))
-                                .build();
-                return payload.toString();
-        }
-
+        return payload.toString();
+    }
 }

@@ -1,13 +1,62 @@
 version: '3.8'
 name: middleware-pdf-reader
+
 services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   pdf-reader-quarkus:
     build:
-      context: . # Pfad zum Dockerfile-Verzeichnis
+      context: . # Path to the directory containing the Dockerfile
       dockerfile: src/main/docker/Dockerfile.jvm
     ports:
       - "8080:8080"
-    user: "1001"
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: ${QUARKUS_DATASOURCE_JDBC_URL}
+      QUARKUS_DATASOURCE_USERNAME: ${QUARKUS_DATASOURCE_USERNAME}
+      QUARKUS_DATASOURCE_PASSWORD: ${QUARKUS_DATASOURCE_PASSWORD}
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: ${QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      QUARKUS_LOG_LEVEL: ${QUARKUS_LOG_LEVEL}
+      QUARKUS_HTTP_CORS: ${QUARKUS_HTTP_CORS}
+      QUARKUS_HTTP_CORS_ORIGINS: ${QUARKUS_HTTP_CORS_ORIGINS}
+      QUARKUS_HTTP_CORS_HEADERS: ${QUARKUS_HTTP_CORS_HEADERS}
+      QUARKUS_HTTP_CORS_EXPOSED_HEADERS: ${QUARKUS_HTTP_CORS_EXPOSED_HEADERS}
+      QUARKUS_HTTP_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS: ${QUARKUS_HTTP_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS}
+      QUARKUS_HTTP_CORS_METHODS: ${QUARKUS_HTTP_CORS_METHODS}
+      QUARKUS_HTTP_PORT: ${QUARKUS_HTTP_PORT}
+      QUARKUS_HTTP_AUTH_BASIC: ${QUARKUS_HTTP_AUTH_BASIC}
+      QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS: ${QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # user: "1001"
+    networks:
+      - app-network
     deploy:
       restart_policy:
         condition: on-failure
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge # mostly for development
