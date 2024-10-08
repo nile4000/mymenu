@@ -7,3 +7,5 @@ project/.firebase
 .quarkus
 .vscode
 .DS_Store
+project/.vscode
+project/.DS_Store
