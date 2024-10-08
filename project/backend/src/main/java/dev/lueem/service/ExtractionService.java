@@ -64,9 +64,9 @@ public class ExtractionService {
             // OpenAI request
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
 
-            // Convert and Save
-            List<Article> articles = convertJsonArrayToArticles(articlesJson);
-            articleRepository.saveAll(articles);
+            // Convert and Save - for future use
+            // List<Article> articles = convertJsonArrayToArticles(articlesJson);
+            // articleRepository.saveAll(articles);
 
             String corp = textUtils.extractCorp(cleanedContent);
             UUID uid = UUID.randomUUID();
