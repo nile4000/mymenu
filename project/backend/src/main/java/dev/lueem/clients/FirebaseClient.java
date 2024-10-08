@@ -19,11 +19,11 @@ import dev.lueem.model.Article;
 @ApplicationScoped
 public class FirebaseClient {
 
-    @ConfigProperty(name = "firebase.api.url")
-    private String firebaseApiUrl;
+    // @ConfigProperty(name = "firebase.api.url")
+    private String firebaseApiUrl = "";
 
-    @ConfigProperty(name = "firebase.api.key")
-    private String firebaseApiKey;
+    // @ConfigProperty(name = "firebase.api.key")
+    private String firebaseApiKey = "";
 
     private static final Logger LOGGER = Logger.getLogger(FirebaseClient.class.getName());
     private final HttpClient httpClient = HttpClient.newHttpClient();
