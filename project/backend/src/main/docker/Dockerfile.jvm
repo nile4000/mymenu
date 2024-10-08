@@ -77,21 +77,42 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
+# Stage 1: Build the application
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /build
+
+# Copy the pom.xml and download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy the source code
+COPY src ./src
+
+# Package the application
+RUN mvn clean package -DskipTests
+
+# Stage 2: Run the application
 FROM registry.access.redhat.com/ubi8/openjdk-17:1.16
+WORKDIR /app
 
-ENV LANGUAGE='en_US:en'
-
-
-# We make four distinct layers so if there are application changes the library layers can be re-used
+# Copy the built Quarkus application from the build stage
 COPY --chown=185 target/quarkus-app/lib/ /deployments/lib/
 COPY --chown=185 target/quarkus-app/*.jar /deployments/
 COPY --chown=185 target/quarkus-app/app/ /deployments/app/
 COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
 
+# Expose the application port
 EXPOSE 8080
+
+# Switch to a non-root user for security
 USER 185
+
+# Set Java options
 ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+
+# Define the path to the application JAR
 ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
 
-ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
+# Start the application
+ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]
 

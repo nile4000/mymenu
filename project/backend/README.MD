@@ -46,3 +46,7 @@ You can create a native executable using:
 ```
 
 It will be created under `target/*-runner.exe`.
+
+## Get Swagger docs (only in dev)
+
+<http://localhost:8080/swagger?format=json>

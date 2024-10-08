@@ -8,6 +8,9 @@ release.properties
 config.properties
 env
 
+# Firebase
+firebase/
+
 # Eclipse
 .project
 .classpath

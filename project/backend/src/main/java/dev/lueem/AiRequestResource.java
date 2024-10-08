@@ -1,6 +1,6 @@
 package dev.lueem;
 
-import dev.lueem.ai.OpenAiClient;
+import dev.lueem.clients.OpenAiClient;
 import jakarta.inject.Inject;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -17,7 +17,7 @@ public class AiRequestResource {
     @Inject
     OpenAiClient openAiClient;
 
-    private static final String QUESTION_PREFIX = "Erstelle ein JSON-Rezept mit den unten aufgeführten Zutaten. Bei Unstimmigkeiten empfehle passende alternative Zutaten.\n";
+    private static final String QUESTION_PREFIX = "Erstelle ein JSON-Rezept mit den unten aufgefuehrten Zutaten. Bei Unstimmigkeiten empfehle passende alternative Zutaten.\n";
 
     private JsonArray getAnswerOpenAI(JsonObject request) {
         // Combining the question prefix with the chosen articles in the frontend

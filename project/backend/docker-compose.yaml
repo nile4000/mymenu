@@ -1,13 +1,36 @@
 version: '3.8'
 name: middleware-pdf-reader
+
 services:
   pdf-reader-quarkus:
     build:
-      context: . # Pfad zum Dockerfile-Verzeichnis
+      context: . # Path to the directory containing the Dockerfile
       dockerfile: src/main/docker/Dockerfile.jvm
     ports:
       - "8080:8080"
+    environment:
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      QUARKUS_LOG_LEVEL: ${QUARKUS_LOG_LEVEL}
+      QUARKUS_HTTP_CORS: ${QUARKUS_HTTP_CORS}
+      QUARKUS_HTTP_CORS_ORIGINS: ${QUARKUS_HTTP_CORS_ORIGINS}
+      QUARKUS_HTTP_CORS_HEADERS: ${QUARKUS_HTTP_CORS_HEADERS}
+      QUARKUS_HTTP_CORS_EXPOSED_HEADERS: ${QUARKUS_HTTP_CORS_EXPOSED_HEADERS}
+      QUARKUS_HTTP_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS: ${QUARKUS_HTTP_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS}
+      QUARKUS_HTTP_CORS_METHODS: ${QUARKUS_HTTP_CORS_METHODS}
+      QUARKUS_HTTP_PORT: ${QUARKUS_HTTP_PORT}
+      QUARKUS_HTTP_AUTH_BASIC: ${QUARKUS_HTTP_AUTH_BASIC}
+      QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS: ${QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS}
+    depends_on:
+      postgres:
+        condition: service_healthy
     user: "1001"
+    networks:
+      - app-network
     deploy:
       restart_policy:
         condition: on-failure
+
+networks:
+  app-network:
+    driver: bridge # mostly for development
