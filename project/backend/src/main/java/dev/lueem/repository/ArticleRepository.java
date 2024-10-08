@@ -1,8 +1,9 @@
 package dev.lueem.repository;
 
+import dev.lueem.clients.FirebaseClient;
 import dev.lueem.model.Article;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,9 +15,12 @@ import java.util.logging.Logger;
  * Repository for managing {@link Article} entities.
  */
 @ApplicationScoped
-public class ArticleRepository implements PanacheRepository<Article> {
+public class ArticleRepository {
 
     private static final Logger LOGGER = Logger.getLogger(ArticleRepository.class.getName());
+
+    @Inject
+    FirebaseClient firbaseClient;
 
     /**
      * Persists a list of articles to the database.
@@ -29,8 +33,9 @@ public class ArticleRepository implements PanacheRepository<Article> {
     public void saveAll(List<Article> articles) {
         validateArticles(articles);
         try {
-            persist(articles);
-            LOGGER.info(() -> String.format("Successfully saved %d articles.", articles.size()));
+            LOGGER.info("Sending " + articles.size() + " articles to Firebase.");
+            List<Article> savedArticles = firbaseClient.insertArticles(articles);
+            LOGGER.info(String.format("Successfully saved %d articles to Firebase.", savedArticles.size()));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to save articles.", e);
             throw new RepositoryException("Error saving articles.", e);

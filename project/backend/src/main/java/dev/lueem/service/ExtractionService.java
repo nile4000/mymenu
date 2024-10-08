@@ -6,10 +6,9 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 import dev.lueem.util.FileUtils;
 import dev.lueem.util.TextUtils;
+import dev.lueem.clients.OpenAiClient;
 import dev.lueem.model.Article;
 import dev.lueem.repository.ArticleRepository;
-import dev.lueem.ai.OpenAiClient;
-
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;

@@ -1,26 +1,33 @@
 package dev.lueem.model;
 
-import jakarta.persistence.*;
-import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Getter;
+import java.math.BigDecimal;
 
-@Entity
-@Table(name = "articles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Article {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("price")
+    private BigDecimal price;
+
+    @JsonProperty("quantity")
+    private int quantity;
+
+    @JsonProperty("discount")
+    private BigDecimal discount;
+
+    // optional?
+    @JsonProperty("id")
     private Long id;
 
-    private String name;
-    private BigDecimal price;
-    private int quantity;
-    private BigDecimal discount;
 }

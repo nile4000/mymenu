@@ -1,3 +1,5 @@
 project/backend/src/main/resources/application.properties
 project/frontend/app/.firebase
 project/backend/.env
+project/firebase
+project/.firebase

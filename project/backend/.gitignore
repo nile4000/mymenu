@@ -7,6 +7,9 @@ release.properties
 .flattened-pom.xml
 config.properties
 
+# Firebase
+firebase/
+
 # Eclipse
 .project
 .classpath

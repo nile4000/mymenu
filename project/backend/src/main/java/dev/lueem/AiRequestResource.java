@@ -1,6 +1,6 @@
 package dev.lueem;
 
-import dev.lueem.ai.OpenAiClient;
+import dev.lueem.clients.OpenAiClient;
 import jakarta.inject.Inject;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;

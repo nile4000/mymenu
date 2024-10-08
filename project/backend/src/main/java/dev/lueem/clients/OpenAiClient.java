@@ -1,4 +1,4 @@
-package dev.lueem.ai;
+package dev.lueem.clients;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
