@@ -63,15 +63,14 @@ const columns = [
 
 interface ResponseItem {
   UID: string;
-  Articles: any[]; // Replace 'any[]' with the actual type of Articles
-  // Add other properties if necessary
+  Articles: any[];
 }
 
 export default defineComponent({
   props: {
     response: {
       type: Array as PropType<ResponseItem[]>,
-      required: true, // Mark the prop as required
+      required: true,
     },
   },
   setup(props, { emit }) {

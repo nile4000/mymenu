@@ -63,20 +63,8 @@ module.exports = configure(function (ctx) {
       env: {
         API_URL: ctx.dev ? "http://localhost:8080" : "https://mymenu.fly.dev",
       },
-
-      // https://v2.quasar.dev/quasar-cli/handling-webpack
-      // chainWebpack(chain) {
-      //   chain
-      //     .plugin("eslint-webpack-plugin")
-      //     .use(ESLintPlugin, [{ extensions: ["js", "vue"] }]);
-      // },
     },
 
-    // devServer: {
-    //   https: false,
-    //   port: 3000,
-    //   open: true, // opens browser window automatically
-    // },
 
     // https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
@@ -223,9 +211,8 @@ module.exports = configure(function (ctx) {
       },
 
       builder: {
-        // https://www.electron.build/configuration/configuration
 
-        appId: 'aaaa'
+        appId: 'mymenu'
       },
 
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
