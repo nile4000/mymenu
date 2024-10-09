@@ -32,10 +32,15 @@ public class ExtractionService {
     private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format. Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none), and Category. Use the following categories for classification:\n"
             +
             "1. Obst und Gemüse\n" +
-            "2. Milchprodukte und Alternativen\n" +
+            "2. Milchprodukte, Eier und Alternativen\n" +
             "3. Fleisch, Fisch und pflanzliche Proteine\n" +
-            "4. Getreide und Backwaren\n" +
-            "5. Getränke\n" +
+            "4. Backwaren und Getreide\n" +
+            "5. Softgetraenke\n" +
+            "6. Alkoholische Getraenke\n" +
+            "6. Snacks\n" +
+            "7. Reinigungsmittel und Haushaltsreiniger\n" +
+            "8. Koerperpflegeprodukte und Hygieneartikel\n" +
+            "9. Tierbedarf\n" +
             "If an article does not fit into any of these categories, assign it to the category 'Andere'.\n\n";
 
     @Inject
