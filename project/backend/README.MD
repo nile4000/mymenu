@@ -27,11 +27,21 @@ quarkus dev
 
 <http://localhost:8080/q/swagger-ui/#>
 
-## Deployment auf fly.io, build package first
+## Deployment auf fly.io
+
+### Testing the container locally for fly
+
+```shell
+docker-compose up -d
+```
+
+### Build package first
 
 ```shell
 ./mvnw package
 ```
+
+### Deploy to production
 
 ```shell
 flyctl deploy

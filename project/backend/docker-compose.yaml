@@ -21,9 +21,6 @@ services:
       QUARKUS_HTTP_PORT: 8080
       QUARKUS_HTTP_AUTH_BASIC: true
       QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS: ${QUARKUS_NATIVE_ADDITIONAL_BUILD_ARGS}
-    depends_on:
-      postgres:
-        condition: service_healthy
     user: "1001"
     networks:
       - app-network
