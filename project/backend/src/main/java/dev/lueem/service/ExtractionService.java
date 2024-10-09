@@ -37,10 +37,10 @@ public class ExtractionService {
             "4. Backwaren und Getreide\n" +
             "5. Softgetraenke\n" +
             "6. Alkoholische Getraenke\n" +
-            "6. Snacks\n" +
+            "6. Snacks und Suesswaren\n" +
             "7. Reinigungsmittel und Haushaltsreiniger\n" +
             "8. Koerperpflegeprodukte und Hygieneartikel\n" +
-            "9. Tierbedarf\n" +
+            "9. Tierbedarf und Sonstiges\n" +
             "If an article does not fit into any of these categories, assign it to the category 'Andere'.\n\n";
 
     @Inject
