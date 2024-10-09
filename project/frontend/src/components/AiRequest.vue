@@ -1,15 +1,15 @@
 <template>
   <div>
     <q-card class="q-ma-md">
-      <transition name="fade">
-        <q-btn
+      <!-- <transition name="fade"> -->
+        <!-- <q-btn
           color="secondary"
           label="Menü erstellen"
           icon="menu_book"
           @click="sendRequest"
           v-ripple
-        ></q-btn>
-      </transition>
+        ></q-btn> -->
+      <!-- </transition> -->
       <q-inner-loading
         class="card-example"
         :showing="isLoading"

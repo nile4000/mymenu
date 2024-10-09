@@ -29,7 +29,14 @@ public class ExtractionService {
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class.getName());
     private static final String FILE_REASON_HEADER = "Reason";
-    private static final String QUESTION_PREFIX = "Extract articles and return a list in a valid JSON format: Name, Price, Quantity, Discount (or 0 if none) from the given receipt.\n";
+    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format. Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none), and Category. Use the following categories for classification:\n"
+            +
+            "1. Obst und Gemüse\n" +
+            "2. Milchprodukte und Alternativen\n" +
+            "3. Fleisch, Fisch und pflanzliche Proteine\n" +
+            "4. Getreide und Backwaren\n" +
+            "5. Getränke\n" +
+            "If an article does not fit into any of these categories, assign it to the category 'Andere'.\n\n";
 
     @Inject
     public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils, ArticleRepository articleRepository) {
@@ -37,7 +44,7 @@ public class ExtractionService {
         this.textUtils = textUtils;
         this.articleRepository = articleRepository;
     }
-    
+
     public Response extractArticles(MultipartFormDataInput input) {
         try {
             File pdfFile = FileUtils.extractPdfFromMultipart(input);
@@ -102,6 +109,8 @@ public class ExtractionService {
             article.setPrice(new BigDecimal(jsonObject.getString("Price")));
             article.setQuantity(jsonObject.getInt("Quantity"));
             article.setDiscount(new BigDecimal(jsonObject.getString("Discount")));
+            article.setTotal(new BigDecimal(jsonObject.getString("Total")));
+            article.setCategory(jsonObject.getString("Category"));
             articles.add(article);
         }
         return articles;

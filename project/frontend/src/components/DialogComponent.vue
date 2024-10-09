@@ -39,6 +39,7 @@
 </template>
 
 <script lang="ts">
+import { Article } from "src/helpers/interfaces/article.interface";
 import { defineComponent, ref, computed, toRaw, PropType } from "vue";
 
 const columns = [
@@ -51,19 +52,21 @@ const columns = [
     sortable: true,
   },
   {
-    name: "Price",
+    name: "Preis",
     align: "center",
     label: "Preis",
     field: "Price",
     sortable: true,
   },
-  { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
-  { name: "Discount", label: "Aktion", field: "Discount" },
+  { name: "Menge", label: "Menge", field: "Quantity", sortable: true },
+  { name: "Rabatt", label: "Aktion", field: "Discount" },
+  { name: "Total", label: "Gesamt", field: "Total" },
+  { name: "Kategorie", label: "Kategorie", field: "Category" },
 ];
 
 interface ResponseItem {
   UID: string;
-  Articles: any[];
+  Articles: Article[];
 }
 
 export default defineComponent({
@@ -83,6 +86,7 @@ export default defineComponent({
         try {
           emit("save-selection");
           const uid = props.response[0].UID || "";
+          if(!selected.value) return resolve();
           sessionStorage.setItem(
             "food_" + uid,
             JSON.stringify(toRaw(selected.value))

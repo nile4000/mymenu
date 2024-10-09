@@ -32,7 +32,9 @@ public class PayloadBuilder {
                         .add(Json.createObjectBuilder()
                             .add("Price", 1.2)
                             .add("Quantity", 1)
-                            .add("Discount", 0.0)))
+                            .add("Discount", 0.0)
+                            .add("Total", "1.2")
+                            .add("Category", "Milchprodukte und Alternativen")))
                     .build();
         }
     }

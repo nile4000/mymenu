@@ -10,9 +10,9 @@
       selection="multiple"
       v-model="selected"
     >
-      <template v-slot:top>
+      <!-- <template v-slot:top>
         <AiRequest :selectedItems="selected"></AiRequest>
-      </template>
+      </template> -->
       <template v-slot:header-selection="scope">
         <q-toggle v-model="scope.selected"></q-toggle>
       </template>
@@ -26,11 +26,26 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, toRaw, reactive } from "vue";
-import AiRequest from "../components/AiRequest.vue";
+// import AiRequest from "../components/AiRequest.vue";
 import { Article } from "../helpers/interfaces/article.interface";
 import { Column } from "../helpers/interfaces/column.interface";
+import { Receipt } from "../helpers/interfaces/receipt.interface";
 
 const columns: Column[] = [
+  {
+    name: "PurchaseDate",
+    label: "Kaufdatum",
+    field: "PurchaseDate",
+    sortable: true,
+    align: "center",
+  },
+  {
+    name: "Category",
+    label: "Kategorie",
+    field: "Category",
+    sortable: true,
+    align: "center",
+  },
   {
     name: "Name",
     required: true,
@@ -47,41 +62,58 @@ const columns: Column[] = [
     sortable: true,
   },
   { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
+  { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
+  { name: "Total", label: "Total", field: "Total", sortable: true },
 ];
 
 export default defineComponent({
   name: "FoodPage",
   components: {
-    AiRequest,
+    // AiRequest,
   },
 
   setup() {
-    const selected = ref([]);
-    const rows = reactive([]); // Make rows reactive
+    const selected = ref<Article[]>([]);
+    const rows = reactive<Article[]>([]);
 
     // Funktion, um die Daten der Tabelle zu aktualisieren
     function updateTableData() {
       const allArticles: Article[] = [];
       Object.keys(sessionStorage).forEach((key) => {
-        if (key.includes("food")) {
-          const rawValue = sessionStorage.getItem(key);
+        if (key.includes("receipt")) {
+          const rawValue: string | null = sessionStorage.getItem(key);
+          console.log("Session Storage Wert für Schlüssel", key, ":", rawValue);
           try {
             if (rawValue) {
-              const itemValue: any[] = JSON.parse(rawValue);
-              itemValue.forEach((article) => allArticles.push(article));
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              const receipt: Receipt = JSON.parse(rawValue);
+              if (receipt.Articles && Array.isArray(receipt.Articles)) {
+                receipt.Articles.forEach((article) => {
+                  article.PurchaseDate = receipt.PurchaseDate;
+                  allArticles.push(article);
+                });
+              } else {
+                console.warn("Keine Artikel in diesem Receipt:", key);
+              }
             }
           } catch (e) {
-            console.error("Error parsing session storage item", key, e);
+            console.error(
+              "Fehler beim Parsen des Session Storage Eintrags",
+              key,
+              e
+            );
           }
         }
       });
 
-      Object.assign(rows, toRaw(allArticles));
+      // Aktualisieren der reaktiven rows
+      rows.splice(0, rows.length, ...allArticles);
+      console.log("Aktualisierte Tabellenzeilen:", rows);
     }
 
     onMounted(() => {
       updateTableData();
-      setInterval(updateTableData, 1000);
+      setInterval(updateTableData, 2000);
     });
 
     return {

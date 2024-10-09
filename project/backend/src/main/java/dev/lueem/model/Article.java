@@ -26,6 +26,12 @@ public class Article {
     @JsonProperty("discount")
     private BigDecimal discount;
 
+    @JsonProperty("total")
+    private BigDecimal total;
+
+    @JsonProperty("category")
+    private String category;
+
     // optional?
     @JsonProperty("id")
     private Long id;

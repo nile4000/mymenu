@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-list padding bordered class="rounded-borders q-ma-md">
+    <!-- <q-list padding bordered class="rounded-borders q-ma-md">
       <q-expansion-item
         icon="help"
         v-for="store in stores"
@@ -30,7 +30,7 @@
           </q-card-section>
         </q-card>
       </q-expansion-item>
-    </q-list>
+    </q-list> -->
     <ScannerPage></ScannerPage>
     <FoodPage></FoodPage>
   </q-page>
