@@ -67,7 +67,7 @@ export default defineComponent({
           const rawValue = sessionStorage.getItem(key);
           try {
             if (rawValue) {
-              const itemValue: Article[] = JSON.parse(rawValue);
+              const itemValue: any[] = JSON.parse(rawValue);
               itemValue.forEach((article) => allArticles.push(article));
             }
           } catch (e) {
@@ -80,8 +80,8 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      updateTableData(); // initial ausführen
-      setInterval(updateTableData, 1000); // alle 1 Sekunde wiederholen
+      updateTableData();
+      setInterval(updateTableData, 1000);
     });
 
     return {

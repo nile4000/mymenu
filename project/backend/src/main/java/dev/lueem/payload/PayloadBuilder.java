@@ -10,8 +10,8 @@ import jakarta.json.JsonObject;
 @ApplicationScoped
 public class PayloadBuilder {
 
-        @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-4o")
-        private String modelDefault = "gpt-4o";
+        @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-0125")
+        private String modelDefault = "gpt-3.5-turbo-0125";
         // private String modelReceipt = "gpt-4-0125-preview";
 
     private JsonObject getModel(String type) {

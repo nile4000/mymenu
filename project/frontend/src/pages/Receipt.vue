@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <q-table :rows="rows" :columns="columns" grid hide-header>
+    <q-table :rows="rows" :columns="columns" grid hide-header title="Meine Belege">
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3">
           <q-card bordered flat>

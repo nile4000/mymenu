@@ -18,7 +18,7 @@
               <q-item clickable v-close-popup @click="openHistory">
                 <q-item-section avatar>
                   <q-item-label
-                    ><q-icon name="history"></q-icon> Verlauf</q-item-label
+                    ><q-icon name="dashboard"></q-icon> Übersicht</q-item-label
                   >
                 </q-item-section>
               </q-item>

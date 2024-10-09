@@ -17,19 +17,19 @@
       ></q-inner-loading>
     </q-card>
     <q-card class="q-ma-md">
-      <div v-if="!isLoading && recipe">
+      <div v-if="!isLoading && receipt">
         <q-card-section>
-          <div class="text-h6">{{ recipe.Name }}</div>
+          <div class="text-h6">{{ receipt.Name }}</div>
         </q-card-section>
         <q-card-section>
-          <div><b>Zutaten:</b> {{ recipe.Ingredients }}</div>
+          <div><b>Zutaten:</b> {{ receipt.Ingredients }}</div>
         </q-card-section>
         <q-card-section>
-          <div><b>Zubereitung:</b> {{ recipe.Instructions }}</div>
+          <div><b>Zubereitung:</b> {{ receipt.Instructions }}</div>
         </q-card-section>
         <q-card-section>
-          <div><b>Portionen:</b> {{ recipe.Servings }}</div>
-          <div><b>Zubereitungszeit:</b> {{ recipe.PreparationTime }}</div>
+          <div><b>Portionen:</b> {{ receipt.Servings }}</div>
+          <div><b>Zubereitungszeit:</b> {{ receipt.PreparationTime }}</div>
         </q-card-section>
       </div>
     </q-card>
@@ -50,7 +50,7 @@ export default defineComponent({
   },
   data() {
     return {
-      recipe: null,
+      receipt: null,
       isLoading: false,
     };
   },
@@ -77,7 +77,7 @@ export default defineComponent({
           }
         );
 
-        this.recipe = response.data[0];
+        this.receipt = response.data[0];
       } catch (error) {
         console.error("Fehler beim Senden der Anfrage:", error);
       } finally {

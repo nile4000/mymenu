@@ -46,6 +46,7 @@ public class OpenAiClient {
 
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
+                System.out.println(contentJson.toString());
                 return contentJson.getJsonArray(type.equals("receipt") ? "ReceiptList" : "ArticleList");
             }
         } catch (Exception e) {

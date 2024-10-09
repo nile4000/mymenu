@@ -8,6 +8,7 @@
       icon="scanner"
       style="width: 100%"
       :headers="authHeaders"
+      multiple
       @rejected="onRejected"
       @uploaded="onUploaded"
     ></q-uploader>
@@ -21,6 +22,7 @@ import { useQuasar } from "quasar";
 export default defineComponent({
   name: "ScannerPage",
   components: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     DialogComponent,
   },
 
