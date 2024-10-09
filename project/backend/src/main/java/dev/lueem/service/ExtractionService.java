@@ -29,7 +29,11 @@ public class ExtractionService {
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class.getName());
     private static final String FILE_REASON_HEADER = "Reason";
-    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format. Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none), and Category. Use the following categories for classification:\n"
+    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format.\n"
+            +
+            "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none), and Category.\n"
+            +
+            "Use the following categories for classification:\n"
             +
             "1. Obst und Gemüse\n" +
             "2. Milchprodukte, Eier und Alternativen\n" +
@@ -41,7 +45,7 @@ public class ExtractionService {
             "7. Reinigungsmittel und Haushaltsreiniger\n" +
             "8. Koerperpflegeprodukte und Hygieneartikel\n" +
             "9. Tierbedarf und Sonstiges\n" +
-            "If an article does not fit into any of these categories, assign it to the category 'Andere'.\n\n";
+            "If an article does not fit into any of these categories, assign it the category 'Andere'.\n\n";
 
     @Inject
     public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils, ArticleRepository articleRepository) {
