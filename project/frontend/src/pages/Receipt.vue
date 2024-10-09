@@ -83,6 +83,7 @@ export default defineComponent({
           try {
             const itemValue = sessionStorage.getItem(key);
             if (itemValue) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               const receipt: Receipt = JSON.parse(itemValue);
               allRows.push(receipt);
             }

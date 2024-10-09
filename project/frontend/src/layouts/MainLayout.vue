@@ -2,10 +2,10 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title>
+        <q-toolbar-title class="title-header">
           <q-avatar square size="36px" class="q-mr-sm">
             <img src="../assets/logo.png" alt="Logo" /> </q-avatar
-          >My Menü
+          >MY MENÜ
         </q-toolbar-title>
         <div>
           <q-btn-dropdown unelevated flat color="white">
@@ -32,6 +32,11 @@
         </div>
       </q-toolbar>
     </q-header>
+    <q-footer>
+        <q-toolbar>
+          <q-toolbar-title class="title-footer">AI Essensplaner</q-toolbar-title>
+        </q-toolbar>
+      </q-footer>
 
     <q-page-container>
       <router-view />
@@ -105,7 +110,7 @@ export default defineComponent({
         .catch((error) => console.log("error", error));
     };
     const openHistory = () => {
-      router.push("/receipt");
+      void router.push("/receipt");
     };
     return {
       email,
@@ -120,3 +125,15 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.title-header {
+  font-family: "Playfair Display", serif;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+.title-footer {
+  font-family: "Playfair Display", serif;
+  letter-spacing: 0.2em;
+}
+</style>
