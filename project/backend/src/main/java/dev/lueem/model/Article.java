@@ -29,6 +29,7 @@ public class Article {
     @JsonProperty("total")
     private BigDecimal total;
 
+    // optional?
     @JsonProperty("category")
     private String category;
 

@@ -32,23 +32,24 @@ public class ExtractionService {
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class.getName());
     private static final String FILE_REASON_HEADER = "Reason";
-    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format.\n"
+    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format..\n"
             +
-            "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none), and Category.\n"
-            +
-            "Use the following categories for classification:\n"
-            +
-            "1. Obst und Gemüse\n" +
-            "2. Milchprodukte, Eier und Alternativen\n" +
-            "3. Fleisch, Fisch und pflanzliche Proteine\n" +
-            "4. Backwaren und Getreide\n" +
-            "5. Softgetraenke\n" +
-            "6. Alkoholische Getraenke\n" +
-            "7. Snacks und Suesswaren\n" +
-            "8. Reinigungsmittel und Haushaltsreiniger\n" +
-            "9. Koerperpflegeprodukte und Hygieneartikel\n" +
-            "10. Tierbedarf und Sonstiges\n" +
-            "If an article does not fit into any of these categories, assign it the category 'Andere'.\n\n";
+            "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none).\n";
+    // +
+    // "Use the following categories for classification:\n"
+    // +
+    // "1. Obst und Gemüse\n" +
+    // "2. Milchprodukte, Eier und Alternativen\n" +
+    // "3. Fleisch, Fisch und pflanzliche Proteine\n" +
+    // "4. Backwaren und Getreide\n" +
+    // "5. Softgetraenke\n" +
+    // "6. Alkoholische Getraenke\n" +
+    // "7. Snacks und Suesswaren\n" +
+    // "8. Reinigungsmittel und Haushaltsreiniger\n" +
+    // "9. Koerperpflegeprodukte und Hygieneartikel\n" +
+    // "10. Tierbedarf und Sonstiges\n" +
+    // "If an article does not fit into any of these categories, assign it the
+    // category 'Andere'.\n\n";
 
     @Inject
     public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils) {
@@ -153,7 +154,7 @@ public class ExtractionService {
             JsonArray response = openAiClient.askQuestion(fullQuestion, "article");
             if (response == null || response.isEmpty()) {
                 LOGGER.severe("OpenAI response is null or empty.");
-                return Json.createArrayBuilder().build(); 
+                return Json.createArrayBuilder().build();
             }
             return response;
         } catch (Exception e) {
@@ -176,12 +177,11 @@ public class ExtractionService {
 
             // Define expected fields and their default values
             Map<String, Object> fieldsWithDefaults = new HashMap<>();
-            fieldsWithDefaults.put("Name", "Unknown");
+            fieldsWithDefaults.put("Name", "");
             fieldsWithDefaults.put("Price", 0.0);
             fieldsWithDefaults.put("Quantity", 0.0);
             fieldsWithDefaults.put("Discount", 0.0);
             fieldsWithDefaults.put("Total", 0.0);
-            fieldsWithDefaults.put("Category", "Andere");
 
             for (Map.Entry<String, Object> entry : fieldsWithDefaults.entrySet()) {
                 String field = entry.getKey();
@@ -192,7 +192,8 @@ public class ExtractionService {
                         // Add the field as is, assuming correct type
                         sanitizedObjectBuilder.add(field, jsonObject.get(field));
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Invalid value for field '" + field + "' in article: " + jsonObject.toString(), e);
+                        LOGGER.log(Level.WARNING,
+                                "Invalid value for field '" + field + "' in article: " + jsonObject.toString(), e);
                         // Assign default value on error
                         if (defaultValue instanceof String) {
                             sanitizedObjectBuilder.add(field, (String) defaultValue);
@@ -216,17 +217,17 @@ public class ExtractionService {
 
             // Additional validation: Ensure numeric fields are non-negative
             double price = jsonObject.containsKey("Price") && !jsonObject.isNull("Price")
-                           ? jsonObject.getJsonNumber("Price").doubleValue()
-                           : 0.0;
+                    ? jsonObject.getJsonNumber("Price").doubleValue()
+                    : 0.0;
             double quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
-                              ? jsonObject.getJsonNumber("Quantity").doubleValue()
-                              : 0.0;
+                    ? jsonObject.getJsonNumber("Quantity").doubleValue()
+                    : 0.0;
             double discount = jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
-                               ? jsonObject.getJsonNumber("Discount").doubleValue()
-                               : 0.0;
+                    ? jsonObject.getJsonNumber("Discount").doubleValue()
+                    : 0.0;
             double total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
-                           ? jsonObject.getJsonNumber("Total").doubleValue()
-                           : 0.0;
+                    ? jsonObject.getJsonNumber("Total").doubleValue()
+                    : 0.0;
 
             // Correct negative values
             if (price < 0.0) {
@@ -256,53 +257,54 @@ public class ExtractionService {
         List<Article> articles = new ArrayList<>();
         for (jakarta.json.JsonValue jsonValue : articlesJson) {
             if (jsonValue.getValueType() != jakarta.json.JsonValue.ValueType.OBJECT) {
-                LOGGER.warning("Invalid JSON value type for article. Expected OBJECT, found: " + jsonValue.getValueType());
+                LOGGER.warning(
+                        "Invalid JSON value type for article. Expected OBJECT, found: " + jsonValue.getValueType());
                 continue; // Skip invalid entries
             }
-    
+
             jakarta.json.JsonObject jsonObject = jsonValue.asJsonObject();
             Article article = new Article();
-    
+
             try {
                 // Handle 'Name' field
-                String name = jsonObject.containsKey("Name") && !jsonObject.isNull("Name") 
-                              ? jsonObject.getString("Name") 
-                              : "Unknown";
+                String name = jsonObject.containsKey("Name") && !jsonObject.isNull("Name")
+                        ? jsonObject.getString("Name")
+                        : "Unknown";
                 article.setName(name);
-    
+
                 // Handle 'Price' field
                 BigDecimal price = jsonObject.containsKey("Price") && !jsonObject.isNull("Price")
-                                   ? jsonObject.getJsonNumber("Price").bigDecimalValue()
-                                   : BigDecimal.ZERO;
+                        ? jsonObject.getJsonNumber("Price").bigDecimalValue()
+                        : BigDecimal.ZERO;
                 article.setPrice(price);
-    
+
                 // Handle 'Quantity' field
                 BigDecimal quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
-                                       ? jsonObject.getJsonNumber("Quantity").bigDecimalValue()
-                                       : BigDecimal.ZERO;
+                        ? jsonObject.getJsonNumber("Quantity").bigDecimalValue()
+                        : BigDecimal.ZERO;
                 article.setQuantity(quantity);
-    
+
                 // Handle 'Discount' field
                 BigDecimal discount = jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
-                                       ? jsonObject.getJsonNumber("Discount").bigDecimalValue()
-                                       : BigDecimal.ZERO;
+                        ? jsonObject.getJsonNumber("Discount").bigDecimalValue()
+                        : BigDecimal.ZERO;
                 article.setDiscount(discount);
-    
+
                 // Handle 'Total' field
                 BigDecimal total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
-                                   ? jsonObject.getJsonNumber("Total").bigDecimalValue()
-                                   : BigDecimal.ZERO;
+                        ? jsonObject.getJsonNumber("Total").bigDecimalValue()
+                        : BigDecimal.ZERO;
                 article.setTotal(total);
-    
-                // Handle 'Category' field
-                String category = jsonObject.containsKey("Category") && !jsonObject.isNull("Category") 
-                                  ? jsonObject.getString("Category") 
-                                  : "Andere";
-                article.setCategory(category);
-    
+
+                // // Handle 'Category' field
+                // String category = jsonObject.containsKey("Category") && !jsonObject.isNull("Category")
+                //         ? jsonObject.getString("Category")
+                //         : "Andere";
+                // article.setCategory(category);
+
                 // Correct data inconsistencies
                 correctArticleData(article);
-    
+
                 articles.add(article);
             } catch (NumberFormatException | ClassCastException e) {
                 LOGGER.log(Level.SEVERE, "Error parsing article fields: " + jsonObject.toString(), e);
@@ -311,20 +313,19 @@ public class ExtractionService {
         }
         return articles;
     }
-    
 
-private void correctArticleData(Article article) {
-    // Correct Quantity if negative
-    if (article.getQuantity().compareTo(BigDecimal.ZERO) < 0) {
-        LOGGER.warning("Negative quantity found for article: " + article.getName() + ". Setting to 0.0.");
-        article.setQuantity(BigDecimal.ZERO);
+    private void correctArticleData(Article article) {
+        // Correct Quantity if negative
+        if (article.getQuantity().compareTo(BigDecimal.ZERO) < 0) {
+            LOGGER.warning("Negative quantity found for article: " + article.getName() + ". Setting to 0.0.");
+            article.setQuantity(BigDecimal.ZERO);
+        }
+
+        // Correct Total
+        BigDecimal calculatedTotal = article.getPrice()
+                .multiply(article.getQuantity())
+                .subtract(article.getDiscount());
+        article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); // Ensure Total is not negative
     }
-
-    // Correct Total
-    BigDecimal calculatedTotal = article.getPrice()
-                                       .multiply(article.getQuantity())
-                                       .subtract(article.getDiscount());
-    article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); // Ensure Total is not negative
-}
 
 }
