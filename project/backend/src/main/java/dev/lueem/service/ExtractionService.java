@@ -8,10 +8,11 @@ import dev.lueem.util.FileUtils;
 import dev.lueem.util.TextUtils;
 import dev.lueem.clients.OpenAiClient;
 import dev.lueem.model.Article;
-import dev.lueem.repository.ArticleRepository;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonArrayBuilder;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -19,13 +20,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @ApplicationScoped
 public class ExtractionService {
 
     private final OpenAiClient openAiClient;
     private final TextUtils textUtils;
-    private final ArticleRepository articleRepository;
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class.getName());
     private static final String FILE_REASON_HEADER = "Reason";
@@ -41,17 +44,16 @@ public class ExtractionService {
             "4. Backwaren und Getreide\n" +
             "5. Softgetraenke\n" +
             "6. Alkoholische Getraenke\n" +
-            "6. Snacks und Suesswaren\n" +
-            "7. Reinigungsmittel und Haushaltsreiniger\n" +
-            "8. Koerperpflegeprodukte und Hygieneartikel\n" +
-            "9. Tierbedarf und Sonstiges\n" +
+            "7. Snacks und Suesswaren\n" +
+            "8. Reinigungsmittel und Haushaltsreiniger\n" +
+            "9. Koerperpflegeprodukte und Hygieneartikel\n" +
+            "10. Tierbedarf und Sonstiges\n" +
             "If an article does not fit into any of these categories, assign it the category 'Andere'.\n\n";
 
     @Inject
-    public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils, ArticleRepository articleRepository) {
+    public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils) {
         this.openAiClient = openAiClient;
         this.textUtils = textUtils;
-        this.articleRepository = articleRepository;
     }
 
     public Response extractArticles(MultipartFormDataInput input) {
@@ -59,6 +61,7 @@ public class ExtractionService {
             File pdfFile = FileUtils.extractPdfFromMultipart(input);
 
             if (pdfFile == null) {
+                LOGGER.warning("No PDF file found in the request.");
                 return Response.status(Response.Status.BAD_REQUEST)
                         .header(FILE_REASON_HEADER, "No PDF file found in the request")
                         .build();
@@ -67,6 +70,7 @@ public class ExtractionService {
             // Extract text
             String documentContent = FileUtils.getTextFromFile(pdfFile);
             if (documentContent == null) {
+                LOGGER.warning("Failed to extract text from the file.");
                 return Response.status(Response.Status.BAD_REQUEST)
                         .header(FILE_REASON_HEADER, "Failed to extract text from the file")
                         .build();
@@ -77,22 +81,61 @@ public class ExtractionService {
             String extractDate = textUtils.extractDate(cleanedContent);
             String cuttedEnd = textUtils.extractArticlesUntilTotal(cleanedContent);
 
+            LOGGER.info("Extracted Total: " + extractTotal);
+            LOGGER.info("Extracted Date: " + extractDate);
+            LOGGER.info("Cutted End Content: " + cuttedEnd);
+
             // OpenAI request
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
+            if (articlesJson == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to retrieve articles from OpenAI.")
+                        .build();
+            }
 
-            // Convert and Save - for future use
-            // List<Article> articles = convertJsonArrayToArticles(articlesJson);
-            // articleRepository.saveAll(articles);
+            LOGGER.info("Raw Articles JSON: " + articlesJson.toString());
+            JsonArray sanitizedArticlesJson = sanitizeArticlesJson(articlesJson);
+            LOGGER.info("Sanitized Articles JSON: " + sanitizedArticlesJson.toString());
+
+            // Convert sanitized JSON to Article objects
+            List<Article> articles = convertJsonArrayToArticles(sanitizedArticlesJson);
+            LOGGER.info("Number of Articles Extracted: " + articles.size());
 
             String corp = textUtils.extractCorp(cleanedContent);
             UUID uid = UUID.randomUUID();
-            JsonObject jsonResponse = Json.createObjectBuilder()
-                    .add("UID", uid.toString())
-                    .add("PurchaseDate", extractDate)
-                    .add("Corp", corp)
-                    .add("Total", extractTotal)
-                    .add("Articles", articlesJson)
-                    .build();
+
+            JsonObjectBuilder jsonResponseBuilder = Json.createObjectBuilder();
+
+            // Add UID
+            jsonResponseBuilder.add("UID", uid.toString());
+
+            // Add Purchase_Date
+            if (extractDate != null) {
+                jsonResponseBuilder.add("Purchase_Date", extractDate);
+            } else {
+                jsonResponseBuilder.add("Purchase_Date", "Unknown");
+            }
+
+            // Add Corp
+            if (corp != null) {
+                jsonResponseBuilder.add("Corp", corp);
+            } else {
+                jsonResponseBuilder.add("Corp", "Unknown");
+            }
+
+            // Add Total
+            if (extractTotal != null) {
+                jsonResponseBuilder.add("Total", extractTotal);
+            } else {
+                jsonResponseBuilder.add("Total", "0.0");
+            }
+
+            // Add Articles
+            jsonResponseBuilder.add("Articles", sanitizedArticlesJson);
+
+            JsonObject jsonResponse = jsonResponseBuilder.build();
+
+            LOGGER.info("JSON Response Built Successfully.");
 
             return Response.ok(jsonResponse)
                     .header("Content-Type", "application/json;charset=UTF-8")
@@ -106,22 +149,182 @@ public class ExtractionService {
 
     private JsonArray getAnswerOpenAI(String extractedText) {
         String fullQuestion = QUESTION_PREFIX + extractedText;
-        return openAiClient.askQuestion(fullQuestion, "article");
+        try {
+            JsonArray response = openAiClient.askQuestion(fullQuestion, "article");
+            if (response == null || response.isEmpty()) {
+                LOGGER.severe("OpenAI response is null or empty.");
+                return Json.createArrayBuilder().build(); 
+            }
+            return response;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error while communicating with OpenAI", e);
+            return Json.createArrayBuilder().build();
+        }
+    }
+
+    private JsonArray sanitizeArticlesJson(JsonArray articlesJson) {
+        JsonArrayBuilder sanitizedArrayBuilder = Json.createArrayBuilder();
+
+        for (jakarta.json.JsonValue jsonValue : articlesJson) {
+            if (jsonValue.getValueType() != jakarta.json.JsonValue.ValueType.OBJECT) {
+                LOGGER.warning("Non-object JSON value found in articles array: " + jsonValue);
+                continue; // Skip invalid entries
+            }
+
+            jakarta.json.JsonObject jsonObject = jsonValue.asJsonObject();
+            JsonObjectBuilder sanitizedObjectBuilder = Json.createObjectBuilder();
+
+            // Define expected fields and their default values
+            Map<String, Object> fieldsWithDefaults = new HashMap<>();
+            fieldsWithDefaults.put("Name", "Unknown");
+            fieldsWithDefaults.put("Price", 0.0);
+            fieldsWithDefaults.put("Quantity", 0.0);
+            fieldsWithDefaults.put("Discount", 0.0);
+            fieldsWithDefaults.put("Total", 0.0);
+            fieldsWithDefaults.put("Category", "Andere");
+
+            for (Map.Entry<String, Object> entry : fieldsWithDefaults.entrySet()) {
+                String field = entry.getKey();
+                Object defaultValue = entry.getValue();
+
+                if (jsonObject.containsKey(field) && !jsonObject.isNull(field)) {
+                    try {
+                        // Add the field as is, assuming correct type
+                        sanitizedObjectBuilder.add(field, jsonObject.get(field));
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Invalid value for field '" + field + "' in article: " + jsonObject.toString(), e);
+                        // Assign default value on error
+                        if (defaultValue instanceof String) {
+                            sanitizedObjectBuilder.add(field, (String) defaultValue);
+                        } else if (defaultValue instanceof Double) {
+                            sanitizedObjectBuilder.add(field, (Double) defaultValue);
+                        } else {
+                            sanitizedObjectBuilder.addNull(field);
+                        }
+                    }
+                } else {
+                    // Assign default value based on field type
+                    if (defaultValue instanceof String) {
+                        sanitizedObjectBuilder.add(field, (String) defaultValue);
+                    } else if (defaultValue instanceof Double) {
+                        sanitizedObjectBuilder.add(field, (Double) defaultValue);
+                    } else {
+                        sanitizedObjectBuilder.addNull(field);
+                    }
+                }
+            }
+
+            // Additional validation: Ensure numeric fields are non-negative
+            double price = jsonObject.containsKey("Price") && !jsonObject.isNull("Price")
+                           ? jsonObject.getJsonNumber("Price").doubleValue()
+                           : 0.0;
+            double quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
+                              ? jsonObject.getJsonNumber("Quantity").doubleValue()
+                              : 0.0;
+            double discount = jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
+                               ? jsonObject.getJsonNumber("Discount").doubleValue()
+                               : 0.0;
+            double total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
+                           ? jsonObject.getJsonNumber("Total").doubleValue()
+                           : 0.0;
+
+            // Correct negative values
+            if (price < 0.0) {
+                LOGGER.warning("Negative price found. Setting to 0.0");
+                sanitizedObjectBuilder.add("Price", 0.0);
+            }
+            if (quantity < 0.0) {
+                LOGGER.warning("Negative quantity found. Setting to 0.0");
+                sanitizedObjectBuilder.add("Quantity", 0.0);
+            }
+            if (discount < 0.0) {
+                LOGGER.warning("Negative discount found. Setting to 0.0");
+                sanitizedObjectBuilder.add("Discount", 0.0);
+            }
+            if (total < 0.0) {
+                LOGGER.warning("Negative total found. Setting to 0.0");
+                sanitizedObjectBuilder.add("Total", 0.0);
+            }
+
+            sanitizedArrayBuilder.add(sanitizedObjectBuilder);
+        }
+
+        return sanitizedArrayBuilder.build();
     }
 
     private List<Article> convertJsonArrayToArticles(JsonArray articlesJson) {
-        List<Article> articles = new java.util.ArrayList<>();
+        List<Article> articles = new ArrayList<>();
         for (jakarta.json.JsonValue jsonValue : articlesJson) {
+            if (jsonValue.getValueType() != jakarta.json.JsonValue.ValueType.OBJECT) {
+                LOGGER.warning("Invalid JSON value type for article. Expected OBJECT, found: " + jsonValue.getValueType());
+                continue; // Skip invalid entries
+            }
+    
             jakarta.json.JsonObject jsonObject = jsonValue.asJsonObject();
             Article article = new Article();
-            article.setName(jsonObject.getString("Name"));
-            article.setPrice(new BigDecimal(jsonObject.getString("Price")));
-            article.setQuantity(jsonObject.getInt("Quantity"));
-            article.setDiscount(new BigDecimal(jsonObject.getString("Discount")));
-            article.setTotal(new BigDecimal(jsonObject.getString("Total")));
-            article.setCategory(jsonObject.getString("Category"));
-            articles.add(article);
+    
+            try {
+                // Handle 'Name' field
+                String name = jsonObject.containsKey("Name") && !jsonObject.isNull("Name") 
+                              ? jsonObject.getString("Name") 
+                              : "Unknown";
+                article.setName(name);
+    
+                // Handle 'Price' field
+                BigDecimal price = jsonObject.containsKey("Price") && !jsonObject.isNull("Price")
+                                   ? jsonObject.getJsonNumber("Price").bigDecimalValue()
+                                   : BigDecimal.ZERO;
+                article.setPrice(price);
+    
+                // Handle 'Quantity' field
+                BigDecimal quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
+                                       ? jsonObject.getJsonNumber("Quantity").bigDecimalValue()
+                                       : BigDecimal.ZERO;
+                article.setQuantity(quantity);
+    
+                // Handle 'Discount' field
+                BigDecimal discount = jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
+                                       ? jsonObject.getJsonNumber("Discount").bigDecimalValue()
+                                       : BigDecimal.ZERO;
+                article.setDiscount(discount);
+    
+                // Handle 'Total' field
+                BigDecimal total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
+                                   ? jsonObject.getJsonNumber("Total").bigDecimalValue()
+                                   : BigDecimal.ZERO;
+                article.setTotal(total);
+    
+                // Handle 'Category' field
+                String category = jsonObject.containsKey("Category") && !jsonObject.isNull("Category") 
+                                  ? jsonObject.getString("Category") 
+                                  : "Andere";
+                article.setCategory(category);
+    
+                // Correct data inconsistencies
+                correctArticleData(article);
+    
+                articles.add(article);
+            } catch (NumberFormatException | ClassCastException e) {
+                LOGGER.log(Level.SEVERE, "Error parsing article fields: " + jsonObject.toString(), e);
+                // Optionally, skip adding this article or add it with default values
+            }
         }
         return articles;
     }
+    
+
+private void correctArticleData(Article article) {
+    // Correct Quantity if negative
+    if (article.getQuantity().compareTo(BigDecimal.ZERO) < 0) {
+        LOGGER.warning("Negative quantity found for article: " + article.getName() + ". Setting to 0.0.");
+        article.setQuantity(BigDecimal.ZERO);
+    }
+
+    // Correct Total
+    BigDecimal calculatedTotal = article.getPrice()
+                                       .multiply(article.getQuantity())
+                                       .subtract(article.getDiscount());
+    article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); // Ensure Total is not negative
+}
+
 }

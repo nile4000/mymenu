@@ -21,7 +21,7 @@ public class Article {
     private BigDecimal price;
 
     @JsonProperty("quantity")
-    private int quantity;
+    private BigDecimal quantity;
 
     @JsonProperty("discount")
     private BigDecimal discount;

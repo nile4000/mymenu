@@ -19,11 +19,15 @@ public class TextUtils {
     // Precompiled regex patterns for efficiency
     private static final Pattern COOP_PATTERN = Pattern.compile("Coop", Pattern.CASE_INSENSITIVE);
     private static final Pattern MIGROS_PATTERN = Pattern.compile("Migros", Pattern.CASE_INSENSITIVE);
-    private static final Pattern TOTAL_PATTERN = Pattern.compile("Total CHF (\\d+\\.\\d{2})");
+    private static final Pattern TOTAL_PATTERN = Pattern.compile("Total CHF (\\d+\\.\\d{2})", Pattern.CASE_INSENSITIVE);
     private static final Pattern DATE_PATTERN = Pattern.compile("\\b\\d{2}\\.\\d{2}\\.\\d{2}\\b");
+    private static final Pattern RABATT_PATTERN = Pattern.compile("^Rabatt\\s+.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BON_PATTERN = Pattern.compile("^Bon\\s+.*", Pattern.CASE_INSENSITIVE);
 
     // Prefix used to locate the total in the receipt
     private static final String TOTAL_PREFIX = "Total CHF";
+    private static final String RABATT_PREFIX = "Rabatt ";
+    private static final String BON_PREFIX = "Bon ";
 
     // Formatter for generating timestamps
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -82,14 +86,55 @@ public class TextUtils {
     }
 
     /**
-     * Extracts the articles section from the receipt, stopping before the total amount.
+     * Extracts the articles section from the receipt, stopping before 'Total CHF', 'Rabatt', or 'Bon'.
      *
      * @param receipt the full receipt text
      * @return the substring of the receipt containing the articles
      */
     public String extractArticlesUntilTotal(String receipt) {
-        int index = receipt.indexOf(TOTAL_PREFIX);
-        return index != -1 ? receipt.substring(0, index).trim() : receipt;
+        // Define patterns to search for 'Total CHF', 'Rabatt', and 'Bon'
+        Matcher totalMatcher = Pattern.compile(Pattern.quote(TOTAL_PREFIX), Pattern.CASE_INSENSITIVE).matcher(receipt);
+        Matcher rabattMatcher = RABATT_PATTERN.matcher(receipt);
+        Matcher bonMatcher = BON_PATTERN.matcher(receipt);
+
+        int totalIndex = -1;
+        int rabattIndex = -1;
+        int bonIndex = -1;
+
+        if (totalMatcher.find()) {
+            totalIndex = totalMatcher.start();
+        }
+
+        if (rabattMatcher.find()) {
+            rabattIndex = rabattMatcher.start();
+        }
+
+        if (bonMatcher.find()) {
+            bonIndex = bonMatcher.start();
+        }
+
+        // Determine the earliest index among 'Total CHF', 'Rabatt', and 'Bon'
+        int earliestIndex = receipt.length(); // Default to end of string
+
+        if (totalIndex != -1 && totalIndex < earliestIndex) {
+            earliestIndex = totalIndex;
+        }
+
+        if (rabattIndex != -1 && rabattIndex < earliestIndex) {
+            earliestIndex = rabattIndex;
+        }
+
+        if (bonIndex != -1 && bonIndex < earliestIndex) {
+            earliestIndex = bonIndex;
+        }
+
+        // Extract the substring up to the earliest keyword
+        if (earliestIndex != receipt.length()) {
+            return receipt.substring(0, earliestIndex).trim();
+        } else {
+            // If none of the keywords are found, return the entire receipt
+            return receipt;
+        }
     }
 
     /**

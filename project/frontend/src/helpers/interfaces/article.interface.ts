@@ -1,9 +1,10 @@
 export interface Article {
+  Id: string;
   Name: string;
   Price: number;
   Quantity: number;
   Discount: number;
   Total: number;
-  PurchaseDate?: string;
+  Purchase_Date?: string;
   Category?: string;
 }

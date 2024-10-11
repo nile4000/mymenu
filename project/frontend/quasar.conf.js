@@ -1,20 +1,16 @@
-/* eslint-env node */
-
-/*
- * This file runs in a Node context (it's NOT transpiled by Babel), so use only
- * the ES6 features that are supported by your Node version. https://node.green/
- */
-
-// Configuration for your app
-// https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js
-
-
 /* eslint-disable @typescript-eslint/no-var-requires */
-
-
 const { configure } = require('quasar/wrappers');
+const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = configure(function (ctx) {
+  const envFile = path.resolve(__dirname, '.env');
+
+  if (fs.existsSync(envFile)) {
+    dotenv.config({ path: envFile });
+  }
+
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
     supportTS: {
@@ -34,8 +30,7 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-webpack/boot-files
     boot: [
-
-
+      'supabase'
     ],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
@@ -53,14 +48,15 @@ module.exports = configure(function (ctx) {
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-      'material-icons', // optional, you are not bound to it
+      'material-icons',
     ],
-
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
       vueRouterMode: "hash", // available values: 'hash', 'history'
       env: {
         API_URL: ctx.dev ? "http://localhost:8080" : "https://mymenu.fly.dev",
+        VITE_SUPABASE_URL: "https://rthxcvylxvzgweeppgec.supabase.co",
+        VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
       },
     },
 

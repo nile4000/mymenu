@@ -57,8 +57,8 @@ export default defineComponent({
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);
-          const uid = response.UID || 0;
-          sessionStorage.setItem("receipt_" + uid, JSON.stringify(response));
+          // const uid = response.UID || 0;
+          // sessionStorage.setItem("receipt_" + uid, JSON.stringify(response));
 
           $q.dialog({
             component: DialogComponent,

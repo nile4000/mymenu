@@ -2,7 +2,7 @@ import { Article } from "./article.interface";
 
 export interface Receipt {
   Total: number;
-  PurchaseDate: string;
+  Purchase_Date: string;
   Articles: Article[];
   Corp: string;
 }

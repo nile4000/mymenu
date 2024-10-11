@@ -6,7 +6,7 @@
           <q-card bordered flat>
             <q-card-section class="row items-center justify-between">
               <div class="flex-grow-1 q-mr-md text-weight-bold">
-                Einkauf vom: {{ props.row.PurchaseDate }}
+                Einkauf vom: {{ props.row.Purchase_Date }}
               </div>
               <q-img
                 v-if="props.row.Corp === 'Coop'"
@@ -58,11 +58,11 @@ import { defineComponent, ref, onMounted } from "vue";
 // Defining the columns
 const columns: Column[] = [
   {
-    name: "PurchaseDate",
+    name: "Purchase_Date",
     required: true,
     label: "Receipt Key",
     align: "left",
-    field: "PurchaseDate",
+    field: "Purchase_Date",
     sortable: true,
   },
 ];

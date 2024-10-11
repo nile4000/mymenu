@@ -31,9 +31,9 @@ public class PayloadBuilder {
                     .add("ArticleList", Json.createArrayBuilder()
                         .add(Json.createObjectBuilder()
                             .add("Price", 1.2)
-                            .add("Quantity", 1)
+                            .add("Quantity", 1.0)
                             .add("Discount", 0.0)
-                            .add("Total", "1.2")
+                            .add("Total", 1.2)
                             .add("Category", "Milchprodukte und Alternativen")))
                     .build();
         }
