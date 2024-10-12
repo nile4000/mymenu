@@ -12,7 +12,6 @@ export function subscribeToArticleChanges(callback: ArticleChangeCallback) {
       "postgres_changes",
       { event: "*", schema: "public", table: "article" },
       (payload) => {
-        console.log("Change received!", payload);
         callback(payload);
       }
     )

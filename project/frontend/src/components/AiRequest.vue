@@ -1,50 +1,33 @@
 <template>
   <div>
-    <q-card class="q-ma-md">
-      <!-- <transition name="fade"> -->
-        <!-- <q-btn
-          color="secondary"
-          label="Menü erstellen"
-          icon="menu_book"
-          @click="sendRequest"
-          v-ripple
-        ></q-btn> -->
-      <!-- </transition> -->
-      <q-inner-loading
-        class="card-example"
-        :showing="isLoading"
-        label="Lädt"
-      ></q-inner-loading>
-    </q-card>
-    <q-card class="q-ma-md">
-      <div v-if="!isLoading && receipt">
-        <q-card-section>
-          <div class="text-h6">{{ receipt.Name }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Zutaten:</b> {{ receipt.Ingredients }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Zubereitung:</b> {{ receipt.Instructions }}</div>
-        </q-card-section>
-        <q-card-section>
-          <div><b>Portionen:</b> {{ receipt.Servings }}</div>
-          <div><b>Zubereitungszeit:</b> {{ receipt.PreparationTime }}</div>
-        </q-card-section>
-      </div>
-    </q-card>
+    <q-btn
+      color="secondary"
+      label="Kategorisieren"
+      icon="menu_book"
+      @click="sendRequest"
+      :disabled="selectedItems.length === 0 || isLoading"
+      v-ripple
+      style="margin: 20px"
+    ></q-btn>
+
+    <q-inner-loading
+      class="card-example"
+      :showing="isLoading"
+      label="Lädt"
+    ></q-inner-loading>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from "axios";
-import { defineComponent } from "vue";
+import { Article } from "../helpers/interfaces/article.interface";
+import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
   name: "AiRequest",
   props: {
     selectedItems: {
-      type: Array,
+      type:  Array as PropType<Article[]>,
       default: () => [],
     },
   },
@@ -55,38 +38,59 @@ export default defineComponent({
     };
   },
   methods: {
-    prepareArticles(selectedItems) {
-      return selectedItems.map((item) => item.Name);
+    prepareArticles(selectedItems: Article[]) {
+      return selectedItems.map((item: Article) => ({
+        id: item.Id,
+        name: item.Name,
+      }));
     },
 
-    async sendRequest() {
-      this.isLoading = true;
-      let articleNames = this.prepareArticles(this.selectedItems);
-      try {
-        const apiUrl = process.env.API_URL;
-        const response = await axios.post(
-          `${apiUrl}/api/ai-request`,
-          {
-            articleNames,
-          },
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        this.receipt = response.data[0];
-      } catch (error) {
-        console.error("Fehler beim Senden der Anfrage:", error);
-      } finally {
-        this.isLoading = false;
+    sendRequest() {
+      if (this.selectedItems.length === 0) {
+        this.$q.notify({
+          type: "warning",
+          message: "Bitte wählen Sie mindestens einen Artikel aus.",
+        });
+        return;
       }
+
+      // this.isLoading = true;
+      const articles = this.prepareArticles(this.selectedItems);
+      console.log(articles);
+      // try {
+      //   const apiUrl = process.env.VUE_APP_API_URL || "http://localhost:3000";
+      //   const response = await axios.post(
+      //     `${apiUrl}/api/ai-request`,
+      //     {
+      //       articles,
+      //     },
+      //     {
+      //       headers: {
+      //         Accept: "application/json",
+      //         "Content-Type": "application/json",
+      //       },
+      //     }
+      //   );
+
+      //   this.receipt = response.data;
+      //   this.$q.notify({
+      //     type: "positive",
+      //     message: "Kategorisierung erfolgreich!",
+      //   });
+      // } catch (error) {
+      //   console.error("Fehler beim Senden der Anfrage:", error);
+      //   this.$q.notify({
+      //     type: "negative",
+      //     message: "Fehler bei der Kategorisierung.",
+      //   });
+      // } finally {
+      //   this.isLoading = false;
+      // }
     },
   },
 });
 </script>
+
 <style scoped>
 .card-example {
   max-width: 400px;

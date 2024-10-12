@@ -81,6 +81,7 @@ public class ExtractionService {
             String extractTotal = textUtils.extractTotal(cleanedContent);
             String extractDate = textUtils.extractDate(cleanedContent);
             String cuttedEnd = textUtils.extractArticlesUntilTotal(cleanedContent);
+            int totalRowNumber = textUtils.findTotalRowNumber(cuttedEnd);
 
             LOGGER.info("Extracted Total: " + extractTotal);
             LOGGER.info("Extracted Date: " + extractDate);
@@ -115,6 +116,18 @@ public class ExtractionService {
                 jsonResponseBuilder.add("Purchase_Date", extractDate);
             } else {
                 jsonResponseBuilder.add("Purchase_Date", "Unknown");
+            }
+
+            if (totalRowNumber >= 0) {
+                jsonResponseBuilder.add("Total_R_Extract", totalRowNumber);
+            } else {
+                jsonResponseBuilder.add("Total_R_Extract", "0");
+            }
+
+            if (totalRowNumber != 0) {
+                jsonResponseBuilder.add("Total_R_Open_Ai", articles.size());
+            } else {
+                jsonResponseBuilder.add("Total_R_Open_Ai", "0");
             }
 
             // Add Corp
@@ -222,9 +235,9 @@ public class ExtractionService {
             double quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
                     ? jsonObject.getJsonNumber("Quantity").doubleValue()
                     : 0.0;
-            double discount = jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
-                    ? jsonObject.getJsonNumber("Discount").doubleValue()
-                    : 0.0;
+            double discount = 0.0;//jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
+                    // ? jsonObject.getJsonNumber("Discount").doubleValue()
+                    // : 0.0;
             double total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
                     ? jsonObject.getJsonNumber("Total").doubleValue()
                     : 0.0;
@@ -297,9 +310,10 @@ public class ExtractionService {
                 article.setTotal(total);
 
                 // // Handle 'Category' field
-                // String category = jsonObject.containsKey("Category") && !jsonObject.isNull("Category")
-                //         ? jsonObject.getString("Category")
-                //         : "Andere";
+                // String category = jsonObject.containsKey("Category") &&
+                // !jsonObject.isNull("Category")
+                // ? jsonObject.getString("Category")
+                // : "Andere";
                 // article.setCategory(category);
 
                 // Correct data inconsistencies

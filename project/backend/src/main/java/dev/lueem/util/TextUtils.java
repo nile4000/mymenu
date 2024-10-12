@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -16,13 +17,20 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class TextUtils {
 
+    private static final Logger LOGGER = Logger.getLogger(TextUtils.class.getName());
+
     // Precompiled regex patterns for efficiency
     private static final Pattern COOP_PATTERN = Pattern.compile("Coop", Pattern.CASE_INSENSITIVE);
     private static final Pattern MIGROS_PATTERN = Pattern.compile("Migros", Pattern.CASE_INSENSITIVE);
-    private static final Pattern TOTAL_PATTERN = Pattern.compile("Total CHF (\\d+\\.\\d{2})", Pattern.CASE_INSENSITIVE);
+    private static final Pattern TOTAL_PATTERN = Pattern.compile("(?m)^\\bTotal CHF\\b.*", Pattern.CASE_INSENSITIVE);
     private static final Pattern DATE_PATTERN = Pattern.compile("\\b\\d{2}\\.\\d{2}\\.\\d{2}\\b");
-    private static final Pattern RABATT_PATTERN = Pattern.compile("^Rabatt\\s+.*", Pattern.CASE_INSENSITIVE);
-    private static final Pattern BON_PATTERN = Pattern.compile("^Bon\\s+.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RABATT_PATTERN = Pattern.compile("(?m)^\\bRabatt\\b.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern BON_PATTERN = Pattern.compile("(?m)^\\bBon\\b.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HEADER_PATTERN = Pattern
+            .compile("Artikel\\s+Menge\\s+Preis\\s+Aktion\\s+Total\\s+Zusatz", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern TERMINATOR_PATTERN = Pattern.compile("(?m)^\\b(?:Total CHF|Rabatt|Bon)\\b.*",
+            Pattern.CASE_INSENSITIVE);
 
     // Prefix used to locate the total in the receipt
     private static final String TOTAL_PREFIX = "Total CHF";
@@ -33,7 +41,8 @@ public class TextUtils {
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     /**
-     * Cleans up the provided content by removing empty lines and trimming whitespace.
+     * Cleans up the provided content by removing empty lines and trimming
+     * whitespace.
      *
      * @param content the raw text content from a receipt
      * @return a cleaned-up version of the text with no empty lines
@@ -71,14 +80,24 @@ public class TextUtils {
      */
     public String extractTotal(String receipt) {
         Matcher matcher = TOTAL_PATTERN.matcher(receipt);
-        return matcher.find() ? matcher.group(1) : "0.00";
+        if (matcher.find()) {
+            // Extrahiere den Betrag aus der Zeile "Total CHF X.XX"
+            String totalLine = matcher.group();
+            Matcher amountMatcher = Pattern.compile("\\d+\\.\\d{2}").matcher(totalLine);
+            if (amountMatcher.find()) {
+                return amountMatcher.group();
+            }
+        }
+        return "0.00";
     }
 
     /**
-     * Extracts the date from the text. If no date is found, returns the current timestamp.
+     * Extracts the date from the text. If no date is found, returns the current
+     * timestamp.
      *
      * @param text the text to search for a date
-     * @return the extracted date in the format "dd.MM.yy" or the current timestamp if not found
+     * @return the extracted date in the format "dd.MM.yy" oder den aktuellen
+     *         Zeitstempel, wenn kein Datum gefunden wurde
      */
     public String extractDate(String text) {
         Matcher matcher = DATE_PATTERN.matcher(text);
@@ -86,55 +105,73 @@ public class TextUtils {
     }
 
     /**
-     * Extracts the articles section from the receipt, stopping before 'Total CHF', 'Rabatt', or 'Bon'.
+     * Extracts the articles section from the receipt, stopping before 'Total CHF',
+     * 'Rabatt', or 'Bon'.
      *
      * @param receipt the full receipt text
      * @return the substring of the receipt containing the articles
      */
     public String extractArticlesUntilTotal(String receipt) {
-        // Define patterns to search for 'Total CHF', 'Rabatt', and 'Bon'
-        Matcher totalMatcher = Pattern.compile(Pattern.quote(TOTAL_PREFIX), Pattern.CASE_INSENSITIVE).matcher(receipt);
-        Matcher rabattMatcher = RABATT_PATTERN.matcher(receipt);
-        Matcher bonMatcher = BON_PATTERN.matcher(receipt);
+        System.out.println(receipt);
+        Matcher terminatorMatcher = TERMINATOR_PATTERN.matcher(receipt);
 
-        int totalIndex = -1;
-        int rabattIndex = -1;
-        int bonIndex = -1;
+        int terminatorIndex = -1;
 
-        if (totalMatcher.find()) {
-            totalIndex = totalMatcher.start();
-        }
-
-        if (rabattMatcher.find()) {
-            rabattIndex = rabattMatcher.start();
-        }
-
-        if (bonMatcher.find()) {
-            bonIndex = bonMatcher.start();
-        }
-
-        // Determine the earliest index among 'Total CHF', 'Rabatt', and 'Bon'
-        int earliestIndex = receipt.length(); // Default to end of string
-
-        if (totalIndex != -1 && totalIndex < earliestIndex) {
-            earliestIndex = totalIndex;
-        }
-
-        if (rabattIndex != -1 && rabattIndex < earliestIndex) {
-            earliestIndex = rabattIndex;
-        }
-
-        if (bonIndex != -1 && bonIndex < earliestIndex) {
-            earliestIndex = bonIndex;
-        }
-
-        // Extract the substring up to the earliest keyword
-        if (earliestIndex != receipt.length()) {
-            return receipt.substring(0, earliestIndex).trim();
+        if (terminatorMatcher.find()) {
+            terminatorIndex = terminatorMatcher.start();
+            String matchedLine = terminatorMatcher.group();
+            LOGGER.info("Terminierende Zeile gefunden: \"" + matchedLine + "\" bei Index: " + terminatorIndex);
         } else {
-            // If none of the keywords are found, return the entire receipt
+            LOGGER.info("Keine terminierenden Schlüsselwörter gefunden.");
+        }
+
+        // Extrahiere den Substring bis zum terminierenden Schlüsselwort
+        if (terminatorIndex != -1) {
+            String extracted = receipt.substring(0, terminatorIndex).trim();
+            LOGGER.info("Extrahierter Artikelabschnitt: " + extracted);
+            return extracted;
+        } else {
+            // Wenn keines der Schlüsselwörter gefunden wurde, gib den gesamten Beleg zurück
+            LOGGER.info("Keine Schlüsselwörter gefunden. Gesamter Beleg wird zurückgegeben.");
             return receipt;
         }
+    }
+
+    public int findTotalRowNumber(String receipt) {
+        String[] lines = receipt.split(System.lineSeparator());
+
+        // Finde den Start der Artikelzeilen
+        int firstArticleLine = findFirstArticleStart(receipt);
+        if (firstArticleLine == -1) {
+            LOGGER.warning("Kopfzeile für Artikelzeilen nicht gefunden. 'Total' kann nicht bestimmt werden.");
+            return -1;
+        }
+
+        for (int i = firstArticleLine; i < lines.length; i++) {
+            Matcher matcher = TOTAL_PATTERN.matcher(lines[i]);
+            if (matcher.find()) {
+                LOGGER.info("\"Total CHF\" Zeile gefunden bei Zeile " + (i + 1));
+                return i + 1;
+            }
+        }
+
+        LOGGER.warning("\"Total CHF\" Zeile nicht gefunden.");
+        return -1;
+    }
+
+    private int findFirstArticleStart(String receipt) {
+        String[] lines = receipt.split(System.lineSeparator());
+
+        for (int i = 0; i < lines.length; i++) {
+            Matcher matcher = HEADER_PATTERN.matcher(lines[i]);
+            if (matcher.find()) {
+                LOGGER.info("Kopfzeile gefunden bei Zeile " + (i + 1));
+                return i + 1;
+            }
+        }
+
+        LOGGER.warning("Kopfzeile nicht gefunden.");
+        return -1;
     }
 
     /**

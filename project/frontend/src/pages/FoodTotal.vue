@@ -13,6 +13,18 @@
       </q-card-section>
     </q-card>
 
+    <q-card class="my-card shadow-2">
+      <q-card-section>
+        <div class="text-h6">Total Berechnet (ohne Bon/Gesamtrabatte)</div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="flex flex-center">
+        <div class="text-h5 text-primary">
+          {{ totalCalculated.toFixed(2) }} CHF
+        </div>
+      </q-card-section>
+    </q-card>
+
     <!-- Top-Kategorie nach Umsatz Card -->
     <q-card class="my-card shadow-2">
       <q-card-section>
@@ -40,7 +52,6 @@
     <q-card class="my-card-wide shadow-2">
       <q-card-section>
         <div class="text-h6">Total pro Kategorie</div>
-        <div class="text-subtitle2 text-grey">Ausgaben nach Kategorien</div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -61,20 +72,17 @@
     <!-- Total pro Kaufdatum Card -->
     <q-card class="my-card shadow-2">
       <q-card-section>
-        <div class="text-h6">Total pro Kaufdatum</div>
-        <div class="text-subtitle2 text-grey">
-          Ausgaben nach Kaufdatum
-        </div>
+        <div class="text-h6">Total pro Beleg</div>
       </q-card-section>
       <q-separator />
       <q-card-section>
         <q-list>
-          <q-item v-for="(total, date) in totalsPerDate" :key="date">
-            <q-item-section>
-              <div class="text-body1">{{ formatDate(date) }}</div>
+          <q-item v-for="receipt in totalsPerReceipt" :key="receipt.id"
+            ><q-item-section>
+              {{ formatDate(receipt.date) }}
             </q-item-section>
             <q-item-section side>
-              <div class="text-body1">{{ total.toFixed(2) }} CHF</div>
+              <div class="text-body1">{{ receipt.total.toFixed(2) }} CHF</div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -93,23 +101,28 @@ export default defineComponent({
       type: Object as PropType<Record<string, number>>,
       required: true,
     },
-    totalsPerDate: {
-      type: Object as PropType<Record<string, number>>,
+    totalsPerReceipt: {
+      type: Array as PropType<
+        Array<{ id: string; date: string; total: number }>
+      >,
       required: true,
     },
     rows: {
       type: Array as PropType<
         Array<{ Total: number; Purchase_Date: string; Category: string }>
       >,
-      default: () => [], // Provide a default empty array
+      default: () => [],
+    },
+    totalCalculated: {
+      type: Number,
+      required: true,
+    },
+    totalExpenses: {
+      type: Number,
+      required: true,
     },
   },
   computed: {
-    totalExpenses() {
-      return (this.rows || []).reduce((sum, item) => sum + item.Total, 0);
-    },
-
-    // Top Category by Revenue
     topCategory() {
       const categoryTotals: Record<string, number> = {};
       (this.rows || []).forEach((item) => {

@@ -56,10 +56,7 @@
       <groupId>jakarta.json.bind</groupId>
       <artifactId>jakarta.json.bind-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-openapi</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>net.sourceforge.tess4j</groupId>
       <artifactId>tess4j</artifactId>

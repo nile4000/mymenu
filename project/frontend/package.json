@@ -20,6 +20,7 @@
     "dotenv": "^16.4.5",
     "firebase": "^9.0.2",
     "mymenu": "file:",
+    "openai": "^4.67.3",
     "quasar": "^2.8.0",
     "vue": "3.4.15",
     "vue-router": "^4.0.12",

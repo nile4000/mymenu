@@ -56,7 +56,9 @@ module.exports = configure(function (ctx) {
       env: {
         API_URL: ctx.dev ? "http://localhost:8080" : "https://mymenu.fly.dev",
         VITE_SUPABASE_URL: "https://rthxcvylxvzgweeppgec.supabase.co",
-        VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY
+        VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY,
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        FIREBASE_API_KEY: process.env.FIREBASE_API_KEY
       },
     },
 
