@@ -1,13 +1,7 @@
 import { supabase } from "src/boot/supabase";
 import { Article } from "../helpers/interfaces/article.interface";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
-
-// (DD.MM.YY -> YYYY-MM-DD)
-function convertToISODate(dateString: string): string {
-  const [day, month, year] = dateString.split(".");
-  const fullYear = year.length === 2 ? `20${year}` : year;
-  return `${fullYear}-${month}-${day}`;
-}
+import { convertToISODate } from "../helpers/dateHelpers";
 
 export async function saveArticlesAndReceipt(
   articles: Article[],

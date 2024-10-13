@@ -27,13 +27,21 @@
                 style="max-width: 55px"
               />
             </q-card-section>
-            <q-card-section class="row items-center justify-between" side>
+            <q-card-section class="row items-center justify-between">
+              <q-btn
+                flat
+                icon="visibility"
+                color="primary"
+                disabled
+                v-close-popup
+              />
               <q-btn
                 flat
                 icon="delete"
                 color="negative"
                 @click="deleteReceipt(props.row)"
                 v-close-popup
+                side
               />
             </q-card-section>
           </q-card>
