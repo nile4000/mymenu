@@ -1,6 +1,5 @@
 <template>
   <div class="q-pa-md row items-start q-gutter-md">
-    <!-- Gesamtausgaben Card -->
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Gesamtausgaben</div>
@@ -13,19 +12,6 @@
       </q-card-section>
     </q-card>
 
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Total Berechnet (ohne Bon/Gesamtrabatte)</div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section class="flex flex-center">
-        <div class="text-h5 text-primary">
-          {{ totalCalculated.toFixed(2) }} CHF
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- Top-Kategorie nach Umsatz Card -->
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Top-Kategorie</div>
@@ -48,8 +34,7 @@
       </q-card-section>
     </q-card>
 
-    <!-- Total pro Kategorie Card -->
-    <q-card class="my-card-wide shadow-2">
+    <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Total pro Kategorie</div>
       </q-card-section>
@@ -69,10 +54,12 @@
       </q-card-section>
     </q-card>
 
-    <!-- Total pro Kaufdatum Card -->
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Total pro Beleg</div>
+        <div class="text-subtitle2 text-grey">
+          "Total CHF" pro Beleg.
+        </div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -88,6 +75,30 @@
         </q-list>
       </q-card-section>
     </q-card>
+    <q-card class="my-card shadow-2">
+      <q-card-section>
+        <div class="text-h6">Total Berechnet</div>
+        <div class="text-subtitle2 text-grey">
+          Artikel-Totale zusammengerechnet. Ohne Rabatte und Bons.
+        </div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section >
+        <q-list>
+          <q-item
+            v-for="(data, receiptId) in totalCalculatedPerReceipt"
+            :key="receiptId"
+          >
+            <q-item-section>
+              {{ formatDate(data.date) }}
+            </q-item-section>
+            <q-item-section side
+              ><div class="text-body1">{{ data.total.toFixed(2) }} CHF</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
@@ -98,7 +109,7 @@ export default defineComponent({
   name: "FoodTotal",
   props: {
     totalsPerCategory: {
-      type: Object as PropType<Record<string, number>>,
+      type: Object as () => Record<string, number>,
       required: true,
     },
     totalsPerReceipt: {
@@ -113,8 +124,8 @@ export default defineComponent({
       >,
       default: () => [],
     },
-    totalCalculated: {
-      type: Number,
+    totalCalculatedPerReceipt: {
+      type: Object as PropType<Record<string, { total: number; date: string }>>,
       required: true,
     },
     totalExpenses: {
@@ -155,7 +166,7 @@ export default defineComponent({
 <style scoped>
 .my-card {
   width: 100%;
-  max-width: 300px;
+  max-width: 400px;
 }
 .my-card-wide {
   width: 100%;

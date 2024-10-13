@@ -3,7 +3,7 @@
     <FoodTotal
       :totalsPerCategory="totalsPerCategory"
       :totalsPerReceipt="totalsPerReceipt"
-      :totalCalculated="calculatedTotal"
+      :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
       :totalExpenses="totalExpenses"
       :rows="rows"
     />
@@ -27,16 +27,8 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  onUnmounted,
-  reactive,
-  computed,
-} from "vue";
+import { defineComponent, ref, onMounted, onUnmounted, reactive } from "vue";
 import { Article } from "../helpers/interfaces/article.interface";
-import { Column } from "../helpers/interfaces/column.interface";
 import {
   readAllArticles,
   readReceiptsByIds,
@@ -48,6 +40,8 @@ import {
 import FoodTotal from "./FoodTotal.vue";
 import AiRequest from "../components/AiRequest.vue";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
+import { articleColumns } from "../helpers/columns/articleColumns";
+import { useTotals } from "../helpers/composables/UseTotals";
 
 export default defineComponent({
   name: "FoodPage",
@@ -62,45 +56,6 @@ export default defineComponent({
     const message = ref("");
     const messageType = ref("positive");
 
-    const columns: Column[] = [
-      {
-        name: "Purchase_Date",
-        label: "Kaufdatum",
-        field: "Purchase_Date",
-        sortable: true,
-        align: "center",
-      },
-      {
-        name: "Category",
-        label: "Kategorie",
-        field: "Category",
-        sortable: true,
-        align: "center",
-      },
-      {
-        name: "Name",
-        required: true,
-        label: "Name",
-        align: "left",
-        field: "Name",
-        sortable: true,
-      },
-      {
-        name: "Price",
-        align: "center",
-        label: "Preis",
-        field: "Price",
-        sortable: true,
-      },
-      { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
-      {
-        name: "Total",
-        label: "Total (nach Rabatt)",
-        field: "Total",
-        sortable: true,
-      },
-    ];
-
     const initialPagination = ref({
       sortBy: "desc",
       descending: false,
@@ -108,39 +63,12 @@ export default defineComponent({
       rowsPerPage: 100,
     });
 
-    const totalsPerCategory = computed(() => {
-      return rows.reduce((acc, article) => {
-        const category = article.Category;
-        if (category) {
-          if (!acc[category]) {
-            acc[category] = 0;
-          }
-          acc[category] += parseFloat(article.Total.toString());
-        }
-        return acc;
-      }, {} as Record<string, number>);
-    });
-
-    const totalsPerReceipt = computed(() => {
-      return Object.values(receipts).map((receipt) => ({
-        id: receipt.Id || "",
-        date: receipt.Purchase_Date,
-        total: parseFloat(receipt.Total_Receipt.toString()),
-      }));
-    });
-
-    const totalExpenses = computed(() => {
-      return Object.values(receipts).reduce((sum, receipt) => {
-        return sum + parseFloat(receipt.Total_Receipt.toString());
-      }, 0);
-    });
-
-    const calculatedTotal = computed(() => {
-      return rows.reduce(
-        (sum, item) => sum + parseFloat(item.Total.toString()),
-        0
-      );
-    });
+    const {
+      totalsPerCategory,
+      totalsPerReceipt,
+      totalExpenses,
+      calculatedTotalPerReceipt,
+    } = useTotals(rows, receipts);
 
     // Handler für Echtzeit-Änderungen
     const handleArticleChange = (payload: any) => {
@@ -187,7 +115,7 @@ export default defineComponent({
         ...new Set(
           articles
             .map((article) => article.Receipt_Id)
-            .filter((id): id is string => !!id) // Typ-Guard hinzugefügt
+            .filter((id): id is string => !!id)
         ),
       ];
       const idsToFetch = uniqueReceiptIds.filter((id) => !receipts[id]);
@@ -206,7 +134,7 @@ export default defineComponent({
     };
 
     return {
-      columns,
+      columns: articleColumns,
       rows,
       selected,
       message,
@@ -215,7 +143,7 @@ export default defineComponent({
       totalsPerCategory,
       totalsPerReceipt,
       totalExpenses,
-      calculatedTotal,
+      calculatedTotalPerReceipt,
     };
   },
 });

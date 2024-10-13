@@ -15,13 +15,14 @@ export async function saveArticlesAndReceipt(
 ): Promise<any> {
   try {
     const formattedDate = convertToISODate(receiptData.Purchase_Date);
+    // save receipt
     const { data: receiptInsertData, error: receiptInsertError } =
       await supabase
         .from("receipt")
         .insert([
           {
             Uuid: receiptData.Uuid,
-            Purchase_Date: formattedDate, // Verwende das konvertierte Datum
+            Purchase_Date: formattedDate,
             Corp: receiptData.Corp,
             Total_Receipt: receiptData.Total_Receipt,
           },
@@ -50,7 +51,7 @@ export async function saveArticlesAndReceipt(
       };
     });
 
-    // 3. Speichere die Artikel
+    // save article
     const { data: articlesInsertData, error: articlesInsertError } =
       await supabase.from("article").insert(preparedArticles);
 
