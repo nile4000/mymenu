@@ -15,19 +15,28 @@
       :showing="isLoading"
       label="Lädt"
     ></q-inner-loading>
+    <q-btn
+      color="primary"
+      label="Beleg Übersicht"
+      icon="dashboard"
+      @click="openHistory"
+      v-ripple
+      style="margin: 20px"
+    ></q-btn>
   </div>
 </template>
 
 <script lang="ts">
 import axios from "axios";
 import { Article } from "../helpers/interfaces/article.interface";
+import router from "../router";
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
   name: "AiRequest",
   props: {
     selectedItems: {
-      type:  Array as PropType<Article[]>,
+      type: Array as PropType<Article[]>,
       default: () => [],
     },
   },
@@ -37,12 +46,17 @@ export default defineComponent({
       isLoading: false,
     };
   },
+
   methods: {
     prepareArticles(selectedItems: Article[]) {
       return selectedItems.map((item: Article) => ({
         id: item.Id,
         name: item.Name,
       }));
+    },
+
+    openHistory() {
+      void router.push("/receipt");
     },
 
     sendRequest() {

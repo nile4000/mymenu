@@ -4,5 +4,6 @@ export interface Column {
   label: string;
   align?: string;
   field: string;
+  format?: any;
   sortable: boolean;
 }

@@ -1,3 +1,4 @@
+import { formatDate } from "../dateHelpers";
 import { Column } from "../interfaces/column.interface";
 
 export const articleColumns: Column[] = [
@@ -5,6 +6,7 @@ export const articleColumns: Column[] = [
     name: "Purchase_Date",
     label: "Kaufdatum",
     field: "Purchase_Date",
+    format: (val: string) => formatDate(val),
     sortable: true,
     align: "center",
   },

@@ -1,12 +1,18 @@
 <template>
   <div class="q-pa-md">
-    <q-table :rows="rows" :columns="columns" grid hide-header title="Meine Belege">
+    <q-table
+      :rows="rows"
+      :columns="columns"
+      grid
+      hide-header
+      title="Meine Belege"
+    >
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3">
           <q-card bordered flat>
             <q-card-section class="row items-center justify-between">
               <div class="flex-grow-1 q-mr-md text-weight-bold">
-                Einkauf vom: {{ props.row.Purchase_Date }}
+                Einkauf vom: {{ formatDate(props.row.Purchase_Date) }}
               </div>
               <q-img
                 v-if="props.row.Corp === 'Coop'"
@@ -21,28 +27,15 @@
                 style="max-width: 55px"
               />
             </q-card-section>
-            <q-separator class="custom-separator"></q-separator>
-            <q-list dense class="custom-list">
-              <!-- just show the first 3 articles -->
-              <q-item
-                v-for="(article, index) in props.row.Articles.slice(0, 3)"
-                :key="index"
-              >
-                <q-item-section>
-                  <q-item-label>{{ article.Name }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label>...</q-item-label>
-                </q-item-section>
-                <q-item-section side bottom>
-                  <q-item-label class="text-weight-bold"
-                    >Total: {{ props.row.Total }}</q-item-label
-                  >
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-card-section class="row items-center justify-between" side>
+              <q-btn
+                flat
+                icon="delete"
+                color="negative"
+                @click="deleteReceipt(props.row)"
+                v-close-popup
+              />
+            </q-card-section>
           </q-card>
         </div>
       </template>
@@ -54,6 +47,9 @@
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { Column } from "../helpers/interfaces/column.interface";
 import { defineComponent, ref, onMounted } from "vue";
+import { readAllReceipts } from "../services/readAllReceipts";
+import { deleteReceiptById } from "../services/deleteReceipt";
+import { formatDate } from "../helpers/dateHelpers";
 
 // Defining the columns
 const columns: Column[] = [
@@ -63,6 +59,7 @@ const columns: Column[] = [
     label: "Receipt Key",
     align: "left",
     field: "Purchase_Date",
+    format: (val: string) => `${formatDate(val)}`,
     sortable: true,
   },
 ];
@@ -75,31 +72,42 @@ export default defineComponent({
     const rows = ref<Receipt[]>([]);
     const filter = ref<string>("");
     const selected = ref<string[]>([]);
+    const allRows: Receipt[] = [];
 
-    onMounted(() => {
-      const allRows: Receipt[] = [];
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.includes("receipt")) {
-          try {
-            const itemValue = sessionStorage.getItem(key);
-            if (itemValue) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const receipt: Receipt = JSON.parse(itemValue);
-              allRows.push(receipt);
-            }
-          } catch (e) {
-            console.error("Error parsing session storage item", key, e);
-          }
+    onMounted(async () => {
+      try {
+        const data = await readAllReceipts();
+        if (data) {
+          console.log(data);
+          allRows.splice(0, allRows.length, ...data);
         }
-      });
+      } catch (error) {
+        console.error("Error loading articles from Supabase:", error);
+      }
       rows.value = allRows;
     });
+
+    const deleteReceipt = async (receipt: Receipt) => {
+      const confirmed = confirm(
+        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.Purchase_Date} löschen wollen?`
+      );
+      if (confirmed && receipt.Id) {
+        try {
+          await deleteReceiptById(receipt.Id);
+          rows.value = rows.value.filter((row) => row.Id !== receipt.Id);
+        } catch (error) {
+          console.error("Error deleting receipt:", error);
+        }
+      }
+    };
 
     return {
       filter,
       selected,
       columns,
       rows,
+      formatDate,
+      deleteReceipt,
     };
   },
 });

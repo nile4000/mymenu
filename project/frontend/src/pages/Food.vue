@@ -16,12 +16,33 @@
       title="Alle Esswaren"
       :rows="rows"
       :columns="columns"
-      row-key="id"
+      row-key="Id"
       separator="cell"
       :pagination="initialPagination"
       v-model:selected="selected"
       selection="multiple"
     >
+      <template v-slot:header-selection="scope">
+        <q-toggle v-model="scope.selected" />
+      </template>
+
+      <template v-slot:body-selection="scope">
+        <q-toggle v-model="scope.selected" />
+      </template>
+      <!-- ToDo: Edit Category -->
+      <!-- <template v-slot:body="props">
+        <q-td :props="props">
+          <q-popup-edit v-model="props.row.Category" v-slot="scope">
+            <q-input
+              v-model="scope.value"
+              dense
+              autofocus
+              counter
+              @keyup.enter="scope.set"
+            />
+          </q-popup-edit>
+        </q-td>
+      </template> -->
     </q-table>
   </div>
 </template>
@@ -83,6 +104,11 @@ export default defineComponent({
 
         case "DELETE":
           rows.splice(rows.indexOf(newArticle), 1);
+          break;
+
+        case "UPDATE":
+          // const index = rows.indexOf(newArticle);
+          // rows[index] = newArticle;
           break;
         default:
           console.warn(`Unknown event type: ${eventType}`);

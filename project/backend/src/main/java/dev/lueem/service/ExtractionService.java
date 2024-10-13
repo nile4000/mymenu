@@ -124,7 +124,7 @@ public class ExtractionService {
                 jsonResponseBuilder.add("Total_R_Extract", "0");
             }
 
-            if (totalRowNumber != 0) {
+            if (articles.size() != 0) {
                 jsonResponseBuilder.add("Total_R_Open_Ai", articles.size());
             } else {
                 jsonResponseBuilder.add("Total_R_Open_Ai", "0");

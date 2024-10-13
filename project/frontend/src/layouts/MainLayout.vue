@@ -2,11 +2,13 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title class="title-header">
-          <q-avatar square size="36px" class="q-mr-sm">
-            <img src="../assets/logo.png" alt="Logo" /> </q-avatar
-          >MY MENÜ
-        </q-toolbar-title>
+        <q-item clickable v-close-popup @click="returnHome">
+          <q-toolbar-title class="title-header">
+            <q-avatar square size="36px" class="q-mr-sm">
+              <img src="../assets/logo.png" alt="Logo" /> </q-avatar
+            >MY MENÜ
+          </q-toolbar-title>
+        </q-item>
         <div>
           <q-btn-dropdown unelevated flat color="white">
             <q-list>
@@ -33,10 +35,10 @@
       </q-toolbar>
     </q-header>
     <q-footer>
-        <q-toolbar>
-          <q-toolbar-title class="title-footer">AI Essensplaner</q-toolbar-title>
-        </q-toolbar>
-      </q-footer>
+      <q-toolbar>
+        <q-toolbar-title class="title-footer">AI Essensplaner</q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
 
     <q-page-container>
       <router-view />
@@ -48,7 +50,6 @@
 import router from "../router";
 import { useQuasar } from "quasar";
 // import { getAuth, onAuthStateChanged } from "firebase/auth";
-
 
 // const linksList = [
 //   {
@@ -112,6 +113,10 @@ export default defineComponent({
     const openHistory = () => {
       void router.push("/receipt");
     };
+
+    const returnHome = () => {
+      void router.push("/");
+    };
     return {
       email,
       name,
@@ -121,6 +126,7 @@ export default defineComponent({
       },
       logout,
       openHistory,
+      returnHome,
     };
   },
 });

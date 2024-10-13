@@ -92,7 +92,7 @@
       <q-card-section>
         <div class="text-h6">Total Berechnet</div>
         <div class="text-subtitle2 text-grey">
-          Artikel-Totale zusammengerechnet. Ohne Rabatte und Bons.
+          Artikel-Totale zusammengerechnet. Ohne Bons.
         </div>
       </q-card-section>
       <q-separator />
@@ -103,7 +103,7 @@
             :key="receiptId"
           >
             <q-item-section>
-              {{ data.date }}
+              {{ formatDate(data.date.toString()) }}
             </q-item-section>
             <q-item-section side
               ><div class="text-body1">{{ data.total.toFixed(2) }} CHF</div>
@@ -118,6 +118,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { TotalExpenses } from "../helpers/interfaces/totalExpenses.interface";
+import { formatMonth, formatDate } from "../helpers/dateHelpers";
 
 export default defineComponent({
   name: "FoodTotal",
@@ -165,32 +166,8 @@ export default defineComponent({
     },
   },
   methods: {
-    formatDate(dateString: string) {
-      if (!dateString) return "";
-      const date = new Date(dateString.toString().trim());
-      return new Intl.DateTimeFormat("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(date);
-    },
-    formatMonth(monthNumber: number): string {
-      const monthNames = [
-        "Januar",
-        "Februar",
-        "März",
-        "April",
-        "Mai",
-        "Juni",
-        "Juli",
-        "August",
-        "September",
-        "Oktober",
-        "November",
-        "Dezember",
-      ];
-      return monthNames[monthNumber - 1] || "Unbekannt";
-    },
+    formatMonth,
+    formatDate,
   },
 });
 </script>
