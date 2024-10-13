@@ -3,20 +3,49 @@
 import { computed } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { Receipt } from "../interfaces/receipt.interface";
+import { TotalExpenses } from "../interfaces/totalExpenses.interface";
 
 export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
+
   const totalsPerReceipt = computed(() => {
     return Object.values(receipts).map((receipt) => ({
       id: receipt.Id || "",
-      date: receipt.Purchase_Date,
+      date: new Date(receipt.Purchase_Date),
       total: parseFloat(receipt.Total_Receipt.toString()),
     }));
   });
 
-  const totalExpenses = computed(() => {
-    return Object.values(receipts).reduce((sum, receipt) => {
+  const totalExpenses = computed<TotalExpenses>(() => {
+    const receiptValues = Object.values(receipts);
+    const sum = receiptValues.reduce((sum, receipt) => {
       return sum + parseFloat(receipt.Total_Receipt.toString());
     }, 0);
+
+    if (receiptValues.length === 0) {
+      return {
+        sum,
+        firstMonth: null,
+        firstYear: null,
+        lastMonth: null,
+        lastYear: null,
+      };
+    }
+
+    // Sort receipts by Purchase_Date
+    const sortedReceipts = receiptValues
+      .map((receipt) => new Date(receipt.Purchase_Date))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    const firstDate = sortedReceipts[0];
+    const lastDate = sortedReceipts[sortedReceipts.length - 1];
+
+    return {
+      sum,
+      firstMonth: firstDate.getMonth() + 1, // getMonth() ist nullbasiert
+      firstYear: firstDate.getFullYear(),
+      lastMonth: lastDate.getMonth() + 1,
+      lastYear: lastDate.getFullYear(),
+    };
   });
 
   const totalsPerCategory = computed(() => {

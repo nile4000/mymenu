@@ -3,11 +3,26 @@
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Gesamtausgaben</div>
+        <div
+          v-if="
+            totalExpenses.firstMonth &&
+            totalExpenses.firstYear &&
+            totalExpenses.lastMonth &&
+            totalExpenses.lastYear
+          "
+        >
+          <div class="text-subtitle2 text-grey">
+            {{ formatMonth(totalExpenses.firstMonth) }}
+            {{ totalExpenses.firstYear }} -
+            {{ formatMonth(totalExpenses.lastMonth) }}
+            {{ totalExpenses.lastYear }}
+          </div>
+        </div>
       </q-card-section>
       <q-separator />
       <q-card-section class="flex flex-center">
         <div class="text-h5 text-primary">
-          {{ totalExpenses.toFixed(2) }} CHF
+          {{ totalExpenses.sum.toFixed(2) }} CHF
         </div>
       </q-card-section>
     </q-card>
@@ -57,9 +72,7 @@
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Total pro Beleg</div>
-        <div class="text-subtitle2 text-grey">
-          "Total CHF" pro Beleg.
-        </div>
+        <div class="text-subtitle2 text-grey">"Total CHF" pro Beleg.</div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -83,14 +96,14 @@
         </div>
       </q-card-section>
       <q-separator />
-      <q-card-section >
+      <q-card-section>
         <q-list>
           <q-item
             v-for="(data, receiptId) in totalCalculatedPerReceipt"
             :key="receiptId"
           >
             <q-item-section>
-              {{ formatDate(data.date) }}
+              {{ data.date }}
             </q-item-section>
             <q-item-section side
               ><div class="text-body1">{{ data.total.toFixed(2) }} CHF</div>
@@ -104,6 +117,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { TotalExpenses } from "../helpers/interfaces/totalExpenses.interface";
 
 export default defineComponent({
   name: "FoodTotal",
@@ -129,7 +143,7 @@ export default defineComponent({
       required: true,
     },
     totalExpenses: {
-      type: Number,
+      type: Object as PropType<TotalExpenses>,
       required: true,
     },
   },
@@ -152,12 +166,30 @@ export default defineComponent({
   },
   methods: {
     formatDate(dateString: string) {
-      const date = new Date(dateString);
+      if (!dateString) return "";
+      const date = new Date(dateString.toString().trim());
       return new Intl.DateTimeFormat("de-DE", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       }).format(date);
+    },
+    formatMonth(monthNumber: number): string {
+      const monthNames = [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
+      ];
+      return monthNames[monthNumber - 1] || "Unbekannt";
     },
   },
 });
