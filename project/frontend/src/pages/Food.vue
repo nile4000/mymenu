@@ -107,8 +107,7 @@ export default defineComponent({
           break;
 
         case "UPDATE":
-          // const index = rows.indexOf(newArticle);
-          // rows[index] = newArticle;
+          rows.push(newArticle);
           break;
         default:
           console.warn(`Unknown event type: ${eventType}`);

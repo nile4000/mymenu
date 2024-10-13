@@ -72,7 +72,7 @@
     <q-card class="my-card shadow-2">
       <q-card-section>
         <div class="text-h6">Total pro Beleg</div>
-        <div class="text-subtitle2 text-grey">"Total CHF" pro Beleg.</div>
+        <div class="text-subtitle2 text-grey">"Total CHF" Zeile vom Beleg.</div>
       </q-card-section>
       <q-separator />
       <q-card-section>
@@ -90,7 +90,7 @@
     </q-card>
     <q-card class="my-card shadow-2">
       <q-card-section>
-        <div class="text-h6">Total Berechnet</div>
+        <div class="text-h6">Total pro Beleg (Berechnet)</div>
         <div class="text-subtitle2 text-grey">
           Artikel-Totale zusammengerechnet. Ohne Bons.
         </div>
