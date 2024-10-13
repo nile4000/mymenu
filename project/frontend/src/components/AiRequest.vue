@@ -31,7 +31,7 @@ import axios from "axios";
 import { Article } from "../helpers/interfaces/article.interface";
 import router from "../router";
 import { defineComponent, PropType } from "vue";
-import { updateArticleById } from "src/services/updateArticle";
+import { updateArticleById } from "../services/updateArticle";
 
 export default defineComponent({
   name: "AiRequest",
