@@ -6,11 +6,10 @@ import { Receipt } from "../interfaces/receipt.interface";
 import { TotalExpenses } from "../interfaces/totalExpenses.interface";
 
 export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
-
   const totalsPerReceipt = computed(() => {
     return Object.values(receipts).map((receipt) => ({
       id: receipt.Id || "",
-      date: new Date(receipt.Purchase_Date),
+      date: receipt.Purchase_Date,
       total: parseFloat(receipt.Total_Receipt.toString()),
     }));
   });
