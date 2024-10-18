@@ -58,6 +58,7 @@ import { defineComponent, ref, onMounted } from "vue";
 import { readAllReceipts } from "../services/readAllReceipts";
 import { deleteReceiptById } from "../services/deleteReceipt";
 import { formatDate } from "../helpers/dateHelpers";
+import { useQuasar } from "quasar";
 
 // Defining the columns
 const columns: Column[] = [
@@ -76,7 +77,7 @@ export default defineComponent({
   name: "ReceiptsPage",
 
   setup() {
-    // Define rows as an array of Receipt objects
+    const $q = useQuasar();
     const rows = ref<Receipt[]>([]);
     const filter = ref<string>("");
     const selected = ref<string[]>([]);
@@ -91,6 +92,10 @@ export default defineComponent({
         }
       } catch (error) {
         console.error("Error loading articles from Supabase:", error);
+        $q.notify({
+          type: "negative",
+          message: "Fehler beim Laden der Artikel.",
+        });
       }
       rows.value = allRows;
     });
@@ -103,8 +108,16 @@ export default defineComponent({
         try {
           await deleteReceiptById(receipt.Id);
           rows.value = rows.value.filter((row) => row.Id !== receipt.Id);
+          $q.notify({
+            type: "positive",
+            message: "Beleg gelöscht.",
+          });
         } catch (error) {
           console.error("Error deleting receipt:", error);
+          $q.notify({
+            type: "negative",
+            message: "Fehler beim Löschen des Belegs.",
+          });
         }
       }
     };

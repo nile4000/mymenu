@@ -63,6 +63,7 @@ import AiRequest from "../components/AiRequest.vue";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../helpers/columns/articleColumns";
 import { useTotals } from "../helpers/composables/UseTotals";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "FoodPage",
@@ -71,6 +72,7 @@ export default defineComponent({
     FoodTotal,
   },
   setup() {
+    const $q = useQuasar();
     const selected = ref<Article[]>([]);
     const rows = reactive<Article[]>([]);
     const receipts = reactive<Record<string, Receipt>>({});
@@ -110,7 +112,10 @@ export default defineComponent({
           rows.push(newArticle);
           break;
         default:
-          console.warn(`Unknown event type: ${eventType}`);
+          $q.notify({
+            type: "warning",
+            message: `Unknown event type: ${eventType}`,
+          });
       }
     };
 
@@ -124,7 +129,10 @@ export default defineComponent({
           await fetchReceiptsForArticles(data);
         }
       } catch (error) {
-        console.error("Error loading articles from Supabase:", error);
+        $q.notify({
+          type: "negative",
+          message: "Fehler beim Laden der Artikel vom Backend.",
+        });
       }
       channel = subscribeToArticleChanges(handleArticleChange);
     });
@@ -153,7 +161,10 @@ export default defineComponent({
             }
           });
         } catch (error) {
-          console.error("Error loading receipts:", error);
+          $q.notify({
+            type: "negative",
+            message: "Fehler beim Laden der Belege vom Backend.",
+          });
         }
       }
     };

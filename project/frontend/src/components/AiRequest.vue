@@ -110,14 +110,9 @@ export default defineComponent({
               },
             }
           );
-
-          // Sanitize the response in case of any formatting errors
+          // sanizitation, formatting, parsing
           let categorizedData = response.data.choices[0].message.content;
-
-          // Remove potential code block formatting (```)
           categorizedData = categorizedData.replace(/```json|```/g, "");
-
-          // Parse the JSON response
           const categorizedArticles = JSON.parse(categorizedData);
 
           const validCategorizedArticles = categorizedArticles.filter(

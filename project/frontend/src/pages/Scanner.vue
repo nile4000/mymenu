@@ -38,7 +38,7 @@ export default defineComponent({
       //   console.error("User not logged in");
       //   return [];
       // }
-      return []
+      return [];
     });
 
     const apiUrl = computed(() => {
@@ -46,10 +46,10 @@ export default defineComponent({
       return `${apiUrl}/api/extract`;
     });
 
-    function onRejected(rejectedEntries : any) {
+    function onRejected(rejectedEntries: any) {
       $q.notify({
         type: "negative",
-        message: `${rejectedEntries.length} file did not pass validation constraints`,
+        message: `${rejectedEntries.length} PDFs konnten nicht geladen werden.`,
       });
     }
 
@@ -57,9 +57,6 @@ export default defineComponent({
       if (event.xhr && event.xhr.responseText) {
         try {
           const response = JSON.parse(event.xhr.responseText);
-          // const uid = response.UID || 0;
-          // sessionStorage.setItem("receipt_" + uid, JSON.stringify(response));
-
           $q.dialog({
             component: DialogComponent,
             componentProps: {
@@ -69,9 +66,8 @@ export default defineComponent({
         } catch (error) {
           $q.notify({
             type: "negative",
-            message: "Failed to parse server response.",
+            message: "Fehler beim Parsen der Antwort.",
           });
-          console.error("Error parsing response:", error);
         }
       }
     }
