@@ -27,6 +27,7 @@
           :rows="articles"
           :columns="columns"
           row-key="Name"
+          no-data-label="Keine Daten gefunden"
         >
         </q-table>
       </q-card-section>

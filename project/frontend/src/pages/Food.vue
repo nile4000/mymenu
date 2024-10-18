@@ -5,7 +5,7 @@
       :totalsPerReceipt="totalsPerReceipt"
       :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
       :totalExpenses="totalExpenses"
-      :rows="rows"
+      :rows="filteredRows"
     />
 
     <AiRequest :selectedItems="selected" />
@@ -14,14 +14,34 @@
       flat
       bordered
       title="Alle Esswaren"
-      :rows="rows"
+      :rows="filteredRows"
       :columns="columns"
       row-key="Id"
       separator="cell"
       :pagination="initialPagination"
       v-model:selected="selected"
       selection="multiple"
+      no-data-label="Keine Daten gefunden"
     >
+      <template v-slot:top>
+        <div style="width: 100%" class="row">
+          <div class="col-9"></div>
+          <div class="col-3">
+            <q-input
+              dense
+              debounce="400"
+              color="primary"
+              v-model="search"
+              outlined
+              label="Kaufdatum, Kategorie oder Name"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </div>
+      </template>
       <template v-slot:header-selection="scope">
         <q-toggle v-model="scope.selected" />
       </template>
@@ -48,7 +68,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted, reactive } from "vue";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  onUnmounted,
+  reactive,
+  computed,
+} from "vue";
 import { Article } from "../helpers/interfaces/article.interface";
 import {
   readAllArticles,
@@ -73,6 +100,8 @@ export default defineComponent({
   },
   setup() {
     const $q = useQuasar();
+
+    const search = ref("");
     const selected = ref<Article[]>([]);
     const rows = reactive<Article[]>([]);
     const receipts = reactive<Record<string, Receipt>>({});
@@ -92,6 +121,29 @@ export default defineComponent({
       totalExpenses,
       calculatedTotalPerReceipt,
     } = useTotals(rows, receipts);
+
+    const filterFields = ["Name", "Purchase_Date", "Category"] as const;
+    type FilterField = (typeof filterFields)[number];
+
+    const filteredRows = computed(() => {
+      const lowerSearch = search.value.trim().toLowerCase();
+
+      if (!lowerSearch) {
+        return rows;
+      }
+
+      // Define the fields to filter on with proper typing
+      const filterFields: FilterField[] = ["Name", "Purchase_Date", "Category"];
+
+      return rows.filter((row) => {
+        return filterFields.some((field) => {
+          const fieldValue = row[field];
+          return (
+            fieldValue && String(fieldValue).toLowerCase().includes(lowerSearch)
+          );
+        });
+      });
+    });
 
     // Handler für Echtzeit-Änderungen
     const handleArticleChange = (payload: any) => {
@@ -171,7 +223,8 @@ export default defineComponent({
 
     return {
       columns: articleColumns,
-      rows,
+      filteredRows,
+      search,
       selected,
       message,
       messageType,
