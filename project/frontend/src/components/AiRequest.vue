@@ -2,7 +2,7 @@
   <div>
     <q-btn
       color="secondary"
-      label="Kategorisieren"
+      :label="`Kategorisieren (${selectedItems.length})`"
       icon="menu_book"
       @click="sendRequest"
       :disabled="selectedItems.length === 0 || isLoading"
@@ -10,11 +10,6 @@
       style="margin: 20px"
     ></q-btn>
 
-    <q-inner-loading
-      class="card-example"
-      :showing="isLoading"
-      label="Lädt"
-    ></q-inner-loading>
     <q-btn
       color="primary"
       label="Beleg Übersicht"
@@ -32,6 +27,7 @@ import { Article } from "../helpers/interfaces/article.interface";
 import router from "../router";
 import { defineComponent, PropType } from "vue";
 import { updateArticleById } from "../services/updateArticle";
+import { useQuasar } from "quasar"; // Importiere useQuasar
 
 export default defineComponent({
   name: "AiRequest",
@@ -41,28 +37,12 @@ export default defineComponent({
       default: () => [],
     },
   },
-  data() {
-    return {
-      receipt: null,
-      isLoading: false,
-    };
-  },
+  setup(props) {
+    const $q = useQuasar();
 
-  methods: {
-    prepareArticles(selectedItems: Article[]) {
-      return selectedItems.map((item: Article) => ({
-        id: item.Id,
-        name: item.Name,
-      }));
-    },
-
-    openHistory() {
-      void router.push("/receipt");
-    },
-
-    async sendRequest() {
-      if (this.selectedItems.length === 0) {
-        this.$q.notify({
+    const sendRequest = async () => {
+      if (props.selectedItems.length === 0) {
+        $q.notify({
           type: "warning",
           message: "Bitte wählen Sie mindestens einen Artikel aus.",
         });
@@ -70,14 +50,19 @@ export default defineComponent({
       }
 
       const batchSize = 50;
-      const articles = this.prepareArticles(this.selectedItems);
+      const articles = prepareArticles(props.selectedItems);
 
       const batches = [];
       for (let i = 0; i < articles.length; i += batchSize) {
         batches.push(articles.slice(i, i + batchSize));
       }
 
-      this.isLoading = true;
+      // Ladebildschirm anzeigen
+      $q.loading.show({
+        message: "Kategorisierung läuft...",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        spinnerColor: "white",
+      });
 
       try {
         for (const batch of batches) {
@@ -110,7 +95,8 @@ export default defineComponent({
               },
             }
           );
-          // sanizitation, formatting, parsing
+
+          // Sanitisierung, Formatierung, Parsing
           let categorizedData = response.data.choices[0].message.content;
           categorizedData = categorizedData.replace(/```json|```/g, "");
           const categorizedArticles = JSON.parse(categorizedData);
@@ -120,26 +106,41 @@ export default defineComponent({
               article.category && article.category.trim() !== ""
           );
 
-          // If there are valid categorized articles, update them
           if (validCategorizedArticles.length > 0) {
             await updateArticleById(validCategorizedArticles);
           }
         }
 
-        this.$q.notify({
+        $q.notify({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
         });
       } catch (error) {
-        console.error("Fehler beim Senden der Anfrage:", error);
-        this.$q.notify({
+        $q.notify({
           type: "negative",
           message: "Fehler bei der Kategorisierung.",
         });
       } finally {
-        this.isLoading = false;
+        $q.loading.hide();
       }
-    },
+    };
+
+    const openHistory = () => {
+      void router.push("/receipt");
+    };
+
+    const prepareArticles = (selectedItems: Article[]) => {
+      return selectedItems.map((item: Article) => ({
+        id: item.Id,
+        name: item.Name,
+      }));
+    };
+
+    return {
+      sendRequest,
+      openHistory,
+      prepareArticles,
+    };
   },
 });
 </script>

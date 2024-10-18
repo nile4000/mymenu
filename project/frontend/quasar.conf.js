@@ -78,7 +78,7 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Notify", "SessionStorage", "Dialog"],
+      plugins: ["Notify", "SessionStorage", "Dialog", "Loading"],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer

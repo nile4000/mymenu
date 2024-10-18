@@ -1,117 +1,150 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md">
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Gesamtausgaben</div>
-        <div
-          v-if="
-            totalExpenses.firstMonth &&
-            totalExpenses.firstYear &&
-            totalExpenses.lastMonth &&
-            totalExpenses.lastYear
-          "
+  <div class="q-pa-md">
+    <q-row gutter="16">
+      <!-- Gesamtausgaben -->
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Gesamtausgaben"
+          icon="monetization_on"
+          expand-separator
+          :dense="false"
+          default-opened
+          class="my-card shadow-2"
         >
-          <div class="text-subtitle2 text-grey">
-            {{ formatMonth(totalExpenses.firstMonth) }}
-            {{ totalExpenses.firstYear }} -
-            {{ formatMonth(totalExpenses.lastMonth) }}
-            {{ totalExpenses.lastYear }}
-          </div>
-        </div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section class="flex flex-center">
-        <div class="text-h5 text-primary">
-          {{ totalExpenses.sum.toFixed(2) }} CHF
-        </div>
-      </q-card-section>
-    </q-card>
+          <template v-slot:default>
+            <div
+              v-if="
+                totalExpenses.firstMonth &&
+                totalExpenses.firstYear &&
+                totalExpenses.lastMonth &&
+                totalExpenses.lastYear
+              "
+            >
+              <div
+                class="text-subtitle2 text-grey flex flex-center"
+                style="margin-bottom: 5px"
+              >
+                {{ formatMonth(totalExpenses.firstMonth) }}
+                {{ totalExpenses.firstYear }} -
+                {{ formatMonth(totalExpenses.lastMonth) }}
+                {{ totalExpenses.lastYear }}
+              </div>
+            </div>
+            <q-separator />
+            <div class="flex flex-center">
+              <div class="text-h5 text-primary">
+                {{ totalExpenses.sum.toFixed(2) }} CHF
+              </div>
+            </div>
+          </template>
+        </q-expansion-item>
+      </q-col>
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Total pro Kategorie"
+          icon="category"
+          expand-separator
+          :dense="false"
+          class="my-card shadow-2"
+        >
+          <template v-slot:default>
+            <q-list>
+              <q-item
+                v-for="(total, category) in totalsPerCategory"
+                :key="category"
+              >
+                <q-item-section>
+                  {{ category }}
+                </q-item-section>
+                <q-item-section side>
+                  {{ total.toFixed(2) }} CHF
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </template>
+        </q-expansion-item>
+      </q-col>
 
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Top-Kategorie</div>
-        <div class="text-subtitle2 text-grey">
-          Kategorie mit den höchsten Ausgaben
-        </div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section class="flex flex-center">
-        <q-list>
-          <q-item>
-            <q-item-section>
-              {{ topCategory.name }}
-            </q-item-section>
-            <q-item-section side>
-              {{ topCategory.total.toFixed(2) }} CHF
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+      <!-- Top-Kategorie -->
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Top Kategorie"
+          icon="star"
+          expand-separator
+          :dense="false"
+          class="my-card shadow-2"
+          caption="Kategorie mit den höchsten Ausgaben"
+        >
+          <template v-slot:default>
+            <q-list>
+              <q-item>
+                <q-item-section>
+                  {{ topCategory.name }}
+                </q-item-section>
+                <q-item-section side>
+                  {{ topCategory.total.toFixed(2) }} CHF
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </template>
+        </q-expansion-item>
+      </q-col>
 
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Total pro Kategorie</div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section>
-        <q-list>
-          <q-item
-            v-for="(total, category) in totalsPerCategory"
-            :key="category"
-          >
-            <q-item-section>
-              {{ category }}
-            </q-item-section>
-            <q-item-section side>{{ total.toFixed(2) }} CHF </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+      <!-- Total pro Beleg -->
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Total pro Beleg"
+          icon="receipt_long"
+          expand-separator
+          :dense="false"
+          class="my-card shadow-2"
+          caption="Total CHF (eingescannt)."
+        >
+          <template v-slot:default>
+            <q-list>
+              <q-item v-for="receipt in totalsPerReceipt" :key="receipt.id">
+                <q-item-section>
+                  {{ formatDate(receipt.date) }}
+                </q-item-section>
+                <q-item-section side>
+                  <div class="text-body1">
+                    {{ receipt.total.toFixed(2) }} CHF
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </template>
+        </q-expansion-item>
+      </q-col>
 
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Total pro Beleg</div>
-        <div class="text-subtitle2 text-grey">"Total CHF" Zeile vom Beleg.</div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section>
-        <q-list>
-          <q-item v-for="receipt in totalsPerReceipt" :key="receipt.id"
-            ><q-item-section>
-              {{ formatDate(receipt.date) }}
-            </q-item-section>
-            <q-item-section side>
-              <div class="text-body1">{{ receipt.total.toFixed(2) }} CHF</div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
-    <q-card class="my-card shadow-2">
-      <q-card-section>
-        <div class="text-h6">Total pro Beleg (Berechnet)</div>
-        <div class="text-subtitle2 text-grey">
-          Artikel-Totale zusammengerechnet. Ohne Bons.
-        </div>
-      </q-card-section>
-      <q-separator />
-      <q-card-section>
-        <q-list>
-          <q-item
-            v-for="(data, receiptId) in totalCalculatedPerReceipt"
-            :key="receiptId"
-          >
-            <q-item-section>
-              {{ formatDate(data.date.toString()) }}
-            </q-item-section>
-            <q-item-section side
-              ><div class="text-body1">{{ data.total.toFixed(2) }} CHF</div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+      <!-- Total pro Beleg (Berechnet) -->
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Total pro Beleg (Berechnet)"
+          icon="calculate"
+          expand-separator
+          :dense="false"
+          class="my-card shadow-2"
+          caption="Artikel-Totale zusammengerechnet. Ohne Bons."
+        >
+          <template v-slot:default>
+            <q-list>
+              <q-item
+                v-for="(data, receiptId) in totalCalculatedPerReceipt"
+                :key="receiptId"
+              >
+                <q-item-section>
+                  {{ formatDate(data.date.toString()) }}
+                </q-item-section>
+                <q-item-section side>
+                  <div class="text-body1">{{ data.total.toFixed(2) }} CHF</div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </template>
+        </q-expansion-item>
+      </q-col>
+    </q-row>
   </div>
 </template>
 
@@ -176,9 +209,21 @@ export default defineComponent({
 .my-card {
   width: 100%;
   max-width: 400px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
-.my-card-wide {
-  width: 100%;
-  max-width: 400px;
+
+.text-h6 {
+  font-weight: bold;
+}
+
+.q-pa-md {
+  padding: 16px;
+}
+
+.my-card:hover {
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
 }
 </style>
