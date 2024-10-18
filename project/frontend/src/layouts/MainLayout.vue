@@ -10,27 +10,27 @@
           </q-toolbar-title>
         </q-item>
         <div>
-          <q-btn-dropdown unelevated flat color="white">
-            <q-list>
+          <!-- <q-btn-dropdown unelevated flat color="white">
+            <q-list> -->
               <!-- <q-item class="bg-grey-3">
                 <q-item-title>
                   Eingeloggt als: <br /><b>{{ email }}</b>
                 </q-item-title>
               </q-item> -->
-              <q-item clickable v-close-popup @click="openHistory">
+              <!-- <q-item clickable v-close-popup @click="openHistory">
                 <q-item-section avatar>
                   <q-item-label
                     ><q-icon name="dashboard"></q-icon> Übersicht</q-item-label
                   >
                 </q-item-section>
-              </q-item>
+              </q-item> -->
               <!-- <q-item clickable v-close-popup @click="logout">
                 <q-item-section>
                   <q-item-label>Ausloggen</q-item-label>
                 </q-item-section>
               </q-item> -->
-            </q-list>
-          </q-btn-dropdown>
+            <!-- </q-list>
+          </q-btn-dropdown> -->
         </div>
       </q-toolbar>
     </q-header>

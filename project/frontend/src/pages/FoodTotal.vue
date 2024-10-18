@@ -12,6 +12,7 @@
           class="my-card shadow-2"
         >
           <template v-slot:default>
+            <q-separator />
             <div
               v-if="
                 totalExpenses.firstMonth &&
@@ -20,22 +21,43 @@
                 totalExpenses.lastYear
               "
             >
-              <div
-                class="text-subtitle2 text-grey flex flex-center"
-                style="margin-bottom: 5px"
-              >
-                {{ formatMonth(totalExpenses.firstMonth) }}
+              <div class="text-subtitle2 text-grey flex flex-center">
+                von {{ formatMonth(totalExpenses.firstMonth) }}
                 {{ totalExpenses.firstYear }} -
                 {{ formatMonth(totalExpenses.lastMonth) }}
                 {{ totalExpenses.lastYear }}
               </div>
             </div>
-            <q-separator />
             <div class="flex flex-center">
               <div class="text-h5 text-primary">
                 {{ totalExpenses.sum.toFixed(2) }} CHF
               </div>
             </div>
+          </template>
+        </q-expansion-item>
+      </q-col>
+      <!-- Top-Kategorie -->
+      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
+        <q-expansion-item
+          label="Top Kategorie"
+          icon="star"
+          expand-separator
+          :dense="false"
+          class="my-card shadow-2"
+          caption="Kategorie mit den höchsten Ausgaben"
+        >
+          <template v-slot:default>
+            <q-separator />
+            <q-list>
+              <q-item>
+                <q-item-section>
+                  {{ topCategory.name }}
+                </q-item-section>
+                <q-item-section side>
+                  {{ topCategory.total.toFixed(2) }} CHF
+                </q-item-section>
+              </q-item>
+            </q-list>
           </template>
         </q-expansion-item>
       </q-col>
@@ -48,6 +70,7 @@
           class="my-card shadow-2"
         >
           <template v-slot:default>
+            <q-separator />
             <q-list>
               <q-item
                 v-for="(total, category) in totalsPerCategory"
@@ -58,31 +81,6 @@
                 </q-item-section>
                 <q-item-section side>
                   {{ total.toFixed(2) }} CHF
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </template>
-        </q-expansion-item>
-      </q-col>
-
-      <!-- Top-Kategorie -->
-      <q-col cols="12" sm="6" md="6" lg="4" xl="3">
-        <q-expansion-item
-          label="Top Kategorie"
-          icon="star"
-          expand-separator
-          :dense="false"
-          class="my-card shadow-2"
-          caption="Kategorie mit den höchsten Ausgaben"
-        >
-          <template v-slot:default>
-            <q-list>
-              <q-item>
-                <q-item-section>
-                  {{ topCategory.name }}
-                </q-item-section>
-                <q-item-section side>
-                  {{ topCategory.total.toFixed(2) }} CHF
                 </q-item-section>
               </q-item>
             </q-list>
@@ -101,6 +99,7 @@
           caption="Total CHF (eingescannt)."
         >
           <template v-slot:default>
+            <q-separator />
             <q-list>
               <q-item v-for="receipt in totalsPerReceipt" :key="receipt.id">
                 <q-item-section>
@@ -128,6 +127,7 @@
           caption="Artikel-Totale zusammengerechnet. Ohne Bons."
         >
           <template v-slot:default>
+            <q-separator />
             <q-list>
               <q-item
                 v-for="(data, receiptId) in totalCalculatedPerReceipt"
@@ -219,11 +219,5 @@ export default defineComponent({
 
 .q-pa-md {
   padding: 16px;
-}
-
-.my-card:hover {
-  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
-  transition: all 0.3s ease;
 }
 </style>
