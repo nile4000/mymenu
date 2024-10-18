@@ -9,11 +9,9 @@
     />
 
     <AiRequest :selectedItems="selected" />
-
     <q-table
       flat
       bordered
-      title="Alle Esswaren"
       :rows="filteredRows"
       :columns="columns"
       row-key="Id"
@@ -25,8 +23,7 @@
     >
       <template v-slot:top>
         <div style="width: 100%" class="row">
-          <div class="col-9"></div>
-          <div class="col-3">
+          <div class="col-12">
             <q-input
               dense
               debounce="400"
@@ -240,6 +237,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+q-table {
+padding-top: 16px;
+}
 .q-mt-md {
   margin-top: 16px;
 }

@@ -8,15 +8,16 @@
       v-ripple
     ></q-btn>
     <q-btn
+      class="btn-categorize"
       color="secondary"
       :label="`Kategorisieren (${selectedItems.length})`"
       icon="menu_book"
       @click="sendCategorizationRequest"
       :disabled="selectedItems.length === 0 || isLoading"
       v-ripple
-      style="margin: 20px"
     ></q-btn>
     <q-btn
+      class="btn-details"
       color="secondary"
       :label="`Einheit extrahieren (${selectedItems.length})`"
       icon="colorize"
@@ -373,5 +374,24 @@ export default defineComponent({
 }
 ::v-deep .q-icon {
   color: white !important;
+}
+
+.btn-categorize {
+  margin: 20px;
+}
+
+.btn-details {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 459px) {
+  .btn-categorize {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 0;
+  }
+  .btn-details {
+    margin-bottom: 10px;
+  }
 }
 </style>

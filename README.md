@@ -1,6 +1,8 @@
 # 🛸 MyMenu - AI Meal planner
 
-MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch die Kombination moderner Technologien wie einer Full-Stack-Architektur, Cloud Services und künstlicher Intelligenz, ermöglichst es dem Benutzer ihren Einkaufsbeleg einfach und effizient in einen wöchentlichen Speiseplan umzuwandeln.
+Coming soon..
+
+![alt text](image.png)
 
 ## Showcase App
 
@@ -16,4 +18,4 @@ MyMenü ist eine innovative Lösung für die alltägliche Essensplanung. Durch d
 
 4. Frontend-Interaktion: Im Frontend der Applikation können Nutzer die verarbeiteten Daten einsehen und bei Bedarf bearbeiten. Dieser Schritt ist entscheidend, um die Genauigkeit und Relevanz der Menüvorschläge zu gewährleisten.
 
-5. Menüzusammenstellung: Nach der Bereinigung der Daten können Benutzer per chatGPT, Menüvorschläge für den Beleg zusammenstellen lassen. Diese Funktion nutzt die bearbeiteten Daten, um kreative und abwechslungsreiche Speisepläne zu erstellen.
+5. Analyse: Coming soon..
