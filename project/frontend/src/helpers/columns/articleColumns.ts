@@ -12,7 +12,7 @@ export const articleColumns: Column[] = [
   },
   {
     name: "Category",
-    label: "Kategorie",
+    label: "Kategorie (Extrahiert)",
     field: "Category",
     sortable: true,
     align: "center",
@@ -32,7 +32,9 @@ export const articleColumns: Column[] = [
     field: "Price",
     sortable: true,
   },
+  { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
   { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
+  { name: "Unit", label: "Einheit (Extrahiert)", field: "Unit", sortable: true },
   {
     name: "Total",
     label: "Total (nach Rabatt)",

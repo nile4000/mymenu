@@ -123,23 +123,17 @@ export default defineComponent({
     } = useTotals(rows, receipts);
 
     const filterFields = ["Name", "Purchase_Date", "Category"] as const;
-    type FilterField = (typeof filterFields)[number];
 
     const filteredRows = computed(() => {
-      const lowerSearch = search.value.trim().toLowerCase();
-
-      if (!lowerSearch) {
-        return rows;
-      }
-
-      // Define the fields to filter on with proper typing
-      const filterFields: FilterField[] = ["Name", "Purchase_Date", "Category"];
+      const cleanedSearch = search.value.trim().toLowerCase();
+      if (!cleanedSearch) return rows;
 
       return rows.filter((row) => {
         return filterFields.some((field) => {
           const fieldValue = row[field];
           return (
-            fieldValue && String(fieldValue).toLowerCase().includes(lowerSearch)
+            fieldValue &&
+            String(fieldValue).toLowerCase().includes(cleanedSearch)
           );
         });
       });
@@ -161,7 +155,14 @@ export default defineComponent({
           break;
 
         case "UPDATE":
-          rows.push(newArticle);
+          const updateIndex = rows.findIndex(
+            (article) => article.Id === newArticle.Id
+          );
+          if (updateIndex !== -1) {
+            rows[updateIndex] = newArticle;
+          } else {
+            rows.push(newArticle);
+          }
           break;
         default:
           $q.notify({

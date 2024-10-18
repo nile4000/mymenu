@@ -35,21 +35,6 @@ public class ExtractionService {
     private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format..\n"
             +
             "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none).\n";
-    // +
-    // "Use the following categories for classification:\n"
-    // +
-    // "1. Obst und Gemüse\n" +
-    // "2. Milchprodukte, Eier und Alternativen\n" +
-    // "3. Fleisch, Fisch und pflanzliche Proteine\n" +
-    // "4. Backwaren und Getreide\n" +
-    // "5. Softgetraenke\n" +
-    // "6. Alkoholische Getraenke\n" +
-    // "7. Snacks und Suesswaren\n" +
-    // "8. Reinigungsmittel und Haushaltsreiniger\n" +
-    // "9. Koerperpflegeprodukte und Hygieneartikel\n" +
-    // "10. Tierbedarf und Sonstiges\n" +
-    // "If an article does not fit into any of these categories, assign it the
-    // category 'Andere'.\n\n";
 
     @Inject
     public ExtractionService(OpenAiClient openAiClient, TextUtils textUtils) {
@@ -198,7 +183,7 @@ public class ExtractionService {
 
             for (Map.Entry<String, Object> entry : fieldsWithDefaults.entrySet()) {
                 String field = entry.getKey();
-                Object defaultValue = entry.getValue();
+                Object defaultValue = entry.getValue(); // Corrected
 
                 if (jsonObject.containsKey(field) && !jsonObject.isNull(field)) {
                     try {
@@ -226,38 +211,6 @@ public class ExtractionService {
                         sanitizedObjectBuilder.addNull(field);
                     }
                 }
-            }
-
-            // Additional validation: Ensure numeric fields are non-negative
-            double price = jsonObject.containsKey("Price") && !jsonObject.isNull("Price")
-                    ? jsonObject.getJsonNumber("Price").doubleValue()
-                    : 0.0;
-            double quantity = jsonObject.containsKey("Quantity") && !jsonObject.isNull("Quantity")
-                    ? jsonObject.getJsonNumber("Quantity").doubleValue()
-                    : 0.0;
-            double discount = 0.0;//jsonObject.containsKey("Discount") && !jsonObject.isNull("Discount")
-                    // ? jsonObject.getJsonNumber("Discount").doubleValue()
-                    // : 0.0;
-            double total = jsonObject.containsKey("Total") && !jsonObject.isNull("Total")
-                    ? jsonObject.getJsonNumber("Total").doubleValue()
-                    : 0.0;
-
-            // Correct negative values
-            if (price < 0.0) {
-                LOGGER.warning("Negative price found. Setting to 0.0");
-                sanitizedObjectBuilder.add("Price", 0.0);
-            }
-            if (quantity < 0.0) {
-                LOGGER.warning("Negative quantity found. Setting to 0.0");
-                sanitizedObjectBuilder.add("Quantity", 0.0);
-            }
-            if (discount < 0.0) {
-                LOGGER.warning("Negative discount found. Setting to 0.0");
-                sanitizedObjectBuilder.add("Discount", 0.0);
-            }
-            if (total < 0.0) {
-                LOGGER.warning("Negative total found. Setting to 0.0");
-                sanitizedObjectBuilder.add("Total", 0.0);
             }
 
             sanitizedArrayBuilder.add(sanitizedObjectBuilder);
@@ -309,12 +262,8 @@ public class ExtractionService {
                         : BigDecimal.ZERO;
                 article.setTotal(total);
 
-                // // Handle 'Category' field
-                // String category = jsonObject.containsKey("Category") &&
-                // !jsonObject.isNull("Category")
-                // ? jsonObject.getString("Category")
-                // : "Andere";
-                // article.setCategory(category);
+                // Initialize empty 'Category' field, its filled later
+                article.setCategory("");
 
                 // Correct data inconsistencies
                 correctArticleData(article);
@@ -331,7 +280,6 @@ public class ExtractionService {
     private void correctArticleData(Article article) {
         // Correct Quantity if negative
         if (article.getQuantity().compareTo(BigDecimal.ZERO) < 0) {
-            LOGGER.warning("Negative quantity found for article: " + article.getName() + ". Setting to 0.0.");
             article.setQuantity(BigDecimal.ZERO);
         }
 
@@ -339,7 +287,7 @@ public class ExtractionService {
         BigDecimal calculatedTotal = article.getPrice()
                 .multiply(article.getQuantity())
                 .subtract(article.getDiscount());
-        article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); // Ensure Total is not negative
+        article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); 
     }
 
 }
