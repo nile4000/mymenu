@@ -1,29 +1,29 @@
 <template>
   <q-dialog transition-show="rotate">
     <q-card>
-      <q-card-section class="q-gutter-md">
+      <q-card-section>
         <q-row>
-          <q-col cols="6" class="flex flex-center">
+          <!-- <q-col cols="6" class="flex flex-center">
             <div class="ml-2">
               <div class="text-subtitle1 text-green-5">
                 Total Zeilen Extrahiert: {{ receiptData.Total_R_Extract }}
               </div>
             </div>
-          </q-col>
-          <q-col cols="6" class="flex flex-center">
+          </q-col> -->
+          <!-- <q-col cols="6" class="flex flex-center">
             <div class="ml-2">
               <div class="text-subtitle1 text-blue-5">
-                Total Zeilen von OpenAI: {{ receiptData.Total_R_Open_Ai }}
+                Zeilen extrahiert von OpenAI: {{ receiptData.Total_R_Open_Ai }}
               </div>
             </div>
-          </q-col>
+          </q-col> -->
         </q-row>
       </q-card-section>
       <q-card-section>
         <q-table
           flat
           bordered
-          title="Esswaren auswählen"
+          title="Artikel extrahiert"
           :rows="articles"
           :columns="columns"
           row-key="Name"
@@ -31,7 +31,16 @@
         >
         </q-table>
       </q-card-section>
-      <q-card-section class="q-pt-none"> </q-card-section>
+      <q-card-section class="q-pt-none" side>
+        <q-toggle
+          v-model="performCategorization"
+          label="Kategorisierung"
+        ></q-toggle>
+        <q-toggle
+          v-model="performDetailExtraction"
+          label="Einheit extrahieren"
+        ></q-toggle>
+      </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Abbrechen" color="primary" v-close-popup></q-btn>
         <q-btn
@@ -84,6 +93,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const selected = ref([]);
     const articles = computed(() => props.response[0].Articles);
+    const performCategorization = ref(true);
+    const performDetailExtraction = ref(true);
 
     const receiptData = computed(() => ({
       Uuid: props.response[0].UID,
@@ -98,9 +109,25 @@ export default defineComponent({
       try {
         emit("save-selection");
         await saveArticlesAndReceipt(articles.value, receiptData.value);
+
+        if (performCategorization.value) {
+          await categorizeArticles();
+        }
+
+        if (performDetailExtraction.value) {
+          await extractDetails();
+        }
       } catch (error: any) {
         console.error("Error saving selection:", error);
       }
+    };
+
+    const categorizeArticles = async () => {
+      // Implement categorization logic here
+    };
+
+    const extractDetails = async () => {
+      // Implement detail extraction logic here
     };
 
     return {
@@ -109,6 +136,10 @@ export default defineComponent({
       saveAll,
       columns,
       receiptData,
+      performCategorization,
+      performDetailExtraction,
+      categorizeArticles,
+      extractDetails,
     };
   },
 });
