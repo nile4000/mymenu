@@ -12,7 +12,7 @@ export const articleColumns: Column[] = [
   },
   {
     name: "Category",
-    label: "Kategorie (Extrahiert)",
+    label: "Kategorie",
     field: "Category",
     sortable: true,
     align: "center",
@@ -25,14 +25,14 @@ export const articleColumns: Column[] = [
     field: "Name",
     sortable: true,
   },
-  {
-    name: "Price",
-    align: "center",
-    label: "Preis",
-    field: "Price",
-    sortable: true,
-  },
-  { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
+  // {
+  //   name: "Price",
+  //   align: "center",
+  //   label: "Preis",
+  //   field: "Price",
+  //   sortable: true,
+  // },
+  // { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
   { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
   { name: "Unit", label: "Einheit", field: "Unit", sortable: true },
   {
@@ -45,6 +45,15 @@ export const articleColumns: Column[] = [
     name: "Price_Base_Unit",
     label: "Preis pro 100g/100ml/Stk",
     field: "Price_Base_Unit",
+    format: (val: number) => {
+      if (typeof val === "number") {
+        return val.toFixed(3);
+      } else {
+        if (isNaN(val)) {
+          return parseFloat(val).toFixed(3);
+        }
+      }
+    },
     sortable: true,
   },
   {

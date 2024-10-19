@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { Article } from "../helpers/interfaces/article.interface";
 
 const OPEN_AI_URL = "https://api.openai.com/v1/chat/completions";
-const OPEN_AI_MODEL = "gpt-4o-mini";
+// const OPEN_AI_MODEL = "gpt-4o-mini";
 const OPEN_AI_TEMP = "gpt-3.5-turbo-0125";
 
 // preparation
@@ -31,10 +31,9 @@ export function createBatches(preparedArticles: any[], batchSize: number) {
   return batches;
 }
 
-// Utility-Funktion für Verzögerung
+// Utility-Funktion
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Batching-Funktionen auslagern
 export async function processBatch(
   batch: any[],
   promptGenerator: (batch: any[]) => string,
@@ -117,14 +116,14 @@ async function callOpenAiApi(prompt: string, model: string) {
         {
           role: "system",
           content:
-            "You are an assistant that provides information in JSON format. Return only pure JSON without any code block or formatting.",
+            "You are an assistant that provides information in JSON format. Return only pure JSON without any text, code block or formatting.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      temperature: 0.2, // work deterministic
+      temperature: 0, // work deterministic
     },
     {
       headers: {
