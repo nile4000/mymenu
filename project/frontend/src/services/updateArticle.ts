@@ -25,7 +25,7 @@ export async function updateArticleCategoryById(
 }
 
 export async function updateArticleDetailsById(
-  unitArticles: { id: string; unit: string }[]
+  unitArticles: { id: string; unit: string; base_unit: number, price_base_unit: number }[]
 ) {
   const updates = [];
 
@@ -34,6 +34,8 @@ export async function updateArticleDetailsById(
       .from("article")
       .update({
         Unit: article.unit,
+        Base_Unit: article.base_unit,
+        Price_Base_Unit: article.price_base_unit,
       })
       .eq("Id", article.id);
 

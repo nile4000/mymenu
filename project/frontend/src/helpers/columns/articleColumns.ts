@@ -34,7 +34,19 @@ export const articleColumns: Column[] = [
   },
   { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
   { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
-  { name: "Unit", label: "Einheit (Extrahiert)", field: "Unit", sortable: true },
+  { name: "Unit", label: "Einheit", field: "Unit", sortable: true },
+  {
+    name: "Base_Unit",
+    label: "Einheit pro 100g/100ml/Stk",
+    field: "Base_Unit",
+    sortable: true,
+  },
+  {
+    name: "Price_Base_Unit",
+    label: "Preis pro 100g/100ml/Stk",
+    field: "Price_Base_Unit",
+    sortable: true,
+  },
   {
     name: "Total",
     label: "Total (nach Rabatt)",

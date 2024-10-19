@@ -41,6 +41,7 @@ import {
   prepareArticles,
   createBatches,
   processAllBatches,
+  prepareArticlesPrices,
 } from "../services/aiRequest.service";
 import { showLoading, hideLoading } from "../helpers/composables/UseLoader";
 
@@ -84,11 +85,75 @@ export default defineComponent({
     };
 
     const generateDetailExtractionPrompt = (batch: any[]) => {
-      return `Extract unit information for the following articles based on their names:\n${batch
-        .map((article) => `ID: ${article.id}, Name: ${article.name}`)
-        .join(
-          "\n"
-        )}\n\nFor each article, provide the unit and id in JSON format: [{id: string, unit: string}]. Default to empty string if no unit is found.`;
+      return `Extract unit information for the following articles based on their Name and Quantity:
+
+${batch
+  .map(
+    (article) =>
+      `ID: ${article.id}, Name: ${article.name}, Quantity: ${article.quantity}, Price: ${article.price}`
+  )
+  .join("\n")}
+
+For each article, provide the following information in JSON format:
+
+- **id**: The article's ID as a **string**.
+- **unit**: The extracted unit of measurement in **lowercase letters** (e.g., g, kg, ml, l, stk). If no unit is found, default to "stk".
+- **base_unit**: The scaling factor based on the unit:
+
+  - **Weight Units**:
+    - mg → 0.1 (per 100g)
+    - g → 100 (per 100g)
+    - kg → 1 (per 1kg)
+  - **Volume Units**:
+    - ml → 1 (per 100ml)
+    - dl → 10 (per 100ml)
+    - l → 1 (per 1L)
+  - **Quantity Units**:
+    - stk → 1
+
+- **price_base_unit**: The price per base unit, calculated as:
+
+  - **For Weight Units**:
+    - \`price_base_unit = (Price / Quantity in grams) × base_unit\`
+  - **For Volume Units**:
+    - \`price_base_unit = (Price / Quantity in milliliters) × base_unit\`
+  - **For Quantity Units (stk)**:
+    - \`price_base_unit = Price / Quantity\`
+
+**Rules:**
+
+- **Units must be in lowercase letters** (e.g., "g", not "G").
+- **IDs must be strings**, enclosed in quotes.
+- **Ensure accurate calculations** for \`base_unit\` and \`price_base_unit\` based on the unit type.
+- **If no unit is found**, default to "stk" with a \`base_unit\` of 1.
+- **Validate JSON structure** to ensure it is correctly formatted.
+
+**Example Output:**
+
+\`\`\`json
+[
+  {
+    "id": "123",
+    "unit": "kg",
+    "base_unit": 1,
+    "price_base_unit": 5.00
+  },
+  {
+    "id": "456",
+    "unit": "ml",
+    "base_unit": 1,
+    "price_base_unit": 0.50
+  },
+  {
+    "id": "789",
+    "unit": "stk",
+    "base_unit": 1,
+    "price_base_unit": 2.00
+  }
+]
+\`\`\`
+
+`;
     };
 
     const sendCategorizationRequest = async () => {
@@ -121,7 +186,8 @@ export default defineComponent({
                 message: "Keine gültigen kategorisierten Artikel gefunden.",
               });
             }
-          }
+          },
+          "gpt-4o-mini"
         );
 
         $q.notify({
@@ -139,7 +205,7 @@ export default defineComponent({
       try {
         validateSelectedItems();
 
-        const preparedArticles = prepareArticles(props.selectedItems);
+        const preparedArticles = prepareArticlesPrices(props.selectedItems);
         const batches = createBatches(preparedArticles, 50);
 
         isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
@@ -161,7 +227,8 @@ export default defineComponent({
                 message: "Keine gültigen extrahierten Einheiten gefunden.",
               });
             }
-          }
+          },
+          "gpt-3.5-turbo-0125"
         );
 
         $q.notify({
@@ -176,7 +243,12 @@ export default defineComponent({
     };
 
     const validateExtractedDetails = (
-      extractedDetails: { id: string; unit: string }[],
+      extractedDetails: {
+        id: string;
+        unit: string;
+        base_unit: number;
+        price_base_unit: number;
+      }[],
       $q: any
     ) => {
       const validExtractedDetails = extractedDetails.filter(
