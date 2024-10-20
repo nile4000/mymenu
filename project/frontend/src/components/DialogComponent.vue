@@ -3,20 +3,7 @@
     <q-card>
       <q-card-section>
         <q-row>
-          <!-- <q-col cols="6" class="flex flex-center">
-            <div class="ml-2">
-              <div class="text-subtitle1 text-green-5">
-                Total Zeilen Extrahiert: {{ receiptData.Total_R_Extract }}
-              </div>
-            </div>
-          </q-col> -->
-          <!-- <q-col cols="6" class="flex flex-center">
-            <div class="ml-2">
-              <div class="text-subtitle1 text-blue-5">
-                Zeilen extrahiert von OpenAI: {{ receiptData.Total_R_Open_Ai }}
-              </div>
-            </div>
-          </q-col> -->
+          <!-- Commented sections -->
         </q-row>
       </q-card-section>
       <q-card-section>
@@ -36,10 +23,10 @@
           v-model="performCategorization"
           label="Kategorisierung"
         ></q-toggle>
-        <q-toggle
+        <!-- <q-toggle
           v-model="performDetailExtraction"
           label="Einheit extrahieren"
-        ></q-toggle>
+        ></q-toggle> -->
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Abbrechen" color="primary" v-close-popup></q-btn>
@@ -60,6 +47,18 @@ import { defineComponent, ref, computed, PropType } from "vue";
 import { Column } from "../helpers/interfaces/column.interface";
 import { saveArticlesAndReceipt } from "../services/saveArticles";
 import { ResponseItem } from "../helpers/interfaces/response-item.interface";
+import {
+  createBatches,
+  prepareDialogArticles,
+  processAllBatches,
+} from "../services/aiRequest.service";
+import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
+import { useQuasar } from "quasar";
+import { upsertArticleCategories } from "../services/updateArticle";
+import {
+  categorizationPrompt,
+  validateExtractedCategories,
+} from "./prompts/categorization";
 
 const columns: Column[] = [
   {
@@ -90,11 +89,14 @@ export default defineComponent({
       required: true,
     },
   },
+
   setup(props, { emit }) {
-    const selected = ref([]);
+    const isLoading = ref(false);
     const articles = computed(() => props.response[0].Articles);
     const performCategorization = ref(true);
-    const performDetailExtraction = ref(true);
+    const systemPrompt = ref<string>("");
+
+    const $q = useQuasar();
 
     const receiptData = computed(() => ({
       Uuid: props.response[0].UID,
@@ -108,38 +110,71 @@ export default defineComponent({
     const saveAll = async () => {
       try {
         emit("save-selection");
-        await saveArticlesAndReceipt(articles.value, receiptData.value);
-
+        const result = await saveArticlesAndReceipt(
+          articles.value,
+          receiptData.value
+        );
         if (performCategorization.value) {
-          await categorizeArticles();
-        }
-
-        if (performDetailExtraction.value) {
-          await extractDetails();
+          await categorizeArticles(result.articles);
         }
       } catch (error: any) {
         console.error("Error saving selection:", error);
+        $q.notify({
+          type: "negative",
+          message: "Fehler beim Speichern der Auswahl.",
+        });
       }
     };
 
-    const categorizeArticles = async () => {
-      // Implement categorization logic here
-    };
+    const categorizeArticles = async (
+      articles: { Id: string; Name: string }[]
+    ) => {
+      try {
+        const preparedArticles = prepareDialogArticles(articles);
+        const batches = createBatches(preparedArticles, 40);
+        isLoading.value = showLoading("Kategorisierung läuft...", $q);
 
-    const extractDetails = async () => {
-      // Implement detail extraction logic here
+        await processAllBatches(
+          batches,
+          categorizationPrompt,
+          async (categorizedArticles: any[]) => {
+            const validCategorizedArticles =
+              validateExtractedCategories(categorizedArticles);
+            if (validCategorizedArticles.length > 0) {
+              await upsertArticleCategories(validCategorizedArticles);
+            } else {
+              $q.notify({
+                type: "warning",
+                message: "Keine gültigen kategorisierten Artikel gefunden.",
+              });
+              throw new Error("Ungültige extrahierte Kategorien.");
+            }
+          },
+          "gpt-4o-mini-2024-07-18",
+          systemPrompt
+        );
+      } catch (error: any) {
+        console.error("Error categorizing articles:", error);
+        $q.notify({
+          type: "negative",
+          message: "Fehler bei der Kategorisierung der Artikel.",
+        });
+      } finally {
+        isLoading.value = hideLoading($q);
+        $q.notify({
+          type: "positive",
+          message: "Kategorisierung erfolgreich!",
+        });
+      }
     };
 
     return {
-      selected,
       articles,
       saveAll,
       columns,
       receiptData,
       performCategorization,
-      performDetailExtraction,
       categorizeArticles,
-      extractDetails,
     };
   },
 });
@@ -152,7 +187,7 @@ export default defineComponent({
 }
 
 .ml-2 {
-  margin-left: 0.5rem; /* Passe den Wert nach Bedarf an */
+  margin-left: 0.5rem;
 }
 
 .text-subtitle1 {
@@ -164,14 +199,14 @@ export default defineComponent({
 }
 
 .text-primary {
-  color: #027be3; /* Passe die Farbe nach deinem Design an */
+  color: #027be3;
 }
 
 .text-green-5 {
-  color: #4caf50; /* Grün für Total Extrahiert */
+  color: #4caf50;
 }
 
 .text-blue-5 {
-  color: #2196f3; /* Blau für Total OpenAI */
+  color: #2196f3;
 }
 </style>

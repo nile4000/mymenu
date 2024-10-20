@@ -23,6 +23,13 @@ export function prepareArticlesPrices(items: Article[]) {
   }));
 }
 
+export function prepareDialogArticles(items: any) {
+  return items.map((item: any) => ({
+    id: item.Id,
+    name: item.Name,
+  }));
+}
+
 // batching
 export function createBatches(preparedArticles: any[], batchSize: number) {
   const batches = [];
@@ -41,18 +48,18 @@ export async function processBatch(
   callApi: (
     prompt: string,
     model: string,
-    serverMsg: string
+    systemPrompt: string
   ) => Promise<AxiosResponse<any, any>>,
   handleApiResponse: (response: AxiosResponse<any, any>) => any[],
   model: string,
-  serverMsg: Ref<string>,
+  systemPrompt: Ref<string>,
   maxRetries = 2,
   retryDelay = 2000,
   attempt = 1
 ): Promise<any[]> {
   const prompt = promptGenerator(batch);
   try {
-    const response = await callApi(prompt, model, serverMsg.value);
+    const response = await callApi(prompt, model, systemPrompt.value);
     const parsedData = handleApiResponse(response);
     return parsedData;
   } catch (error) {
@@ -68,7 +75,7 @@ export async function processBatch(
         callApi,
         handleApiResponse,
         model,
-        serverMsg,
+        systemPrompt,
         maxRetries,
         retryDelay,
         attempt + 1
@@ -80,13 +87,12 @@ export async function processBatch(
   }
 }
 
-
 export async function processAllBatches(
   batches: any[],
   promptGenerator: (batch: any[]) => string,
   handleBatchResponse: (data: any[]) => Promise<void>,
   model: string,
-  serverMsg: Ref<string>
+  systemPrompt: Ref<string>
 ) {
   let index = 0;
 
@@ -101,7 +107,7 @@ export async function processAllBatches(
         callOpenAiApi,
         handleResponse,
         model,
-        serverMsg,
+        systemPrompt
       ).then(async (parsedData) => {
         await handleBatchResponse(parsedData);
       });
@@ -117,7 +123,11 @@ export async function processAllBatches(
 }
 
 // call
-async function callOpenAiApi(prompt: string, model: string, serverMsg: string) {
+async function callOpenAiApi(
+  prompt: string,
+  model: string,
+  systemPrompt: string
+) {
   return axios.post(
     OPEN_AI_URL,
     {
@@ -125,9 +135,7 @@ async function callOpenAiApi(prompt: string, model: string, serverMsg: string) {
       messages: [
         {
           role: "system",
-          content:
-            serverMsg ||
-            "You are an assistant that provides information in JSON format. Return only pure JSON without any text, code block or formatting.",
+          content: systemPrompt,
         },
         {
           role: "user",

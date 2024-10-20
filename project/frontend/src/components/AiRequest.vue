@@ -42,7 +42,7 @@ import router from "../router";
 import { defineComponent, PropType, ref } from "vue";
 import {
   upsertArticleCategories,
-  upsertArticleDetails,
+  upsertArticleUnit,
 } from "../services/updateArticle";
 import { useQuasar } from "quasar";
 import {
@@ -54,8 +54,8 @@ import {
 import { showLoading, hideLoading } from "../helpers/composables/UseLoader";
 import { deleteArticleById } from "../services/deleteArticle";
 import {
-  categories,
-  formatArticlesForCategorization,
+  categorizationPrompt,
+  validateExtractedCategories,
 } from "./prompts/categorization";
 import { formatArticlesForDetailExtraction } from "./prompts/detailExtraction";
 
@@ -70,7 +70,7 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar();
     const isLoading = ref(false);
-    const serverMsg = ref<string>("");
+    const systemPrompt = ref<string>("");
 
     const validateSelectedItems = () => {
       if (props.selectedItems.length === 0) {
@@ -91,43 +91,28 @@ export default defineComponent({
       });
     };
 
-    const categorizationPrompt = (batch: any[]) => {
-      serverMsg.value =
-        "You are an categorization-assistant. Provide only valid JSON strictly in the format [{id: string, category: string}] without any additional text or formatting.";
-      const formattedArticles = formatArticlesForCategorization(batch);
-      const categoriesList = categories
-        .map((category, index) => `${index + 1}. ${category}`)
-        .join("\n");
-      return `Categorize the following articles based on their names:/n
-              ${formattedArticles}
-              Use the following categories for classification:\n
-              ${categoriesList}
-              **Rules:**
-              - If an article does not fit into any of these categories, assign it the category 'Andere'.
-              - Use stritly the following jsonformat: [{id: string, category: string}].`;
-    };
-
     const detailExtractionPrompt = (batch: any[]) => {
-      serverMsg.value =
+      systemPrompt.value =
         "You are an text-extraction assistant. Provide only valid JSON strictlyin the format [{id: string, unit: string}] without any additional text or formatting.";
       const formattedArticles = formatArticlesForDetailExtraction(batch);
       return `Extract unit and the quantity for the following articles based on their Name:/n
               ${formattedArticles}
       For each article, provide the following information in JSON format:
       - **id**: The article's Id as a string, enclosed in quotes.
-      - **unit**: The unit and quantity extracted from **Name** in lowercase letters. Examples are: "100g","200ml","2stk","33cl","1kg","10x10ml","2st ca. 330g, 10St 53g+").
+      - **unit**: The unit and quantity extracted from **Name** in lowercase letters. Examples are: "100g","200ml","2stk","33cl","1kg","10x10ml",8x60g,"2st ca. 330g, 10St 53g+").
 
       **Rules:**
-      - **Valid units are only: "g","kg","stk","l","ml","cl".
-      - **If no unit is found in article Name. default to appropriate "kg" or "stk".
-      - **Only a number in article Name is not a valid unit. Default to appropriate "kg" or "stk"`;
+      - **Valid units are only: "g","kg","stk","l","ml","cl".**
+      - **Always copy the multiplicators.**
+      - **If no unit is found in article Name. default to appropriate "kg" or "stk".**
+      - **Only a number in article Name is not a valid unit. Default to appropriate "kg" or "stk"**`;
     };
 
     const sendCategorizationRequest = async () => {
       try {
         validateSelectedItems();
         const preparedArticles = prepareArticles(props.selectedItems);
-        const batches = createBatches(preparedArticles, 20);
+        const batches = createBatches(preparedArticles, 40);
         isLoading.value = showLoading("Kategorisierung läuft...", $q);
 
         await processAllBatches(
@@ -147,7 +132,7 @@ export default defineComponent({
             }
           },
           "gpt-4o-mini-2024-07-18",
-          serverMsg
+          systemPrompt
         );
       } catch (error) {
         handleError(error);
@@ -165,7 +150,7 @@ export default defineComponent({
         validateSelectedItems();
 
         const preparedArticles = prepareArticlesPrices(props.selectedItems);
-        const batches = createBatches(preparedArticles, 20);
+        const batches = createBatches(preparedArticles, 40);
 
         isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
 
@@ -176,7 +161,7 @@ export default defineComponent({
             const validExtractedDetails =
               validateExtractedDetails(extractedDetails);
             if (validExtractedDetails.length > 0) {
-              await upsertArticleDetails(validExtractedDetails);
+              await upsertArticleUnit(validExtractedDetails);
             } else {
               $q.notify({
                 type: "warning",
@@ -186,7 +171,7 @@ export default defineComponent({
             }
           },
           "gpt-4o-mini-2024-07-18",
-          serverMsg
+          systemPrompt
         );
       } catch (error) {
         handleError(error);
@@ -198,24 +183,6 @@ export default defineComponent({
         });
       }
     };
-
-    function validateExtractedCategories(
-      categorizedArticles: {
-        id: string;
-        category: string;
-      }[]
-    ) {
-      const validCategorizedArticles = categorizedArticles.filter(
-        (article) =>
-          article.id &&
-          typeof article.id === "string" &&
-          article.category &&
-          typeof article.category === "string" &&
-          article.category.trim() !== ""
-      );
-
-      return validCategorizedArticles;
-    }
 
     const validateExtractedDetails = (
       extractedDetails: {

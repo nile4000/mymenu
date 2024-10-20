@@ -47,7 +47,10 @@ export async function saveArticlesAndReceipt(
 
     // save article
     const { data: articlesInsertData, error: articlesInsertError } =
-      await supabase.from("article").insert(preparedArticles);
+      await supabase
+        .from("article")
+        .insert(preparedArticles)
+        .select("Id, Name");
 
     if (articlesInsertError) {
       console.error("Error inserting articles:", articlesInsertError);
