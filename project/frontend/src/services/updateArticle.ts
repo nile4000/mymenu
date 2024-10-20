@@ -24,8 +24,8 @@ export async function upsertArticleDetails(
   unitArticles: {
     id: string;
     unit: string;
-    base_unit: number;
-    price_base_unit: number;
+    // base_unit: number;
+    // price_base_unit: number;
   }[]
 ) {
   for (const article of unitArticles) {
@@ -46,8 +46,8 @@ export async function upsertArticleDetails(
         .from("article")
         .update({
           Unit: article.unit,
-          Base_Unit: article.base_unit,
-          Price_Base_Unit: article.price_base_unit,
+          // Base_Unit: article.base_unit,
+          // Price_Base_Unit: article.price_base_unit,
         })
         .eq("Id", article.id);
 
@@ -60,9 +60,9 @@ export async function upsertArticleDetails(
       const { data, error } = await supabase.from("article").insert({
         Id: article.id,
         Unit: article.unit,
-        Base_Unit: article.base_unit,
-        Price_Base_Unit: article.price_base_unit,
-        Receipt_Id: "your_receipt_id", // Provide appropriate Receipt_Id
+        // Base_Unit: article.base_unit,
+        // Price_Base_Unit: article.price_base_unit,
+        // Receipt_Id: "your_receipt_id", // Provide appropriate Receipt_Id
       });
 
       if (error) {

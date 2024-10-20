@@ -4,8 +4,8 @@ export interface Article {
   Name: string;
   Price: number;
   Unit?: string;
-  Base_Unit?: number;
-  Price_Base_Unit?: number;
+  // Base_Unit?: number;
+  // Price_Base_Unit?: number;
   Quantity: number;
   Discount: number;
   Total: number;
