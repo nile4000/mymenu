@@ -70,6 +70,7 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar();
     const isLoading = ref(false);
+    const serverMsg = ref<string>("");
 
     const validateSelectedItems = () => {
       if (props.selectedItems.length === 0) {
@@ -91,6 +92,8 @@ export default defineComponent({
     };
 
     const categorizationPrompt = (batch: any[]) => {
+      serverMsg.value =
+        "You are an categorization-assistant. Provide only valid JSON strictly in the format [{id: string, category: string}] without any additional text or formatting.";
       const formattedArticles = formatArticlesForCategorization(batch);
       const categoriesList = categories
         .map((category, index) => `${index + 1}. ${category}`)
@@ -104,28 +107,27 @@ export default defineComponent({
               - Use stritly the following jsonformat: [{id: string, category: string}].`;
     };
 
-    const generateDetailExtractionPrompt = (batch: any[]) => {
+    const detailExtractionPrompt = (batch: any[]) => {
+      serverMsg.value =
+        "You are an text-extraction assistant. Provide only valid JSON strictlyin the format [{id: string, unit: string}] without any additional text or formatting.";
       const formattedArticles = formatArticlesForDetailExtraction(batch);
-      return `Extract unit information for the following articles based on their Name and Quantity:/n
+      return `Extract unit and the quantity for the following articles based on their Name:/n
               ${formattedArticles}
-              For each article, provide the following information in JSON format:
+      For each article, provide the following information in JSON format:
+      - **id**: The article's Id as a string, enclosed in quotes.
+      - **unit**: The unit and quantity extracted from **Name** in lowercase letters. Examples are: "100g","200ml","2stk","33cl","1kg","10x10ml","2st ca. 330g, 10St 53g+").
 
-              - **id**: The article's Id as a **string**, enclosed in quotes.
-              - **unit**: The extracted unit from **Name** in **lowercase letters** ("g", "ml", "stk","cl","kg").
-
-              **Rules:**
-              - **If no unit is found in Name**, default to "stk" with a quantity of 1.
-              - **Use strictly the following output format**: \`[{id: string, unit: string}]\`.
-              `;
+      **Rules:**
+      - **Valid units are only: "g","kg","stk","l","ml","cl".
+      - **If no unit is found in article Name. default to appropriate "kg" or "stk".
+      - **Only a number in article Name is not a valid unit. Default to appropriate "kg" or "stk"`;
     };
 
     const sendCategorizationRequest = async () => {
       try {
         validateSelectedItems();
-
         const preparedArticles = prepareArticles(props.selectedItems);
         const batches = createBatches(preparedArticles, 20);
-
         isLoading.value = showLoading("Kategorisierung läuft...", $q);
 
         await processAllBatches(
@@ -144,7 +146,8 @@ export default defineComponent({
               throw new Error("Ungültige extrahierte Einheiten.");
             }
           },
-          "gpt-4o-mini-2024-07-18"
+          "gpt-4o-mini-2024-07-18",
+          serverMsg
         );
       } catch (error) {
         handleError(error);
@@ -168,7 +171,7 @@ export default defineComponent({
 
         await processAllBatches(
           batches,
-          generateDetailExtractionPrompt,
+          detailExtractionPrompt,
           async (extractedDetails: any[]) => {
             const validExtractedDetails =
               validateExtractedDetails(extractedDetails);
@@ -182,7 +185,8 @@ export default defineComponent({
               throw new Error("Ungültige extrahierte Einheiten.");
             }
           },
-          "gpt-4o-mini-2024-07-18"
+          "gpt-4o-mini-2024-07-18",
+          serverMsg
         );
       } catch (error) {
         handleError(error);

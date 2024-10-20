@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { Article } from "../helpers/interfaces/article.interface";
+import { Ref } from "vue";
 
 const OPEN_AI_URL = "https://api.openai.com/v1/chat/completions";
 // const OPEN_AI_MODEL = "gpt-4o-mini";
@@ -37,22 +38,27 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function processBatch(
   batch: any[],
   promptGenerator: (batch: any[]) => string,
-  callApi: (prompt: string, model: string) => Promise<AxiosResponse<any, any>>,
+  callApi: (
+    prompt: string,
+    model: string,
+    serverMsg: string
+  ) => Promise<AxiosResponse<any, any>>,
   handleApiResponse: (response: AxiosResponse<any, any>) => any[],
   model: string,
+  serverMsg: Ref<string>,
   maxRetries = 2,
   retryDelay = 2000,
   attempt = 1
 ): Promise<any[]> {
   const prompt = promptGenerator(batch);
   try {
-    const response = await callApi(prompt, model);
+    const response = await callApi(prompt, model, serverMsg.value);
     const parsedData = handleApiResponse(response);
     return parsedData;
   } catch (error) {
     if (attempt < maxRetries) {
       console.warn(
-        `Fehler bei der Batch-Verarbeitung (Versuch ${attempt} von ${maxRetries}). Erneuter Versuch in ${retryDelay}ms...`,
+        `Error processing batch (Attempt ${attempt} of ${maxRetries}). Retrying in ${retryDelay}ms...`,
         error
       );
       await delay(retryDelay);
@@ -62,28 +68,31 @@ export async function processBatch(
         callApi,
         handleApiResponse,
         model,
+        serverMsg,
         maxRetries,
         retryDelay,
         attempt + 1
       );
     } else {
-      console.error("Maximale Anzahl von Versuchen erreicht.", error);
+      console.error("Maximum retry attempts reached.", error);
       throw error;
     }
   }
 }
+
 
 export async function processAllBatches(
   batches: any[],
   promptGenerator: (batch: any[]) => string,
   handleBatchResponse: (data: any[]) => Promise<void>,
   model: string,
-  concurrencyLimit = 5
+  serverMsg: Ref<string>
 ) {
   let index = 0;
 
   const executeBatches = async () => {
     const promises = [];
+    const concurrencyLimit = 5;
     while (index < batches.length && promises.length < concurrencyLimit) {
       const batch = batches[index++];
       const promise = processBatch(
@@ -91,7 +100,8 @@ export async function processAllBatches(
         promptGenerator,
         callOpenAiApi,
         handleResponse,
-        model
+        model,
+        serverMsg,
       ).then(async (parsedData) => {
         await handleBatchResponse(parsedData);
       });
@@ -107,7 +117,7 @@ export async function processAllBatches(
 }
 
 // call
-async function callOpenAiApi(prompt: string, model: string) {
+async function callOpenAiApi(prompt: string, model: string, serverMsg: string) {
   return axios.post(
     OPEN_AI_URL,
     {
@@ -116,6 +126,7 @@ async function callOpenAiApi(prompt: string, model: string) {
         {
           role: "system",
           content:
+            serverMsg ||
             "You are an assistant that provides information in JSON format. Return only pure JSON without any text, code block or formatting.",
         },
         {
