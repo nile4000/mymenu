@@ -32,7 +32,7 @@ public class ExtractionService {
 
     private static final Logger LOGGER = Logger.getLogger(ExtractionService.class.getName());
     private static final String FILE_REASON_HEADER = "Reason";
-    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format..\n"
+    private static final String QUESTION_PREFIX = "Extract articles from the given receipt and return a list in a valid JSON format.\n"
             +
             "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none).\n";
 

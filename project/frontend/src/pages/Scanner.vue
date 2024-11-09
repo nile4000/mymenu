@@ -6,9 +6,9 @@
       label="PDFs hochladen"
       accept=".pdf"
       icon="scanner"
-      style="width: 100%"
       :headers="authHeaders"
       multiple
+      style="width: 400px"
       @rejected="onRejected"
       @uploaded="onUploaded"
     ></q-uploader>

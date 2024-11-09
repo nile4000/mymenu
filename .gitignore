@@ -3,6 +3,7 @@ project/frontend/app/.firebase
 project/backend/.env
 project/firebase
 project/.firebase
+project/.vscode
 .github
 .quarkus
 .vscode

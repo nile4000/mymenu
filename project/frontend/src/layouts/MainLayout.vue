@@ -2,36 +2,13 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-item clickable v-close-popup @click="returnHome">
+        <q-item clickable @click="returnHome">
           <q-toolbar-title class="title-header">
-            <q-avatar square size="36px" class="q-mr-sm">
+            <q-avatar flat round class="q-mr-sm">
               <img src="../assets/logo.png" alt="Logo" /> </q-avatar
             >MY MENÜ
           </q-toolbar-title>
         </q-item>
-        <div>
-          <!-- <q-btn-dropdown unelevated flat color="white">
-            <q-list> -->
-              <!-- <q-item class="bg-grey-3">
-                <q-item-title>
-                  Eingeloggt als: <br /><b>{{ email }}</b>
-                </q-item-title>
-              </q-item> -->
-              <!-- <q-item clickable v-close-popup @click="openHistory">
-                <q-item-section avatar>
-                  <q-item-label
-                    ><q-icon name="dashboard"></q-icon> Übersicht</q-item-label
-                  >
-                </q-item-section>
-              </q-item> -->
-              <!-- <q-item clickable v-close-popup @click="logout">
-                <q-item-section>
-                  <q-item-label>Ausloggen</q-item-label>
-                </q-item-section>
-              </q-item> -->
-            <!-- </q-list>
-          </q-btn-dropdown> -->
-        </div>
       </q-toolbar>
     </q-header>
     <q-footer>
@@ -134,12 +111,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .title-header {
-  font-family: "Playfair Display", serif;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  font-size: 24px;
 }
-.title-footer {
-  font-family: "Playfair Display", serif;
-  letter-spacing: 0.2em;
+
+.q-toolbar__title {
+  padding: 0;
 }
 </style>
