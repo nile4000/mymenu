@@ -1,10 +1,11 @@
 # 🛸 MyMenu - AI Meal planner
 
-Coming soon..
 
 ![alt text](image-1.png)
 
 ## Showcase App
+
+App will be up again soon..
 
 <https://mymenu-bdf37.firebaseapp.com/>
 
