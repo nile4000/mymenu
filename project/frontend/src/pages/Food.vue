@@ -1,12 +1,14 @@
 <template>
-  <div class="q-pa-md">
-    <FoodTotal
-      :totalsPerCategory="totalsPerCategory"
-      :totalsPerReceipt="totalsPerReceipt"
-      :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
-      :totalExpenses="totalExpenses"
-      :rows="filteredRows"
-    />
+  <div class="q-pa-md" style="margin-top: 10px;">
+    <div style="display: flex; flex-direction: row;">
+      <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
+      <FoodTotal
+        :totalsPerCategory="totalsPerCategory"
+        :totalsPerReceipt="totalsPerReceipt"
+        :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
+        :rows="filteredRows"
+      />
+    </div>
 
     <AiRequest :selectedItems="selected" />
     <q-table
@@ -25,6 +27,7 @@
         <div style="width: 100%" class="row">
           <div class="col-12">
             <q-input
+              rounded
               dense
               debounce="400"
               color="primary"
@@ -32,6 +35,7 @@
               outlined
               label="Kaufdatum, Kategorie oder Name"
             >
+              <span></span>
               <template v-slot:append>
                 <q-icon name="search" />
               </template>
@@ -83,6 +87,7 @@ import {
   unsubscribeFromArticleChanges,
 } from "../services/realtimeArticles";
 import FoodTotal from "./FoodTotal.vue";
+import FoodDasboard from "./FoodDashboard.vue";
 import AiRequest from "../components/AiRequest.vue";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../helpers/columns/articleColumns";
@@ -94,6 +99,7 @@ export default defineComponent({
   components: {
     AiRequest,
     FoodTotal,
+    FoodDasboard,
   },
   setup() {
     const $q = useQuasar();
@@ -236,10 +242,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 q-table {
-padding-top: 16px;
+  border-top-left-radius: 15px;
 }
+
 .q-mt-md {
   margin-top: 16px;
 }

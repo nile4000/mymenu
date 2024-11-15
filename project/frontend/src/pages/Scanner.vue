@@ -1,14 +1,15 @@
 <template>
-  <div class="q-pa-md">
+  <div class="custom">
     <DialogComponent></DialogComponent>
     <q-uploader
       :url="apiUrl"
       label="PDFs hochladen"
       accept=".pdf"
-      icon="scanner"
       :headers="authHeaders"
       multiple
-      style="width: 400px"
+      color="amber"
+      text-color="black"
+      class="uploader"
       @rejected="onRejected"
       @uploaded="onUploaded"
     ></q-uploader>
@@ -66,7 +67,7 @@ export default defineComponent({
         } catch (error) {
           $q.notify({
             type: "negative",
-            message: "Fehler beim Parsen der Antwort.",
+            message: "Fehler beim verarbeiten der Antwort.",
           });
         }
       }
@@ -81,8 +82,20 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
+<style lang="scss" scoped>
 ::v-deep .q-icon {
   color: white !important;
+}
+.uploader {
+  margin: 0;
+  width: 420px;
+  height: 200px;
+  border-radius: 15px;
+}
+.custom {
+  padding-left: 0;
+}
+.q-uploader__header {
+  background-color: $card-background !important;
 }
 </style>

@@ -31,7 +31,7 @@
         </q-card>
       </q-expansion-item>
     </q-list> -->
-    <ScannerPage></ScannerPage>
+    <!-- <ScannerPage></ScannerPage> -->
     <FoodPage></FoodPage>
   </q-page>
 </template>

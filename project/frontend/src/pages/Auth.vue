@@ -22,9 +22,6 @@
 
         <q-tab-panel name="register" class="q-pa-none">
           <AuthComponent :tab="tab" />
-          <div class="q-ma-sm">
-            <b>Hinweis:</b> MyMenu speichert keine Einkaufsdaten in unseren Systemen.
-          </div>
         </q-tab-panel>
       </q-tab-panels>
     </q-card>

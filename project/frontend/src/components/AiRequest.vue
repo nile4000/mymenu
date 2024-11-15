@@ -1,39 +1,26 @@
 <template>
-  <div>
+  <q-btn-group rounded>
     <q-btn
-      color="primary"
-      label="Beleg Übersicht"
-      icon="dashboard"
-      @click="openOverview"
+      unelevated
+      rounded
+      :disabled="selectedItems.length === 0 || isLoading"
+      @click="sendCategorizationRequest"
       v-ripple
-    ></q-btn>
-    <!-- <q-btn
-      color="negative"
-      label="Artikel löschen"
-      icon="delete"
+    >
+      <q-icon size="1.9em" name="hub" color="secondary" />
+      <q-tooltip> Klassifikation: {{ selectedItems.length }} Artikel gewählt </q-tooltip>
+    </q-btn>
+    <q-btn
+      unelevated
+      rounded
       @click="deleteArticle(selectedItems[0].Id)"
       :disabled="selectedItems.length !== 1"
       v-ripple
-    ></q-btn> -->
-    <q-btn
-      class="btn-categorize"
-      color="secondary"
-      :label="`Kategorisieren (${selectedItems.length})`"
-      icon="menu_book"
-      @click="sendCategorizationRequest"
-      :disabled="selectedItems.length === 0 || isLoading"
-      v-ripple
-    ></q-btn>
-    <q-btn
-      class="btn-details"
-      color="secondary"
-      :label="`Einheit extrahieren (${selectedItems.length})`"
-      icon="colorize"
-      @click="sendDetailExtractionRequest"
-      :disabled="selectedItems.length === 0 || isLoading"
-      v-ripple
-    ></q-btn>
-  </div>
+    >
+      <q-icon size="1.9em" name="delete" color="negative" />
+      <q-tooltip> Einzelne Artikel löschen </q-tooltip>
+    </q-btn>
+  </q-btn-group>
 </template>
 
 <script lang="ts">
@@ -142,6 +129,7 @@ export default defineComponent({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
         });
+        await sendDetailExtractionRequest();
       }
     };
 
@@ -222,7 +210,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .card-example {
   max-width: 400px;
   margin: 0 auto;
@@ -233,16 +221,28 @@ export default defineComponent({
   align-items: center;
   margin-bottom: 20px;
 }
-::v-deep .q-icon {
-  color: white !important;
+.q-btn {
+  height: 45px;
 }
 
-.btn-categorize {
-  margin: 20px;
+.q-icon {
+  margin-right: 10px;
+}
+.q-btn {
+  .q-icon {
+    margin-right: 10px;
+  }
 }
 
-.btn-details {
-  margin-bottom: 0px;
+.q-btn-group {
+  position: fixed;
+  bottom: 0;
+  right: 25px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  z-index: 1000;
+  background-color: $bar-background;
+  border: 1px solid $primary;
 }
 
 @media (max-width: 459px) {

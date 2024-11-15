@@ -1,19 +1,28 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="lHh Lpr lFf" class="shadow-2 rounded-borders">
+    <q-header reveal>
       <q-toolbar>
         <q-item clickable @click="returnHome">
           <q-toolbar-title class="title-header">
             <q-avatar flat round class="q-mr-sm">
               <img src="../assets/logo.png" alt="Logo" /> </q-avatar
-            >MY MENÜ
+            ><span class="menu-title">MY MENÜ</span>
           </q-toolbar-title>
         </q-item>
+        <q-space />
+        <q-tabs>
+          <q-tab icon="account_circle" />
+        </q-tabs>
       </q-toolbar>
     </q-header>
-    <q-footer>
+    <q-footer reveal>
       <q-toolbar>
-        <q-toolbar-title class="title-footer">AI Essensplaner</q-toolbar-title>
+        <q-toolbar-title class="title-footer"
+          >AI Essensplaner by
+          <a href="https://lueem.dev" target="_blank"
+            >lueem.dev</a
+          ></q-toolbar-title
+        >
       </q-toolbar>
     </q-footer>
 
@@ -110,12 +119,64 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.title-header .menu-title,
+a {
+  text-decoration: underline;
+  transition: text-decoration-color 0.5s ease;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.title-header .menu-title:hover,
+a:hover {
+  text-decoration: underline;
+  text-decoration-color: $secondary;
+}
+
+.title-footer,
 .title-header {
+  color: $dark;
   font-weight: 500;
-  font-size: 24px;
+}
+
+.q-tab,
+.q-item {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.q-tab:hover {
+  background-color: $tab-accent;
+  border-radius: 15px;
+}
+
+.title-header {
+  font-size: 26px;
+}
+.title-footer {
+  font-style: italic;
+  font-size: 16px;
 }
 
 .q-toolbar__title {
   padding: 0;
+}
+
+.q-avatar {
+  background-color: $bar-primary;
+}
+.q-header {
+  margin: 10px;
+  border-radius: 15px !important;
+}
+
+.q-footer {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  max-width: 280px;
+}
+.q-footer,
+.q-header {
+  background-color: $bar-background;
+  border: 1px solid $dark;
 }
 </style>

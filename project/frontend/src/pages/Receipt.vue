@@ -6,13 +6,14 @@
       grid
       hide-header
       title="Meine Belege"
+      no-data-label="Keine Daten gefunden"
     >
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3">
-          <q-card bordered flat>
+          <q-card round bordered flat>
             <q-card-section class="row items-center justify-between">
               <div class="flex-grow-1 q-mr-md text-weight-bold">
-                Einkauf vom: {{ formatDate(props.row.Purchase_Date) }}
+                Einkauf vom {{ formatDate(props.row.Purchase_Date) }}
               </div>
               <q-img
                 v-if="props.row.Corp === 'Coop'"
@@ -146,6 +147,7 @@ export default defineComponent({
 
 .q-card {
   transition: background-color 0.3s ease;
+  border-radius: 15px;
 
   &:hover {
     cursor: pointer;
