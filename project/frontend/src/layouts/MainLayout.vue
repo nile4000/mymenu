@@ -11,7 +11,9 @@
         </q-item>
         <q-space />
         <q-tabs>
-          <q-tab icon="account_circle" />
+          <q-tab icon="account_circle">
+            <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
+          </q-tab>
         </q-tabs>
       </q-toolbar>
     </q-header>

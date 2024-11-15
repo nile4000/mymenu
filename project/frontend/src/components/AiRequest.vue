@@ -8,7 +8,7 @@
       v-ripple
     >
       <q-icon size="1.9em" name="hub" color="secondary" />
-      <q-tooltip> Klassifikation: {{ selectedItems.length }} Artikel gewählt </q-tooltip>
+      <q-tooltip class="text-h6"> Klassifikation: {{ selectedItems.length }}</q-tooltip>
     </q-btn>
     <q-btn
       unelevated
@@ -18,7 +18,7 @@
       v-ripple
     >
       <q-icon size="1.9em" name="delete" color="negative" />
-      <q-tooltip> Einzelne Artikel löschen </q-tooltip>
+      <q-tooltip anchor="center left" class="text-h6">Artikel löschen</q-tooltip>
     </q-btn>
   </q-btn-group>
 </template>
@@ -187,10 +187,6 @@ export default defineComponent({
       return validExtractedDetails;
     };
 
-    const openOverview = () => {
-      void router.push("/receipt");
-    };
-
     const deleteArticle = async (id: string) => {
       try {
         await deleteArticleById(id);
@@ -202,7 +198,6 @@ export default defineComponent({
     return {
       sendCategorizationRequest,
       sendDetailExtractionRequest,
-      openOverview,
       deleteArticle,
       isLoading,
     };
@@ -238,7 +233,6 @@ export default defineComponent({
   position: fixed;
   bottom: 0;
   right: 25px;
-  margin-top: 10px;
   margin-bottom: 10px;
   z-index: 1000;
   background-color: $bar-background;

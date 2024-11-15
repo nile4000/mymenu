@@ -31,7 +31,6 @@
         </q-card>
       </q-expansion-item>
     </q-list> -->
-    <!-- <ScannerPage></ScannerPage> -->
     <FoodPage></FoodPage>
   </q-page>
 </template>
@@ -39,13 +38,11 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import ScannerPage from "./Scanner.vue";
-import FoodPage from "./Food.vue";
+import FoodPage from "./FoodTable.vue";
 
 export default defineComponent({
   name: "HomePage",
   components: {
-    ScannerPage,
     FoodPage,
   },
   setup() {

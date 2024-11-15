@@ -19,11 +19,11 @@ const routes = [
         component: () => import("pages/Receipt.vue"),
         meta: { requiresAuth: false },
       },
-      {
-        path: "food",
-        component: () => import("src/pages/Food.vue"),
-        meta: { requiresAuth: false },
-      },
+      // {
+      //   path: "food",
+      //   component: () => import("src/pages/Food.vue"),
+      //   meta: { requiresAuth: false },
+      // },
     ],
   },
   {

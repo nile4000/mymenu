@@ -4,6 +4,7 @@
       label="Total pro Kategorie"
       icon="category"
       expand-separator
+      expand-icon="0"
       :dense="false"
       class="my-card shadow-2"
     >
@@ -20,6 +21,7 @@
       label="Total pro Beleg"
       icon="receipt_long"
       expand-separator
+      expand-icon="0"
       :dense="false"
       default-opened
       class="my-card shadow-2"
@@ -70,17 +72,19 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .my-card {
-  width: 100%;
-  max-width: 420px;
-  margin-top: 10px;
   margin-bottom: 10px;
   border-radius: 15px;
 }
 .q-item:focus {
-  background-color:none;
+  background-color: none;
   border-radius: 15px;
 }
 
+:deep(.q-expansion-item) {
+  .q-focus-helper {
+    border-radius: 15px;
+  }
+}
 
 .text-h6 {
   font-weight: bold;

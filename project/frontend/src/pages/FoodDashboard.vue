@@ -109,9 +109,19 @@ export default defineComponent({
   color: black;
   text-decoration: underline;
   text-decoration-color: white;
-  text-underline-offset: 8px;
   text-decoration-thickness: 1.5px;
+  transition: text-decoration-color 0.5s ease;
+  text-underline-offset: 4px;
 }
+
+.text-h5:hover {
+  text-decoration: underline;
+  text-decoration-color: $dark;
+}
+
+.text-caption {
+    font-size: 15px;
+  }
 
 .text-h6 {
   font-weight: bold;

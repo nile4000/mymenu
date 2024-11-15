@@ -1,6 +1,6 @@
 <template>
-  <div class="q-pa-md" style="margin-top: 10px;">
-    <div style="display: flex; flex-direction: row;">
+  <div class="q-pa-md" style="margin-top: 10px">
+    <div style="display: flex; flex-direction: row">
       <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
       <FoodTotal
         :totalsPerCategory="totalsPerCategory"
@@ -11,6 +11,21 @@
     </div>
 
     <AiRequest :selectedItems="selected" />
+    <q-btn
+      rounded
+      v-ripple
+      label="Meine Belege"
+      color="primary"
+      :to="'/receipt'"
+      style="margin-bottom: 20px; height: 42px"
+    >
+      <q-icon
+        size="1.6em"
+        name="dashboard"
+        color="white"
+        style="margin-left: 10px"
+      />
+    </q-btn>
     <q-table
       flat
       bordered
@@ -25,6 +40,7 @@
     >
       <template v-slot:top>
         <div style="width: 100%" class="row">
+          <span class="text-h6" style="margin-bottom: 10px">Artikel</span>
           <div class="col-12">
             <q-input
               rounded
@@ -50,20 +66,21 @@
       <template v-slot:body-selection="scope">
         <q-toggle v-model="scope.selected" />
       </template>
-      <!-- ToDo: Edit Category -->
-      <!-- <template v-slot:body="props">
+      <template v-slot:body-cell-Category="props">
         <q-td :props="props">
+          {{ props.row.Category }}
           <q-popup-edit v-model="props.row.Category" v-slot="scope">
-            <q-input
+            <q-select
               v-model="scope.value"
+              :options="categories"
               dense
               autofocus
-              counter
+              @blur="scope.set"
               @keyup.enter="scope.set"
             />
           </q-popup-edit>
         </q-td>
-      </template> -->
+      </template>
     </q-table>
   </div>
 </template>
@@ -93,6 +110,7 @@ import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../helpers/columns/articleColumns";
 import { useTotals } from "../helpers/composables/UseTotals";
 import { useQuasar } from "quasar";
+import { categories } from "../components/prompts/categorization";
 
 export default defineComponent({
   name: "FoodPage",
@@ -158,15 +176,18 @@ export default defineComponent({
           break;
 
         case "UPDATE":
+          // eslint-disable-next-line no-case-declarations
           const updateIndex = rows.findIndex(
-            (article) => article.Id === newArticle.Id
+            (article: Article) => article.Id === newArticle.Id
           );
           if (updateIndex !== -1) {
             rows[updateIndex] = newArticle;
           } else {
             rows.push(newArticle);
           }
+          // todo: submit
           break;
+
         default:
           $q.notify({
             type: "warning",
@@ -237,6 +258,7 @@ export default defineComponent({
       totalsPerReceipt,
       totalExpenses,
       calculatedTotalPerReceipt,
+      categories,
     };
   },
 });

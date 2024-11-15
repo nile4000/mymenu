@@ -16,6 +16,7 @@ export const articleColumns: Column[] = [
     field: "Category",
     sortable: true,
     align: "center",
+    icon: "edit",
   },
   {
     name: "Name",

@@ -5,5 +5,6 @@ export interface Column {
   align?: string;
   field: string;
   format?: any;
+  icon?: string;
   sortable: boolean;
 }
