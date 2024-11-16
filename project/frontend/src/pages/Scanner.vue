@@ -97,6 +97,12 @@ export default defineComponent({
   margin-left: 0;
   padding-left: 0;
 }
+:deep(.q-uploader__file) {
+  border-radius: 15px;
+  .q-icon {
+    color: black !important;
+  }
+}
 .q-uploader__header {
   background-color: $card-background !important;
 }
