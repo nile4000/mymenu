@@ -1,5 +1,5 @@
 <template>
-  <div class="custom-container">
+  <div class="custom-container q-gutter-md">
     <ScannerPage></ScannerPage>
     <q-card flat bordered class="first">
       <q-card-section>
@@ -11,7 +11,6 @@
           {{ totalExpenses.lastYear }}</q-item-label
         >
       </q-card-section>
-      <q-card-section></q-card-section>
       <q-card-actions align="center">
         <q-item class="text-h5">
           <div>{{ totalExpenses.sum.toFixed(2) }} CHF</div>
@@ -21,11 +20,13 @@
     <q-card flat bordered class="second">
       <q-card-section>
         <q-item-label class="text-h6">Top Kategorie</q-item-label>
-        <q-item-label class="text-h6" caption
-          >- {{ topCategory.name }}</q-item-label
-        >
+        <template v-if="topCategory.name">
+          <q-item-label class="text-h6" caption
+            ><q-icon size="1.9em" name="star" color="amber" />
+            {{ topCategory.name }}</q-item-label
+          >
+        </template>
       </q-card-section>
-      <q-card-section></q-card-section>
       <q-card-actions align="center">
         <q-item class="text-h5">
           <div>{{ topCategory.total.toFixed(2) }} CHF</div>
@@ -87,13 +88,11 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
 }
 .q-card {
   border-radius: 25px;
   width: 200px;
-  height: 200px;
+  min-height: 200px;
   border-color: transparent;
 }
 
@@ -120,11 +119,12 @@ export default defineComponent({
 }
 
 .text-caption {
-    font-size: 15px;
-  }
+  font-size: 15px;
+}
 
 .text-h6 {
   font-weight: bold;
+  word-break: break-all;
 }
 
 .q-pa-md {

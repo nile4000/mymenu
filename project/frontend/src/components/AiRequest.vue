@@ -25,7 +25,6 @@
 
 <script lang="ts">
 import { Article } from "../helpers/interfaces/article.interface";
-import router from "../router";
 import { defineComponent, PropType, ref } from "vue";
 import {
   upsertArticleCategories,

@@ -5,7 +5,7 @@
       :columns="columns"
       grid
       hide-header
-      title="Meine Belege"
+      title="Belege"
       no-data-label="Keine Daten gefunden"
     >
       <template v-slot:item="props">
@@ -31,17 +31,10 @@
             <q-card-section class="row items-center justify-between">
               <q-btn
                 flat
-                icon="visibility"
-                color="primary"
-                disabled
-                v-close-popup
-              />
-              <q-btn
-                flat
+                round
                 icon="delete"
                 color="negative"
                 @click="deleteReceipt(props.row)"
-                v-close-popup
                 side
               />
             </q-card-section>
@@ -88,7 +81,6 @@ export default defineComponent({
       try {
         const data = await readAllReceipts();
         if (data) {
-          console.log(data);
           allRows.splice(0, allRows.length, ...data);
         }
       } catch (error) {

@@ -35,7 +35,6 @@
   </q-page>
 </template>
 
-
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import FoodPage from "./FoodTable.vue";
@@ -101,18 +100,22 @@ export default defineComponent({
     ]);
 
     const getPrefix = (description: string) => {
-      const match = description.match(/^(.*?)(Supercard-Webseite|Migros-Webseite)/);
-      return match ? match[1] : '';
+      const match = description.match(
+        /^(.*?)(Supercard-Webseite|Migros-Webseite)/
+      );
+      return match ? match[1] : "";
     };
 
     const getLinkText = (description: string) => {
       const match = description.match(/(Supercard-Webseite|Migros-Webseite)/);
-      return match ? match[1] : '';
+      return match ? match[1] : "";
     };
 
     const getSuffix = (description: string) => {
-      const match = description.match(/(Supercard-Webseite|Migros-Webseite)(.*)$/);
-      return match ? match[2] : '';
+      const match = description.match(
+        /(Supercard-Webseite|Migros-Webseite)(.*)$/
+      );
+      return match ? match[2] : "";
     };
 
     return {

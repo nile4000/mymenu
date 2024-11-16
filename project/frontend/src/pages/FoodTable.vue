@@ -1,55 +1,44 @@
 <template>
-  <div class="q-pa-md" style="margin-top: 10px">
-    <div style="display: flex; flex-direction: row">
-      <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
-      <FoodTotal
-        :totalsPerCategory="totalsPerCategory"
-        :totalsPerReceipt="totalsPerReceipt"
-        :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
-        :rows="filteredRows"
-      />
-    </div>
-
+  <div class="q-pa-md row items-start q-gutter-md">
+    <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
+    <FoodTotal
+      :totalsPerCategory="totalsPerCategory"
+      :totalsPerReceipt="totalsPerReceipt"
+      :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
+      @update:selectedReceipts="handleSelectedReceipts"
+    />
     <AiRequest :selectedItems="selected" />
-    <q-btn
-      rounded
-      v-ripple
-      label="Meine Belege"
-      color="primary"
-      :to="'/receipt'"
-      style="margin-bottom: 20px; height: 42px"
-    >
-      <q-icon
-        size="1.6em"
-        name="dashboard"
-        color="white"
-        style="margin-left: 10px"
-      />
-    </q-btn>
     <q-table
       flat
       bordered
       :rows="filteredRows"
       :columns="columns"
       row-key="Id"
-      separator="cell"
       :pagination="initialPagination"
       v-model:selected="selected"
       selection="multiple"
-      no-data-label="Keine Daten gefunden"
+      virtual-scroll
+      table-header-class="table-header-custom"
+      class="table-custom"
+      no-data-label="Keine Daten gefunden, keine Belege selektiert"
     >
       <template v-slot:top>
         <div style="width: 100%" class="row">
-          <span class="text-h6" style="margin-bottom: 10px">Artikel</span>
+          <div
+            class="row items-center justify-center q-gutter-sm"
+            style="margin-bottom: 10px"
+          >
+            <q-icon size="1.4em" name="restaurant" color="dark" />
+            <span class="text-h6">Artikel</span>
+          </div>
           <div class="col-12">
             <q-input
               rounded
               dense
               debounce="400"
-              color="primary"
               v-model="search"
               outlined
-              label="Kaufdatum, Kategorie oder Name"
+              label="Kaufdatum, Name oder Kategorie"
             >
               <span></span>
               <template v-slot:append>
@@ -145,22 +134,37 @@ export default defineComponent({
 
     const filterFields = ["Name", "Purchase_Date", "Category"] as const;
 
-    const filteredRows = computed(() => {
-      const cleanedSearch = search.value.trim().toLowerCase();
-      if (!cleanedSearch) return rows;
+    const selectedReceiptIds = ref<string[]>([]);
 
-      return rows.filter((row) => {
-        return filterFields.some((field) => {
-          const fieldValue = row[field];
-          return (
-            fieldValue &&
-            String(fieldValue).toLowerCase().includes(cleanedSearch)
-          );
+    const filteredRows = computed(() => {
+      let filtered = rows;
+
+      const cleanedSearch = search.value.trim().toLowerCase();
+      if (cleanedSearch) {
+        filtered = filtered.filter((row) => {
+          return filterFields.some((field) => {
+            const fieldValue = row[field];
+            return (
+              fieldValue &&
+              String(fieldValue).toLowerCase().includes(cleanedSearch)
+            );
+          });
         });
-      });
+      }
+
+      if (selectedReceiptIds.value.length > 0) {
+        filtered = filtered.filter(
+          (row) =>
+            row.Receipt_Id &&
+            selectedReceiptIds.value.includes(String(row.Receipt_Id))
+        );
+      } else {
+        filtered = [];
+      }
+
+      return filtered;
     });
 
-    // Handler für Echtzeit-Änderungen
     const handleArticleChange = (payload: any) => {
       const newArticle = payload.new as Article;
       const eventType = payload.eventType;
@@ -172,7 +176,13 @@ export default defineComponent({
           break;
 
         case "DELETE":
-          rows.splice(rows.indexOf(newArticle), 1);
+          // eslint-disable-next-line no-case-declarations
+          const indexToDelete = rows.findIndex(
+            (article: Article) => article.Id === newArticle.Id
+          );
+          if (indexToDelete !== -1) {
+            rows.splice(indexToDelete, 1);
+          }
           break;
 
         case "UPDATE":
@@ -246,6 +256,10 @@ export default defineComponent({
       }
     };
 
+    const handleSelectedReceipts = (selectedIds: string[]) => {
+      selectedReceiptIds.value = selectedIds;
+    };
+
     return {
       columns: articleColumns,
       filteredRows,
@@ -259,14 +273,24 @@ export default defineComponent({
       totalExpenses,
       calculatedTotalPerReceipt,
       categories,
+      handleSelectedReceipts,
+      selectedReceiptIds,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-q-table {
-  border-top-left-radius: 15px;
+.table-custom {
+  width: 100%;
+  height: 400px;
+  border-radius: 15px;
+  border: 1px solid $primary;
+}
+
+.q-input {
+  border-radius: 15px;
+  background-color: $bar-background;
 }
 
 .q-mt-md {

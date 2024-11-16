@@ -87,12 +87,14 @@ export default defineComponent({
   color: white !important;
 }
 .uploader {
-  margin: 0;
-  width: 420px;
-  height: 200px;
+  max-width: 400px;
+  min-height: 200px;
   border-radius: 15px;
+  border: 1px solid $primary;
+  box-shadow: none;
 }
 .custom {
+  margin-left: 0;
   padding-left: 0;
 }
 .q-uploader__header {

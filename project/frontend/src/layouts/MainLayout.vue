@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="shadow-2 rounded-borders">
+  <q-layout view="lHh Lpr lFf">
     <q-header reveal>
       <q-toolbar>
         <q-item clickable @click="returnHome">
@@ -11,7 +11,20 @@
         </q-item>
         <q-space />
         <q-tabs>
-          <q-tab icon="account_circle">
+          <template v-if="!isReceipt">
+            <q-route-tab round icon="receipt_long" :to="'/receipt'" >
+              <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
+            </q-route-tab>
+          </template>
+          <template v-else>
+            <q-route-tab round icon="restaurant" :to="'/'">
+              <q-tooltip anchor="center left" class="text-h5"
+                >Artikel</q-tooltip
+              >
+            </q-route-tab>
+          </template>
+
+          <q-tab icon="account_circle" round>
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
           </q-tab>
         </q-tabs>
@@ -21,7 +34,7 @@
       <q-toolbar>
         <q-toolbar-title class="title-footer"
           >AI Essensplaner by
-          <a href="https://lueem.dev" target="_blank"
+          <a style="font-family: 'Playfair Display';" href="https://lueem.dev" target="_blank"
             >lueem.dev</a
           ></q-toolbar-title
         >
@@ -37,6 +50,7 @@
 <script>
 import router from "../router";
 import { useQuasar } from "quasar";
+import { defineComponent, ref, computed } from "vue";
 // import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // const linksList = [
@@ -66,8 +80,6 @@ import { useQuasar } from "quasar";
 //   },
 // ];
 
-import { defineComponent, ref } from "vue";
-
 export default defineComponent({
   name: "MainLayout",
 
@@ -80,6 +92,7 @@ export default defineComponent({
     const email = ref("");
     const name = ref("");
     const $q = useQuasar();
+    const isReceipt = computed(() => router.currentRoute.value.path === "/receipt");
     // const auth = getAuth();
     // if we want to get the user details, this is how its done
     // onAuthStateChanged(auth, (user) => {
@@ -88,6 +101,7 @@ export default defineComponent({
     //     name.value = user.displayName;
     //   }
     // });
+
     const logout = () => {
       // getAuth().signOut();
       router
@@ -115,12 +129,17 @@ export default defineComponent({
       logout,
       openHistory,
       returnHome,
+      isReceipt,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
+
+.color-primary {
+  color: $primary ;
+}
 .title-header .menu-title,
 a {
   text-decoration: underline;
