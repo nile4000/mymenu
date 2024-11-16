@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md">
+  <div class="q-pa-md row q-gutter-md justify-evenly" style="max-width: 1300px">
     <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
     <FoodTotal
       :totalsPerCategory="totalsPerCategory"

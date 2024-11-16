@@ -105,9 +105,19 @@ export default defineComponent({
   setup(props, { emit }) {
     const selectedReceipts = reactive<Record<string, boolean>>({});
 
-    props.totalsPerReceipt.forEach((receipt) => {
-      selectedReceipts[receipt.id] = true;
-    });
+    watch(
+      () => props.totalsPerReceipt,
+      (newReceipts) => {
+        if (newReceipts && newReceipts.length > 0) {
+          newReceipts.forEach((receipt) => {
+            if (selectedReceipts[receipt.id] === undefined) {
+              selectedReceipts[receipt.id] = true;
+            }
+          });
+        }
+      },
+      {  deep: true }
+    );
 
     const toggleReceiptSelection = (id: string, value: boolean) => {
       selectedReceipts[id] = value;

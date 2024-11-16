@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr fff" class="bg-grey-1 main-layout">
     <q-header
       class="bg-grey-1 text-grey-8"
-      style="display: flex; align-items: center; justify-content: center"
+      style="display: flex; align-items: center; justify-content: center; "
     >
       <q-img
         src="../assets/logo.png"

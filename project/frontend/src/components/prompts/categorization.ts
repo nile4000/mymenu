@@ -47,7 +47,7 @@ export const categories: string[] = [
   "Fleisch, Fisch und pflanzliche Proteine",
   "Backwaren und Getreide",
   "Softgetraenke",
-  "Alkoholische/Alkoholfreie Getraenke",
+  "Getraenke (alkoholisch & alkoholfrei)",
   "Snacks, Apero und Suesswaren",
   "Reinigungsmittel und Haushaltsreiniger",
   "Koerperpflegeprodukte und Hygieneartikel",

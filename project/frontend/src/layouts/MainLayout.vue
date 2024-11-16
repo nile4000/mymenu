@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header reveal>
+    <q-header reveal style="max-width: 1300px">
       <q-toolbar>
         <q-item clickable @click="returnHome">
           <q-toolbar-title class="title-header">
@@ -12,7 +12,7 @@
         <q-space />
         <q-tabs>
           <template v-if="!isReceipt">
-            <q-route-tab round icon="receipt_long" :to="'/receipt'" >
+            <q-route-tab round icon="receipt_long" :to="'/receipt'">
               <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
             </q-route-tab>
           </template>
@@ -34,7 +34,10 @@
       <q-toolbar>
         <q-toolbar-title class="title-footer"
           >AI Essensplaner by
-          <a style="font-family: 'Playfair Display';" href="https://lueem.dev" target="_blank"
+          <a
+            style="font-family: 'Playfair Display'"
+            href="https://lueem.dev"
+            target="_blank"
             >lueem.dev</a
           ></q-toolbar-title
         >
@@ -92,7 +95,9 @@ export default defineComponent({
     const email = ref("");
     const name = ref("");
     const $q = useQuasar();
-    const isReceipt = computed(() => router.currentRoute.value.path === "/receipt");
+    const isReceipt = computed(
+      () => router.currentRoute.value.path === "/receipt"
+    );
     // const auth = getAuth();
     // if we want to get the user details, this is how its done
     // onAuthStateChanged(auth, (user) => {
@@ -136,9 +141,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
 .color-primary {
-  color: $primary ;
+  color: $primary;
 }
 .title-header .menu-title,
 a {
