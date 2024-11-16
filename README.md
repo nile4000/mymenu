@@ -1,4 +1,4 @@
-# 🛸 MyMenu - AI Meal planner
+# 🛸 My Menü - AI Essensplaner
 
 
 ![alt text](image.png)
