@@ -8,7 +8,7 @@ export const articleColumns: Column[] = [
     field: "Purchase_Date",
     format: (val: string) => formatDate(val),
     sortable: true,
-    align: "center",
+    align: "left",
   },
   {
     name: "Category",
@@ -34,7 +34,13 @@ export const articleColumns: Column[] = [
   //   sortable: true,
   // },
   // { name: "Discount", label: "Rabatt", field: "Discount", sortable: true },
-  { name: "Quantity", label: "Menge", field: "Quantity", sortable: true },
+  {
+    name: "Quantity",
+    label: "Menge",
+    field: "Quantity",
+    align: "center",
+    sortable: true,
+  },
   { name: "Unit", label: "Einheit", field: "Unit", sortable: true },
   // {
   //   name: "Base_Unit",

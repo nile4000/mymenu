@@ -38,7 +38,6 @@
               outlined
               label="Kaufdatum, Name oder Kategorie"
             >
-              <span></span>
               <template v-slot:append>
                 <q-icon name="search" />
               </template>
@@ -284,10 +283,10 @@ export default defineComponent({
   border-radius: 15px;
   border: 1px solid $primary;
 }
-thead {
-  th {
-    font-weight: bold;
-  }
+:deep(th) {
+  font-size: 14px;
+  color: $dark;
+  font-weight: bold;
 }
 
 .q-input {
@@ -297,7 +296,6 @@ thead {
 
 .text-h6 {
   color: $dark;
-
 }
 
 .q-mt-md {
