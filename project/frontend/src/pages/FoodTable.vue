@@ -17,8 +17,6 @@
       :pagination="initialPagination"
       v-model:selected="selected"
       selection="multiple"
-      virtual-scroll
-      table-header-class="table-header-custom"
       class="table-custom"
       no-data-label="Keine Daten gefunden, keine Belege selektiert"
     >
@@ -28,8 +26,8 @@
             class="row items-center justify-center q-gutter-sm"
             style="margin-bottom: 10px"
           >
-            <q-icon size="1.4em" name="restaurant" color="dark" />
-            <span class="text-h6">Artikel</span>
+            <q-icon size="1.4em" name="restaurant" color="negative" />
+            <span class="text-h6" style="font-weight: bold">Artikel</span>
           </div>
           <div class="col-12">
             <q-input
@@ -283,14 +281,23 @@ export default defineComponent({
 <style lang="scss" scoped>
 .table-custom {
   width: 100%;
-  height: 400px;
   border-radius: 15px;
   border: 1px solid $primary;
+}
+thead {
+  th {
+    font-weight: bold;
+  }
 }
 
 .q-input {
   border-radius: 15px;
   background-color: $bar-background;
+}
+
+.text-h6 {
+  color: $dark;
+
 }
 
 .q-mt-md {

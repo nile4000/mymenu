@@ -3,7 +3,7 @@
     <ScannerPage></ScannerPage>
     <q-card flat bordered class="first">
       <q-card-section>
-        <q-item-label class="text-h6">Gesamtausgaben</q-item-label>
+        <q-item-label class="text-h6" style="font-size: 16px">Gesamtausgaben</q-item-label>
         <q-item-label class="text-h6" caption>
           vom {{ formatMonth(totalExpenses.firstMonth) }}
           -
@@ -19,7 +19,7 @@
     </q-card>
     <q-card flat bordered class="second">
       <q-card-section>
-        <q-item-label class="text-h6">Top Kategorie</q-item-label>
+        <q-item-label class="text-h6" style="font-size: 16px">Top Kategorie</q-item-label>
         <template v-if="topCategory.name">
           <q-item-label class="text-h6" caption
             ><q-icon size="1.9em" name="star" color="amber" />
@@ -105,7 +105,7 @@ export default defineComponent({
 }
 
 .text-h5 {
-  color: black;
+  color: $dark;
   text-decoration: underline;
   text-decoration-color: white;
   text-decoration-thickness: 1.5px;
