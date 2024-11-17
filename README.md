@@ -1,11 +1,8 @@
 # 🛸 My Menü - AI Essensplaner
 
-
 ![alt text](image-1.png)
 
 ## Showcase App
-
-App will be up again soon..
 
 <https://mymenu-bdf37.firebaseapp.com/>
 
@@ -19,4 +16,4 @@ App will be up again soon..
 
 4. Frontend-Interaktion: Im Frontend der Applikation können Nutzer die verarbeiteten Daten einsehen und bei Bedarf bearbeiten. Dieser Schritt ist entscheidend, um die Genauigkeit und Relevanz der Menüvorschläge zu gewährleisten.
 
-5. Analyse: Coming soon..
+5. Analyse: Die App wurde um einfache Analysefunktionen deiner Essensartikel erweitert. Alle Artikel können kategorisiert und ihre Einheiten extrahiert werden. Damit hast du deine Ausgaben über Monate hinweg im Überblick und kannst deine Einkäufe detailliert analysieren.

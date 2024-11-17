@@ -6,7 +6,6 @@
     <!-- Total pro Beleg -->
     <q-expansion-item
       :dense="false"
-      default-opened
       class="my-card"
       caption="Total CHF (eingescannt)."
     >
@@ -71,7 +70,6 @@
       color="primary"
       :dense="false"
       class="my-card"
-      default-opened
     >
       <template v-slot:header>
         <q-item-section avatar>
