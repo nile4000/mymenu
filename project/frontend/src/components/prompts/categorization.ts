@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 
 export const formatArticlesForCategorization = (articles: any[]): string => {
   return articles
@@ -6,14 +6,12 @@ export const formatArticlesForCategorization = (articles: any[]): string => {
     .join("\n");
 };
 
-export const systemPrompt = ref("");
+export const categorySystemPrompt: Ref<string> = ref(
+  "You are a categorization-assistant. Provide only valid JSON strictly in the format [{id: string, category: string}] without any additional text or formatting."
+);
 export const categorizationPrompt = (batch: any[]) => {
-  systemPrompt.value =
-    "You are a categorization-assistant. Provide only valid JSON strictly in the format [{id: string, category: string}] without any additional text or formatting.";
   const formattedArticles = formatArticlesForCategorization(batch);
-  const categoriesList = categories
-    .map((category) => `${category}`)
-    .join("\n");
+  const categoriesList = categories.map((category) => `${category}`).join("\n");
   return `Categorize the following articles based on their names:\n
           ${formattedArticles}
           Use the following categories for classification:\n
@@ -46,10 +44,12 @@ export const categories: string[] = [
   "Milchprodukte, Eier und Alternativen",
   "Fleisch, Fisch und pflanzliche Proteine",
   "Backwaren und Getreide",
-  "Softgetraenke",
-  "Getraenke (alkoholisch & alkoholfrei)",
-  "Snacks, Apero und Suesswaren",
+  "Getränke (alkoholisch & alkoholfrei)",
+  "Snacks, Apero und Süßwaren",
   "Reinigungsmittel und Haushaltsreiniger",
-  "Koerperpflegeprodukte und Hygieneartikel",
+  "Körperpflegeprodukte und Hygieneartikel",
   "Tierbedarf und Sonstiges",
+  "Tiefkühlprodukte",
+  "Konserven und Vorratsartikel",
+  "Gewürze, Kräuter und Saucen",
 ];

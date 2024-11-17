@@ -16,14 +16,14 @@ const routes = [
       },
       {
         path: "receipt",
-        component: () => import("pages/Receipt.vue"),
+        component: () => import("pages/ReceiptTable.vue"),
         meta: { requiresAuth: false },
       },
-      // {
-      //   path: "food",
-      //   component: () => import("src/pages/Food.vue"),
-      //   meta: { requiresAuth: false },
-      // },
+      {
+        path: "food",
+        component: () => import("src/pages/FoodTable.vue"),
+        meta: { requiresAuth: false },
+      },
     ],
   },
   {

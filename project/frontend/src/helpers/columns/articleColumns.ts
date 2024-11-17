@@ -65,7 +65,7 @@ export const articleColumns: Column[] = [
   // },
   {
     name: "Total",
-    label: "Total (nach Rabatt)",
+    label: "Total CHF (nach Rabatt)",
     field: "Total",
     sortable: true,
   },

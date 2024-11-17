@@ -23,10 +23,10 @@
           v-model="performCategorization"
           label="Kategorisierung"
         ></q-toggle>
-        <!-- <q-toggle
-          v-model="performDetailExtraction"
+        <q-toggle
+          v-model="performUnitExtraction"
           label="Einheit extrahieren"
-        ></q-toggle> -->
+        ></q-toggle>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Abbrechen" color="primary" v-close-popup></q-btn>
@@ -49,16 +49,27 @@ import { saveArticlesAndReceipt } from "../services/saveArticles";
 import { ResponseItem } from "../helpers/interfaces/response-item.interface";
 import {
   createBatches,
+  prepareArticlesPrices,
   prepareDialogArticles,
   processAllBatches,
 } from "../services/aiRequest.service";
 import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
 import { useQuasar } from "quasar";
-import { upsertArticleCategories } from "../services/updateArticle";
+import {
+  upsertArticleCategories,
+  upsertArticleUnits,
+} from "../services/updateArticle";
 import {
   categorizationPrompt,
+  categorySystemPrompt,
   validateExtractedCategories,
 } from "./prompts/categorization";
+import {
+  detailExtractionPrompt,
+  detailSystemPrompt,
+  validateExtractedDetails,
+} from "./prompts/detailExtraction";
+import { handleError } from "../helpers/composables/UseErrors";
 
 const columns: Column[] = [
   {
@@ -69,17 +80,17 @@ const columns: Column[] = [
     field: "Name",
     sortable: true,
   },
-  {
-    name: "Preis",
-    align: "center",
-    label: "Preis",
-    field: "Price",
-    sortable: true,
-  },
+  // {
+  //   name: "Preis",
+  //   align: "center",
+  //   label: "Preis",
+  //   field: "Price",
+  //   sortable: true,
+  // },
   { name: "Menge", label: "Menge", field: "Quantity", sortable: true },
-  { name: "Rabatt", label: "Aktion", field: "Discount", sortable: true },
+  // { name: "Rabatt", label: "Aktion", field: "Discount", sortable: true },
   { name: "Total", label: "Gesamt", field: "Total", sortable: true },
-  { name: "Kategorie", label: "Kategorie", field: "Category", sortable: true },
+  // { name: "Kategorie", label: "Kategorie", field: "Category", sortable: true },
 ];
 
 export default defineComponent({
@@ -94,7 +105,7 @@ export default defineComponent({
     const isLoading = ref(false);
     const articles = computed(() => props.response[0].Articles);
     const performCategorization = ref(true);
-    const systemPrompt = ref<string>("");
+    const performUnitExtraction = ref(false);
 
     const $q = useQuasar();
 
@@ -117,17 +128,16 @@ export default defineComponent({
         if (performCategorization.value) {
           await categorizeArticles(result.articles);
         }
+        if (performUnitExtraction.value) {
+          await extractUnit(result.articles);
+        }
       } catch (error: any) {
-        console.error("Error saving selection:", error);
-        $q.notify({
-          type: "negative",
-          message: "Fehler beim Speichern der Auswahl.",
-        });
+        handleError("Speichern", error, $q);
       }
     };
 
     const categorizeArticles = async (
-      articles: { Id: string; Name: string }[]
+      articles: { Id: string; Name: string; Quantity: number; Price: number }[]
     ) => {
       try {
         const preparedArticles = prepareDialogArticles(articles);
@@ -143,27 +153,61 @@ export default defineComponent({
             if (validCategorizedArticles.length > 0) {
               await upsertArticleCategories(validCategorizedArticles);
             } else {
-              $q.notify({
-                type: "warning",
-                message: "Keine gültigen kategorisierten Artikel gefunden.",
-              });
-              throw new Error("Ungültige extrahierte Kategorien.");
+              handleError(
+                "Kategorisierung",
+                "Keine gültigen kategorisierten Artikel gefunden.",
+                $q
+              );
             }
           },
           "gpt-4o-mini-2024-07-18",
-          systemPrompt
+          categorySystemPrompt
         );
       } catch (error: any) {
-        console.error("Error categorizing articles:", error);
-        $q.notify({
-          type: "negative",
-          message: "Fehler bei der Kategorisierung der Artikel.",
-        });
+        handleError("Kategorisierung", error, $q);
       } finally {
         isLoading.value = hideLoading($q);
         $q.notify({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
+        });
+      }
+    };
+
+    const extractUnit = async (
+      articles: { Id: string; Name: string; Quantity: number; Price: number }[]
+    ) => {
+      try {
+        const preparedArticles = prepareArticlesPrices(articles);
+        const batches = createBatches(preparedArticles, 40);
+        isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
+
+        await processAllBatches(
+          batches,
+          detailExtractionPrompt,
+          async (extractedDetails: any[]) => {
+            const validExtractedDetails =
+              validateExtractedDetails(extractedDetails);
+            if (validExtractedDetails.length > 0) {
+              await upsertArticleUnits(validExtractedDetails);
+            } else {
+              handleError(
+                "Kategorisierung",
+                "Keine gültigen extrahierten Einheiten gefunden.",
+                $q
+              );
+            }
+          },
+          "gpt-4o-mini-2024-07-18",
+          detailSystemPrompt
+        );
+      } catch (error: any) {
+        handleError("Einheitsextraktion", error, $q);
+      } finally {
+        isLoading.value = hideLoading($q);
+        $q.notify({
+          type: "positive",
+          message: "Einheitsextraktion erfolgreich!",
         });
       }
     };
@@ -174,6 +218,7 @@ export default defineComponent({
       columns,
       receiptData,
       performCategorization,
+      performUnitExtraction,
       categorizeArticles,
     };
   },

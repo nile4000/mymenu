@@ -1,11 +1,12 @@
 <template>
   <div class="custom-container q-gutter-md">
-    <ScannerPage></ScannerPage>
     <q-card flat bordered class="first">
       <q-card-section>
-        <q-item-label class="text-h6" style="font-size: 16px">Gesamtausgaben</q-item-label>
-        <q-item-label class="text-h6" caption>
-          vom {{ formatMonth(totalExpenses.firstMonth) }}
+        <q-item-label class="text-h6" style="font-size: 16px"
+          >Gesamtausgaben</q-item-label
+        >
+        <q-item-label class="text-h6" caption style="min-height: 70px">
+          vom {{ formatMonth(totalExpenses.firstMonth) }} {{ totalExpenses.firstYear }}
           -
           {{ formatMonth(totalExpenses.lastMonth) }}
           {{ totalExpenses.lastYear }}</q-item-label
@@ -19,19 +20,51 @@
     </q-card>
     <q-card flat bordered class="second">
       <q-card-section>
-        <q-item-label class="text-h6" style="font-size: 16px">Top Kategorie</q-item-label>
-        <template v-if="topCategory.name">
-          <q-item-label class="text-h6" caption
-            ><q-icon size="1.9em" name="star" color="amber" />
-            {{ topCategory.name }}</q-item-label
-          >
-        </template>
+        <q-item-label class="text-h6" style="font-size: 16px"
+          >Top Kategorie</q-item-label
+        >
+
+        <q-item-label class="text-h6" caption style="min-height: 70px"
+          ><template v-if="topCategory.name">
+            <q-icon size="1.9em" name="star" color="amber" />
+            {{ topCategory.name }}</template
+          ></q-item-label
+        >
       </q-card-section>
       <q-card-actions align="center">
         <q-item class="text-h5">
           <div>{{ topCategory.total.toFixed(2) }} CHF</div>
         </q-item>
       </q-card-actions>
+    </q-card>
+    <q-card flat bordered class="third">
+      <q-card-section>
+        <q-item-label class="text-h6" style="font-size: 16px">
+          Top 5 Artikel
+        </q-item-label>
+      </q-card-section>
+      <q-card-section>
+        <q-list>
+          <q-item
+            v-for="(item, index) in topFiveItems"
+            :key="index"
+            style="min-height: auto; padding: 0"
+          >
+            <q-item-section>
+              <q-item-label style="font-size: 12px"
+                >{{ item.Name.slice(0, 10) + ".." || "xxx"
+                }}<q-tooltip anchor="center left" class="text-h5"
+                  >{{ item.Name }},
+                  {{ formatDate(item.Purchase_Date) }}</q-tooltip
+                >
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div>{{ item.Total.toFixed(2) }} CHF</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
     </q-card>
   </div>
 </template>
@@ -40,13 +73,10 @@
 import { defineComponent, PropType } from "vue";
 import { TotalExpenses } from "../helpers/interfaces/totalExpenses.interface";
 import { formatMonth, formatDate } from "../helpers/dateHelpers";
-import ScannerPage from "./Scanner.vue";
 
 export default defineComponent({
-  name: "FoodDashboard",
-  components: {
-    ScannerPage,
-  },
+  name: "FoodControl",
+
   props: {
     totalExpenses: {
       type: Object as PropType<TotalExpenses>,
@@ -54,7 +84,12 @@ export default defineComponent({
     },
     rows: {
       type: Array as PropType<
-        Array<{ Total: number; Purchase_Date: string; Category: string }>
+        Array<{
+          Name: string;
+          Total: number;
+          Purchase_Date: string;
+          Category: string;
+        }>
       >,
       default: () => [],
     },
@@ -75,6 +110,9 @@ export default defineComponent({
       );
       return topCategory;
     },
+    topFiveItems() {
+      return [...this.rows].sort((a, b) => b.Total - a.Total).slice(0, 5);
+    },
   },
   methods: {
     formatMonth,
@@ -92,7 +130,7 @@ export default defineComponent({
 .q-card {
   border-radius: 25px;
   width: 200px;
-  min-height: 200px;
+  max-height: 200px;
   border-color: transparent;
 }
 
@@ -102,6 +140,10 @@ export default defineComponent({
 
 .second {
   background-color: $secondary;
+}
+
+.third {
+  background-color: $amber;
 }
 
 .text-h5 {

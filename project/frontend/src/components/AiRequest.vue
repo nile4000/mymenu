@@ -8,7 +8,9 @@
       v-ripple
     >
       <q-icon size="1.9em" name="hub" color="secondary" />
-      <q-tooltip class="text-h6"> Klassifikation: {{ selectedItems.length }}</q-tooltip>
+      <q-tooltip class="text-h6">
+        Klassifikation: {{ selectedItems.length }}</q-tooltip
+      >
     </q-btn>
     <q-btn
       unelevated
@@ -18,7 +20,9 @@
       v-ripple
     >
       <q-icon size="1.9em" name="delete" color="negative" />
-      <q-tooltip anchor="center left" class="text-h6">Artikel löschen</q-tooltip>
+      <q-tooltip anchor="center left" class="text-h6"
+        >Artikel löschen</q-tooltip
+      >
     </q-btn>
   </q-btn-group>
 </template>
@@ -28,7 +32,7 @@ import { Article } from "../helpers/interfaces/article.interface";
 import { defineComponent, PropType, ref } from "vue";
 import {
   upsertArticleCategories,
-  upsertArticleUnit,
+  upsertArticleUnits,
 } from "../services/updateArticle";
 import { useQuasar } from "quasar";
 import {
@@ -41,9 +45,15 @@ import { showLoading, hideLoading } from "../helpers/composables/UseLoader";
 import { deleteArticleById } from "../services/deleteArticle";
 import {
   categorizationPrompt,
+  categorySystemPrompt,
   validateExtractedCategories,
 } from "./prompts/categorization";
-import { formatArticlesForDetailExtraction } from "./prompts/detailExtraction";
+import {
+  detailExtractionPrompt,
+  detailSystemPrompt,
+  validateExtractedDetails,
+} from "./prompts/detailExtraction";
+import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
   name: "AiRequest",
@@ -56,7 +66,6 @@ export default defineComponent({
   setup(props) {
     const $q = useQuasar();
     const isLoading = ref(false);
-    const systemPrompt = ref<string>("");
 
     const validateSelectedItems = () => {
       if (props.selectedItems.length === 0) {
@@ -66,32 +75,6 @@ export default defineComponent({
         });
         throw new Error("Keine ausgewählten Artikel.");
       }
-    };
-
-    const handleError = (error: any) => {
-      $q.notify({
-        type: "negative",
-        message:
-          error.message ||
-          "Ein unerwarteter Fehler ist bei der Anfrage aufgetreten.",
-      });
-    };
-
-    const detailExtractionPrompt = (batch: any[]) => {
-      systemPrompt.value =
-        "You are an text-extraction assistant. Provide only valid JSON strictlyin the format [{id: string, unit: string}] without any additional text or formatting.";
-      const formattedArticles = formatArticlesForDetailExtraction(batch);
-      return `Extract unit and the quantity for the following articles based on their Name:/n
-              ${formattedArticles}
-      For each article, provide the following information in JSON format:
-      - **id**: The article's Id as a string, enclosed in quotes.
-      - **unit**: The unit and quantity extracted from **Name** in lowercase letters. Examples are: "100g","200ml","2stk","33cl","1kg","10x10ml",8x60g,"2st ca. 330g, 10St 53g+").
-
-      **Rules:**
-      - **Valid units are only: "g","kg","stk","l","ml","cl".**
-      - **Always copy the multiplicators.**
-      - **If no unit is found in article Name. default to appropriate "kg" or "stk".**
-      - **Only a number in article Name is not a valid unit. Default to appropriate "kg" or "stk"**`;
     };
 
     const sendCategorizationRequest = async () => {
@@ -104,64 +87,57 @@ export default defineComponent({
         await processAllBatches(
           batches,
           categorizationPrompt,
-          async (categorizedArticles: any[]) => {
-            const validCategorizedArticles =
-              validateExtractedCategories(categorizedArticles);
-            if (validCategorizedArticles.length > 0) {
-              await upsertArticleCategories(validCategorizedArticles);
-            } else {
-              $q.notify({
-                type: "warning",
-                message: "Keine gültigen kategorisierten Artikel gefunden.",
-              });
-              throw new Error("Ungültige extrahierte Einheiten.");
-            }
-          },
+          validateAndUpdateCategory,
           "gpt-4o-mini-2024-07-18",
-          systemPrompt
+          categorySystemPrompt
         );
       } catch (error) {
-        handleError(error);
+        handleError("Kategorisierung", error, $q);
       } finally {
         isLoading.value = hideLoading($q);
         $q.notify({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
         });
+        // no further detail extraction
         await sendDetailExtractionRequest();
       }
     };
 
+    async function validateAndUpdateCategory(
+      categorizedArticles: any[]
+    ): Promise<void> {
+      const validCategorizedArticles =
+        validateExtractedCategories(categorizedArticles);
+      if (validCategorizedArticles.length > 0) {
+        await upsertArticleCategories(validCategorizedArticles);
+      } else {
+        $q.notify({
+          type: "warning",
+          message: "Keine gültigen kategorisierten Artikel gefunden.",
+        });
+        throw new Error("Ungültige extrahierte Einheiten.");
+      }
+    }
+
     const sendDetailExtractionRequest = async () => {
       try {
         validateSelectedItems();
-
         const preparedArticles = prepareArticlesPrices(props.selectedItems);
         const batches = createBatches(preparedArticles, 40);
+        console.log(batches);
 
         isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
 
         await processAllBatches(
           batches,
           detailExtractionPrompt,
-          async (extractedDetails: any[]) => {
-            const validExtractedDetails =
-              validateExtractedDetails(extractedDetails);
-            if (validExtractedDetails.length > 0) {
-              await upsertArticleUnit(validExtractedDetails);
-            } else {
-              $q.notify({
-                type: "warning",
-                message: "Keine gültigen extrahierten Einheiten gefunden.",
-              });
-              throw new Error("Ungültige extrahierte Einheiten.");
-            }
-          },
+          validateAndUpdateUnitExtraction,
           "gpt-4o-mini-2024-07-18",
-          systemPrompt
+          detailSystemPrompt
         );
       } catch (error) {
-        handleError(error);
+        handleError("Einheitsextraktion", error, $q);
       } finally {
         isLoading.value = hideLoading($q);
         $q.notify({
@@ -171,26 +147,26 @@ export default defineComponent({
       }
     };
 
-    const validateExtractedDetails = (
-      extractedDetails: {
-        id: string;
-        unit: string;
-      }[]
-    ) => {
-      const validExtractedDetails = extractedDetails.filter(
-        (detail) =>
-          detail.id &&
-          typeof detail.id === "string" &&
-          (typeof detail.unit === "string" || detail.unit === "")
-      );
-      return validExtractedDetails;
-    };
+    async function validateAndUpdateUnitExtraction(
+      extractedDetails: any[]
+    ): Promise<void> {
+      const validExtractedDetails = validateExtractedDetails(extractedDetails);
+      if (validExtractedDetails.length > 0) {
+        await upsertArticleUnits(validExtractedDetails);
+      } else {
+        $q.notify({
+          type: "warning",
+          message: "Keine gültigen extrahierten Einheiten gefunden.",
+        });
+        throw new Error("Ungültige extrahierte Einheiten.");
+      }
+    }
 
     const deleteArticle = async (id: string) => {
       try {
         await deleteArticleById(id);
       } catch (error) {
-        handleError(error);
+        handleError("Artikel löschen", error, $q);
       }
     };
 

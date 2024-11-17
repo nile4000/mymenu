@@ -50,7 +50,7 @@ export async function saveArticlesAndReceipt(
       await supabase
         .from("article")
         .insert(preparedArticles)
-        .select("Id, Name");
+        .select("Id,Name,Quantity,Price");
 
     if (articlesInsertError) {
       console.error("Error inserting articles:", articlesInsertError);

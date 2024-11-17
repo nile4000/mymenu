@@ -1,6 +1,6 @@
 <template>
-  <div class="q-pa-md row q-gutter-md justify-evenly" style="max-width: 1300px">
-    <FoodDasboard :totalExpenses="totalExpenses" :rows="filteredRows" />
+  <div class="q-pa-md row q-gutter-md justify-evenly">
+    <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
     <FoodTotal
       :totalsPerCategory="totalsPerCategory"
       :totalsPerReceipt="totalsPerReceipt"
@@ -18,7 +18,7 @@
       v-model:selected="selected"
       selection="multiple"
       class="table-custom"
-      no-data-label="Keine Daten gefunden, keine Belege selektiert"
+      no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
     >
       <template v-slot:top>
         <div style="width: 100%" class="row">
@@ -27,7 +27,9 @@
             style="margin-bottom: 10px"
           >
             <q-icon size="1.4em" name="restaurant" color="negative" />
-            <span class="text-h6" style="font-weight: bold">Artikel</span>
+            <span class="text-h6" style="font-weight: bold"
+              >Artikel ({{ selected.length }} / {{ filteredRows.length }})</span
+            >
           </div>
           <div class="col-12">
             <q-input
@@ -45,13 +47,15 @@
           </div>
         </div>
       </template>
+      <!-- Toggles styled -->
       <template v-slot:header-selection="scope">
         <q-toggle v-model="scope.selected" />
       </template>
-
       <template v-slot:body-selection="scope">
         <q-toggle v-model="scope.selected" />
       </template>
+
+      <!-- editable columns -->
       <template v-slot:body-cell-Category="props">
         <q-td :props="props">
           {{ props.row.Category }}
@@ -61,8 +65,31 @@
               :options="categories"
               dense
               autofocus
-              @blur="scope.set"
-              @keyup.enter="scope.set"
+              @keyup.enter="
+                () => {
+                  scope.set();
+                  updateCategory(props.row);
+                }
+              "
+            />
+          </q-popup-edit>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-Unit="props">
+        <q-td :props="props">
+          {{ props.row.Unit }}
+          <q-popup-edit v-model="props.row.Unit" v-slot="scope">
+            <q-input
+              v-model="scope.value"
+              dense
+              autofocus
+              @keyup.enter="
+                () => {
+                  scope.set();
+                  updateUnit(props.row);
+                }
+              "
+              placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
             />
           </q-popup-edit>
         </q-td>
@@ -90,20 +117,25 @@ import {
   unsubscribeFromArticleChanges,
 } from "../services/realtimeArticles";
 import FoodTotal from "./FoodTotal.vue";
-import FoodDasboard from "./FoodDashboard.vue";
+import FoodControl from "./FoodControl.vue";
 import AiRequest from "../components/AiRequest.vue";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../helpers/columns/articleColumns";
 import { useTotals } from "../helpers/composables/UseTotals";
 import { useQuasar } from "quasar";
 import { categories } from "../components/prompts/categorization";
+import {
+  upsertArticleCategory,
+  upsertArticleUnit,
+} from "../services/updateArticle";
+import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
   name: "FoodPage",
   components: {
     AiRequest,
     FoodTotal,
-    FoodDasboard,
+    FoodControl,
   },
   setup() {
     const $q = useQuasar();
@@ -119,7 +151,7 @@ export default defineComponent({
       sortBy: "desc",
       descending: false,
       page: 1,
-      rowsPerPage: 100,
+      rowsPerPage: 500,
     });
 
     const {
@@ -169,7 +201,7 @@ export default defineComponent({
       switch (eventType) {
         case "INSERT":
           rows.push(newArticle);
-          void fetchReceiptsForArticles([newArticle]);
+          // void fetchReceiptsForArticles([newArticle]);
           break;
 
         case "DELETE":
@@ -192,9 +224,7 @@ export default defineComponent({
           } else {
             rows.push(newArticle);
           }
-          // todo: submit
           break;
-
         default:
           $q.notify({
             type: "warning",
@@ -213,10 +243,7 @@ export default defineComponent({
           await fetchReceiptsForArticles(data);
         }
       } catch (error) {
-        $q.notify({
-          type: "negative",
-          message: "Fehler beim Laden der Artikel vom Backend.",
-        });
+        handleError("Belege laden", error, $q);
       }
       channel = subscribeToArticleChanges(handleArticleChange);
     });
@@ -226,6 +253,30 @@ export default defineComponent({
         unsubscribeFromArticleChanges(channel);
       }
     });
+
+    const updateCategory = async (article: Article) => {
+      try {
+        await upsertArticleCategory(article);
+        $q.notify({
+          type: "positive",
+          message: "Kategorie aktualisiert",
+        });
+      } catch (error) {
+        handleError("Kategorie aktualisieren", error, $q);
+      }
+    };
+
+    const updateUnit = async (article: Article) => {
+      try {
+        await upsertArticleUnit(article.Id, article.Unit);
+        $q.notify({
+          type: "positive",
+          message: "Einheit aktualisiert",
+        });
+      } catch (error) {
+        handleError("Einheit aktualisieren", error, $q);
+      }
+    };
 
     const fetchReceiptsForArticles = async (articles: Article[]) => {
       const uniqueReceiptIds = [
@@ -245,10 +296,7 @@ export default defineComponent({
             }
           });
         } catch (error) {
-          $q.notify({
-            type: "negative",
-            message: "Fehler beim Laden der Belege vom Backend.",
-          });
+          handleError("Belege laden", error, $q);
         }
       }
     };
@@ -272,6 +320,8 @@ export default defineComponent({
       categories,
       handleSelectedReceipts,
       selectedReceiptIds,
+      updateCategory,
+      updateUnit,
     };
   },
 });

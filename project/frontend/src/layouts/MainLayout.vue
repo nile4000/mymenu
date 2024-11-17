@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header reveal style="max-width: 1300px">
+    <q-header reveal>
       <q-toolbar>
         <q-item clickable @click="returnHome">
           <q-toolbar-title class="title-header">
@@ -12,19 +12,24 @@
         <q-space />
         <q-tabs>
           <template v-if="!isReceipt">
-            <q-route-tab round icon="receipt_long" :to="'/receipt'">
+            <q-route-tab
+              round
+              icon="receipt_long"
+              :to="'/receipt'"
+              class="custom-icon"
+            >
               <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
             </q-route-tab>
           </template>
           <template v-else>
-            <q-route-tab round icon="restaurant" :to="'/'">
+            <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
               <q-tooltip anchor="center left" class="text-h5"
                 >Artikel</q-tooltip
               >
             </q-route-tab>
           </template>
 
-          <q-tab icon="account_circle" round>
+          <q-tab icon="account_circle" round class="custom-icon3">
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
           </q-tab>
         </q-tabs>
@@ -163,6 +168,30 @@ a:hover {
   font-weight: 500;
 }
 
+.custom-icon {
+  :deep(.q-tab__content) {
+    .q-icon {
+      color: $primary !important;
+    }
+  }
+}
+
+.custom-icon2 {
+  :deep(.q-tab__content) {
+    .q-icon {
+      color: $negative !important;
+    }
+  }
+}
+
+.custom-icon3 {
+  :deep(.q-tab__content) {
+    .q-icon {
+      color: $profile !important;
+    }
+  }
+}
+
 .q-tab,
 .q-item {
   padding-left: 4px;
@@ -170,7 +199,6 @@ a:hover {
 }
 
 .q-tab:hover {
-  background-color: $tab-accent;
   border-radius: 15px;
 }
 

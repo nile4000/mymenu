@@ -14,8 +14,8 @@ export function prepareArticles(items: Article[]) {
   }));
 }
 
-export function prepareArticlesPrices(items: Article[]) {
-  return items.map((item: Article) => ({
+export function prepareArticlesPrices(items: any) {
+  return items.map((item: any) => ({
     id: item.Id,
     name: item.Name,
     quantity: item.Quantity,

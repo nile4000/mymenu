@@ -19,6 +19,7 @@
 import { defineComponent, computed } from "vue";
 import DialogComponent from "../components/DialogComponent.vue";
 import { useQuasar } from "quasar";
+import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
   name: "ScannerPage",
@@ -48,10 +49,7 @@ export default defineComponent({
     });
 
     function onRejected(rejectedEntries: any) {
-      $q.notify({
-        type: "negative",
-        message: `${rejectedEntries.length} PDFs konnten nicht geladen werden.`,
-      });
+      handleError("PDF hochladen", rejectedEntries, $q);
     }
 
     function onUploaded(event: any) {
@@ -65,14 +63,10 @@ export default defineComponent({
             },
           });
         } catch (error) {
-          $q.notify({
-            type: "negative",
-            message: "Fehler beim verarbeiten der Antwort.",
-          });
+          handleError("Antwort verarbeiten", error, $q);
         }
       }
     }
-
     return {
       authHeaders,
       apiUrl,
