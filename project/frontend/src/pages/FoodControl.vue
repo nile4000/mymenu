@@ -1,16 +1,21 @@
 <template>
-  <div class="custom-container q-gutter-md">
-    <q-card flat bordered class="first">
+  <div
+    class="q-gutter-md custom-container"
+    style="display: flex; flex-wrap: wrap"
+  >
+    <q-card flat bordered class="first custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px"
           >Gesamtausgaben</q-item-label
         >
         <q-item-label class="text-h6" caption style="min-height: 70px">
           <template v-if="totalExpenses.firstMonth">
-          vom {{ formatMonth(totalExpenses.firstMonth) }} {{ totalExpenses.firstYear }}
-          -
-          {{ formatMonth(totalExpenses.lastMonth) }}
-          {{ totalExpenses.lastYear }}</template></q-item-label
+            vom {{ formatMonth(totalExpenses.firstMonth) }}
+            {{ totalExpenses.firstYear }}
+            -
+            {{ formatMonth(totalExpenses.lastMonth) }}
+            {{ totalExpenses.lastYear }}</template
+          ></q-item-label
         >
       </q-card-section>
       <q-card-actions align="center">
@@ -19,13 +24,16 @@
         </q-item>
       </q-card-actions>
     </q-card>
-    <q-card flat bordered class="second">
+    <q-card flat bordered class="second custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px"
           >Top Kategorie</q-item-label
         >
 
-        <q-item-label class="text-h6" caption style="min-height: 70px"
+        <q-item-label
+          class="text-h6"
+          caption
+          style="min-height: 70px"
           ><template v-if="topCategory.name">
             <q-icon size="1.9em" name="star" color="amber" />
             {{ topCategory.name }}</template
@@ -38,13 +46,13 @@
         </q-item>
       </q-card-actions>
     </q-card>
-    <q-card flat bordered class="third">
+    <q-card flat bordered class="third custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px">
           Top 5 Artikel
         </q-item-label>
       </q-card-section>
-      <q-card-section>
+      <q-card-section align="left">
         <q-list>
           <q-item
             v-for="(item, index) in topFiveItems"
@@ -123,16 +131,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.custom-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+@media (max-width: 700px) {
+  .custom-container {
+    flex-direction: column;
+  }
 }
-.q-card {
+.custom-card {
   border-radius: 25px;
-  width: 200px;
-  max-height: 200px;
-  border-color: transparent;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+.q-card__section {
+  padding-bottom: 0;
 }
 
 .first {
@@ -149,16 +160,6 @@ export default defineComponent({
 
 .text-h5 {
   color: $dark;
-  text-decoration: underline;
-  text-decoration-color: white;
-  text-decoration-thickness: 1.5px;
-  transition: text-decoration-color 0.5s ease;
-  text-underline-offset: 4px;
-}
-
-.text-h5:hover {
-  text-decoration: underline;
-  text-decoration-color: $dark;
 }
 
 .text-caption {

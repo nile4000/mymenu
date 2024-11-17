@@ -165,7 +165,6 @@ a:hover {
 .title-footer,
 .title-header {
   color: $dark;
-  font-weight: 500;
 }
 
 .custom-icon {
@@ -225,8 +224,9 @@ a:hover {
 .q-footer {
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
-  max-width: 280px;
+  max-width: 270px;
 }
+
 .q-footer,
 .q-header {
   background-color: $bar-background;

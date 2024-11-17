@@ -1,7 +1,7 @@
 <template>
   <q-list
     class="q-gutter-md justify-center"
-    style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 16px"
+    style="display: flex; flex-direction: row; flex-wrap: wrap;"
   >
     <!-- Total pro Beleg -->
     <q-expansion-item
@@ -206,9 +206,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+
 .my-card {
   color: $dark;
-  width: 310px;
   height: fit-content;
   border-radius: 15px;
   border: 1px solid $primary;

@@ -57,7 +57,7 @@
 
       <!-- editable columns -->
       <template v-slot:body-cell-Category="props">
-        <q-td :props="props">
+        <q-td :props="props" style="text-decoration: underline; cursor: pointer; text-underline-offset: 4px;">
           {{ props.row.Category }}
           <q-popup-edit v-model="props.row.Category" v-slot="scope">
             <q-select
@@ -76,7 +76,7 @@
         </q-td>
       </template>
       <template v-slot:body-cell-Unit="props">
-        <q-td :props="props">
+        <q-td :props="props" style="text-decoration: underline; cursor: pointer;  text-underline-offset: 4px;">
           {{ props.row.Unit }}
           <q-popup-edit v-model="props.row.Unit" v-slot="scope">
             <q-input
@@ -201,9 +201,7 @@ export default defineComponent({
       switch (eventType) {
         case "INSERT":
           rows.push(newArticle);
-          // void fetchReceiptsForArticles([newArticle]);
           break;
-
         case "DELETE":
           // eslint-disable-next-line no-case-declarations
           const indexToDelete = rows.findIndex(
