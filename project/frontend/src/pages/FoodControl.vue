@@ -6,10 +6,11 @@
           >Gesamtausgaben</q-item-label
         >
         <q-item-label class="text-h6" caption style="min-height: 70px">
+          <template v-if="totalExpenses.firstMonth">
           vom {{ formatMonth(totalExpenses.firstMonth) }} {{ totalExpenses.firstYear }}
           -
           {{ formatMonth(totalExpenses.lastMonth) }}
-          {{ totalExpenses.lastYear }}</q-item-label
+          {{ totalExpenses.lastYear }}</template></q-item-label
         >
       </q-card-section>
       <q-card-actions align="center">
