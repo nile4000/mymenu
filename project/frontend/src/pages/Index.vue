@@ -31,18 +31,18 @@
         </q-card>
       </q-expansion-item>
     </q-list> -->
-    <FoodPage></FoodPage>
+    <FoodTable></FoodTable>
   </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import FoodPage from "./FoodTable.vue";
+import FoodTable from "./article/FoodTable.vue";
 
 export default defineComponent({
   name: "HomePage",
   components: {
-    FoodPage,
+    FoodTable,
   },
   setup() {
     const stores = ref([

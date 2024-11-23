@@ -35,7 +35,11 @@ export function formatMonth(monthNumber: number): string {
 
 // (DD.MM.YY -> YYYY-MM-DD)
 export function convertToISODate(dateString: string): string {
-  const [day, month, year] = dateString.split(".");
-  const fullYear = year.length === 2 ? `20${year}` : year;
-  return `${fullYear}-${month}-${day}`;
+  try {
+    const [day, month, year] = dateString.split(".");
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    return `${fullYear}-${month}-${day}`;
+  } catch (error) {
+    return "2024-11-23";
+  }
 }

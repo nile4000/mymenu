@@ -1,8 +1,6 @@
 <template>
   <div>
-    <div
-      class="q-pa-md row q-gutter-md justify-evenly"
-    >
+    <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
     </div>
     <q-table
@@ -12,7 +10,7 @@
       :columns="columns"
       grid
       hide-header
-      class="table-custom"
+      class="table-custom q-pa-md"
       no-data-label="Keine Daten gefunden"
       :pagination="initialPagination"
     >
@@ -31,17 +29,17 @@
         <q-card round bordered flat>
           <q-card-section class="row items-center justify-between">
             <div class="flex-grow-1 q-mr-md text-weight-bold">
-              Einkauf vom {{ formatDate(props.row.Purchase_Date) }}
+              Einkauf vom {{ formatDate(props.row.PurchaseDate) }}
             </div>
             <q-img
               v-if="props.row.Corp === 'Coop'"
-              src="../assets/coop.png"
+              src="../../assets/coop.png"
               alt="Coop"
               style="max-width: 55px"
             />
             <q-img
               v-if="props.row.Corp === 'Migros'"
-              src="../assets/migros.png"
+              src="../../assets/migros.png"
               alt="Migros"
               style="max-width: 55px"
             />
@@ -63,31 +61,31 @@
 </template>
 
 <script lang="ts">
-import { Receipt } from "../helpers/interfaces/receipt.interface";
-import { Column } from "../helpers/interfaces/column.interface";
+import { Receipt } from "../../helpers/interfaces/receipt.interface";
+import { Column } from "../../helpers/interfaces/column.interface";
 import { defineComponent, ref, onMounted } from "vue";
-import { readAllReceipts } from "../services/readAllReceipts";
-import { deleteReceiptById } from "../services/deleteReceipt";
-import { formatDate } from "../helpers/dateHelpers";
+import { readAllReceipts } from "../../services/readAllReceipts";
+import { deleteReceiptById } from "../../services/deleteReceipt";
+import { formatDate } from "../../helpers/dateHelpers";
 import { useQuasar } from "quasar";
-import ScannerPage from "./Scanner.vue";
-import { handleError } from "../helpers/composables/UseErrors";
+import ScannerPage from "../Scanner.vue";
+import { handleError } from "../../helpers/composables/UseErrors";
 
 // Defining the columns
 const columns: Column[] = [
   {
-    name: "Purchase_Date",
+    name: "PurchaseDate",
     required: true,
     label: "Receipt Key",
     align: "left",
-    field: "Purchase_Date",
+    field: "PurchaseDate",
     format: (val: string) => `${formatDate(val)}`,
     sortable: true,
   },
 ];
 
 export default defineComponent({
-  name: "ReceiptsPage",
+  name: "ReceiptTable",
   components: {
     ScannerPage,
   },
@@ -120,7 +118,7 @@ export default defineComponent({
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
-        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.Purchase_Date} löschen wollen?`
+        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.PurchaseDate} löschen wollen?`
       );
       if (confirmed && receipt.Id) {
         try {
@@ -155,6 +153,7 @@ export default defineComponent({
   border: 1px solid $primary;
   background-color: $bar-background;
   margin: 20px;
+  margin-top: 10px;
 }
 .custom-separator {
   margin-left: 10px;

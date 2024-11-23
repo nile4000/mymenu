@@ -90,6 +90,7 @@ export default defineComponent({
 .custom {
   margin-left: 0;
   padding-left: 0;
+  padding-top: 10px;
 }
 :deep(.q-uploader__file) {
   border-radius: 15px;

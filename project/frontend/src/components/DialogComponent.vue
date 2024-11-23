@@ -111,7 +111,7 @@ export default defineComponent({
 
     const receiptData = computed(() => ({
       Uuid: props.response[0].UID,
-      Purchase_Date: props.response[0].Purchase_Date,
+      PurchaseDate: props.response[0].PurchaseDate,
       Corp: props.response[0].Corp,
       Total_R_Extract: props.response[0].Total_R_Extract,
       Total_R_Open_Ai: props.response[0].Total_R_Open_Ai,

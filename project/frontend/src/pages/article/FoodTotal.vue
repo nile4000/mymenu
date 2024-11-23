@@ -113,7 +113,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, watch, computed, ref } from "vue";
-import { formatDate } from "../helpers/dateHelpers";
+import { formatDate } from "../../helpers/dateHelpers";
 
 export default defineComponent({
   name: "FoodTotal",

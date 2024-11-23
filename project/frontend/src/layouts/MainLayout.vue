@@ -14,6 +14,16 @@
           <template v-if="!isReceipt">
             <q-route-tab
               round
+              icon="home"
+              :to="'/receipe'"
+              class="custom-icon2"
+            >
+              <q-tooltip anchor="center left" class="text-h5"
+                >Rezepte</q-tooltip
+              >
+            </q-route-tab>
+            <q-route-tab
+              round
               icon="receipt_long"
               :to="'/receipt'"
               class="custom-icon"
@@ -22,6 +32,16 @@
             </q-route-tab>
           </template>
           <template v-else>
+            <q-route-tab
+              round
+              icon="home"
+              :to="'/receipe'"
+              class="custom-icon2"
+            >
+              <q-tooltip anchor="center left" class="text-h5"
+                >Rezepte</q-tooltip
+              >
+            </q-route-tab>
             <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
               <q-tooltip anchor="center left" class="text-h5"
                 >Artikel</q-tooltip
@@ -38,12 +58,15 @@
     <q-footer reveal>
       <q-toolbar>
         <q-toolbar-title class="title-footer"
-          >AI Essensplaner by
-          <a
-            style="font-family: 'Playfair Display'"
-            href="https://lueem.dev"
-            target="_blank"
-            >lueem.dev</a
+          >AI Essensplaner
+          <span class="title-part">
+            by
+            <a
+              style="font-family: 'Playfair Display'"
+              href="https://lueem.dev"
+              target="_blank"
+              >lueem.dev</a
+            ></span
           ></q-toolbar-title
         >
       </q-toolbar>
@@ -164,6 +187,7 @@ a:hover {
 
 .title-footer,
 .title-header {
+  font-size: 11px;
   color: $dark;
 }
 
@@ -207,6 +231,15 @@ a:hover {
 .title-footer {
   font-style: italic;
   font-size: 16px;
+}
+
+@media (max-width: 431px) {
+  .title-part {
+    font-size: 12px;
+  }
+  .q-footer {
+    width: 178px;
+  }
 }
 
 .q-toolbar__title {

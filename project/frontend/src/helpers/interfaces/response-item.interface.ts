@@ -3,7 +3,7 @@ import { Article } from "./article.interface";
 export interface ResponseItem {
   UID: string;
   Articles: Article[];
-  Purchase_Date: string;
+  PurchaseDate: string;
   Corp: string;
   Total: string;
   Total_R_Extract: number;

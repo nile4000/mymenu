@@ -30,10 +30,7 @@
           >Top Kategorie</q-item-label
         >
 
-        <q-item-label
-          class="text-h6"
-          caption
-          style="min-height: 70px"
+        <q-item-label class="text-h6" caption style="min-height: 70px"
           ><template v-if="topCategory.name">
             <q-icon size="1.9em" name="star" color="amber" />
             {{ topCategory.name }}</template
@@ -61,7 +58,7 @@
           >
             <q-item-section>
               <q-item-label style="font-size: 12px"
-                >{{ item.Name.slice(0, 10) + ".." || "xxx"
+                >{{ item.Name.slice(0, 12) + ".." || "xxx"
                 }}<q-tooltip anchor="center left" class="text-h5"
                   >{{ item.Name }},
                   {{ formatDate(item.Purchase_Date) }}</q-tooltip
@@ -80,8 +77,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { TotalExpenses } from "../helpers/interfaces/totalExpenses.interface";
-import { formatMonth, formatDate } from "../helpers/dateHelpers";
+import { TotalExpenses } from "../../helpers/interfaces/totalExpenses.interface";
+import { formatMonth, formatDate } from "../../helpers/dateHelpers";
 
 export default defineComponent({
   name: "FoodControl",
@@ -136,10 +133,16 @@ export default defineComponent({
     flex-direction: column;
   }
 }
+@media (min-width: 700px) {
+  .custom-card {
+    width: 200px;
+  }
+}
 .custom-card {
   border-radius: 25px;
   max-width: 300px;
-  max-height: 300px;
+  height: auto;
+  max-height: 200px;
 }
 
 .q-card__section {

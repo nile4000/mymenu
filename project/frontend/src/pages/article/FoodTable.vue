@@ -107,31 +107,31 @@ import {
   reactive,
   computed,
 } from "vue";
-import { Article } from "../helpers/interfaces/article.interface";
+import { Article } from "../../helpers/interfaces/article.interface";
 import {
   readAllArticles,
   readReceiptsByIds,
-} from "../services/readAllArticles";
+} from "../../services/readAllArticles";
 import {
   subscribeToArticleChanges,
   unsubscribeFromArticleChanges,
-} from "../services/realtimeArticles";
+} from "../../services/realtimeArticles";
 import FoodTotal from "./FoodTotal.vue";
 import FoodControl from "./FoodControl.vue";
-import AiRequest from "../components/AiRequest.vue";
-import { Receipt } from "../helpers/interfaces/receipt.interface";
-import { articleColumns } from "../helpers/columns/articleColumns";
-import { useTotals } from "../helpers/composables/UseTotals";
+import AiRequest from "../../components/AiRequest.vue";
+import { Receipt } from "../../helpers/interfaces/receipt.interface";
+import { articleColumns } from "../../helpers/columns/articleColumns";
+import { useTotals } from "../../helpers/composables/UseTotals";
 import { useQuasar } from "quasar";
-import { categories } from "../components/prompts/categorization";
+import { categories } from "../../components/prompts/categorization";
 import {
   upsertArticleCategory,
   upsertArticleUnit,
-} from "../services/updateArticle";
-import { handleError } from "../helpers/composables/UseErrors";
+} from "../../services/updateArticle";
+import { handleError } from "../../helpers/composables/UseErrors";
 
 export default defineComponent({
-  name: "FoodPage",
+  name: "FoodTable",
   components: {
     AiRequest,
     FoodTotal,

@@ -16,12 +16,17 @@ const routes = [
       },
       {
         path: "receipt",
-        component: () => import("pages/ReceiptTable.vue"),
+        component: () => import("pages/receipt/ReceiptTable.vue"),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: "receipe",
+        component: () => import("pages/receipe/ReceipeTable.vue"),
         meta: { requiresAuth: false },
       },
       {
         path: "food",
-        component: () => import("src/pages/FoodTable.vue"),
+        component: () => import("pages/article/FoodTable.vue"),
         meta: { requiresAuth: false },
       },
     ],
