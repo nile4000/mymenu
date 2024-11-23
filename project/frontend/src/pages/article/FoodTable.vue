@@ -7,7 +7,7 @@
       :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
       @update:selectedReceipts="handleSelectedReceipts"
     />
-    <AiRequest :selectedItems="selected" />
+    <CategorizationRequest :selectedItems="selected" />
     <q-table
       flat
       bordered
@@ -118,7 +118,7 @@ import {
 } from "../../services/realtimeArticles";
 import FoodTotal from "./FoodTotal.vue";
 import FoodControl from "./FoodControl.vue";
-import AiRequest from "../../components/AiRequest.vue";
+import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../../helpers/columns/articleColumns";
 import { useTotals } from "../../helpers/composables/UseTotals";
@@ -133,7 +133,7 @@ import { handleError } from "../../helpers/composables/UseErrors";
 export default defineComponent({
   name: "FoodTable",
   components: {
-    AiRequest,
+    CategorizationRequest,
     FoodTotal,
     FoodControl,
   },

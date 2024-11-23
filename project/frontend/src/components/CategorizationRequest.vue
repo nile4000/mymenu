@@ -56,7 +56,7 @@ import {
 import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
-  name: "AiRequest",
+  name: "CategorizationRequest",
   props: {
     selectedItems: {
       type: Array as PropType<Article[]>,
