@@ -20,9 +20,16 @@ const routes = [
         meta: { requiresAuth: false },
       },
       {
-        path: "receipe",
-        component: () => import("pages/receipe/ReceipeTable.vue"),
+        path: "recipe",
+        component: () => import("pages/recipe/RecipeTable.vue"),
         meta: { requiresAuth: false },
+        children: [
+          {
+            path: ":id",
+            component: () => import("pages/recipe/RecipeDetail.vue"),
+            meta: { requiresAuth: false },
+          },
+        ],
       },
       {
         path: "food",

@@ -42,7 +42,7 @@ import {
 import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
-  name: "ReceiptRequest",
+  name: "RecipeRequest",
   props: {
     selectedItems: {
       type: Array as PropType<Article[]>,

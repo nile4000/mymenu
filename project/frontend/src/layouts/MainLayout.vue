@@ -15,7 +15,7 @@
             <q-route-tab
               round
               icon="home"
-              :to="'/receipe'"
+              :to="'/recipe'"
               class="custom-icon2"
             >
               <q-tooltip anchor="center left" class="text-h5"
@@ -35,7 +35,7 @@
             <q-route-tab
               round
               icon="home"
-              :to="'/receipe'"
+              :to="'/recipe'"
               class="custom-icon2"
             >
               <q-tooltip anchor="center left" class="text-h5"
