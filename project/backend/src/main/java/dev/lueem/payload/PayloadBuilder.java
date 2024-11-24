@@ -13,57 +13,49 @@ public class PayloadBuilder {
         @ConfigProperty(name = "OPENAI_MODEL", defaultValue = "gpt-3.5-turbo-0125")
         private String modelDefault = "gpt-3.5-turbo-0125";
 
-    private JsonObject getModel(String type) {
-        if ("receipt".equalsIgnoreCase(type)) {
-            return Json.createObjectBuilder()
-                    .add("Name", "Rezeptname")
-                    .add("ReceiptList", Json.createArrayBuilder()
-                            .add(Json.createObjectBuilder()
-                                    .add("Ingredients", "Artikel 1, Artikel 2")
-                                    .add("Instructions", "Anleitung")
-                                    .add("Servings", "Personen")
-                                    .add("PreparationTime", "Minuten")))
-                    .build();
-        } else { // Default to article model
-            return Json.createObjectBuilder()
-                    .add("Name", "QP Früchtequark Erdbeer 2x125g")
-                    .add("ArticleList", Json.createArrayBuilder()
-                            .add(Json.createObjectBuilder()
-                                    .add("Price", 1.2)
-                                    .add("Quantity", 1.0)
-                                    .add("Discount", 0.0)
-                                    .add("Total", 1.2)))
-                    .build();
+        @ConfigProperty(name = "OPENAI_TEMPERATURE", defaultValue = "0.0")
+        private double temperature;
+
+        private JsonObject getModel() {
+                return Json.createObjectBuilder()
+                                .add("Name", "QP Früchtequark Erdbeer 2x125g")
+                                .add("ArticleList", Json.createArrayBuilder()
+                                                .add(Json.createObjectBuilder()
+                                                                .add("Price", 1.2)
+                                                                .add("Quantity", 1.0)
+                                                                .add("Discount", 0.0)
+                                                                .add("Total", 1.2)))
+                                .build();
         }
-    }
 
-    public String constructPayload(String question, String type) {
-        JsonObject model = getModel(type);
-        String systemContent = "You are an assistant that provides information in JSON format. Please adhere strictly to the following structure: "
-                + model.toString();
-        return constructGPTMessages(question, systemContent);
-    }
+        public String constructPayload(String question) {
+                JsonObject model = getModel();
+                String systemContent = "You are an assistant that provides information in JSON format. Please adhere strictly to the following structure: "
+                                + model.toString();
+                return constructGPTMessages(question, systemContent);
+        }
 
-    private String constructGPTMessages(String userContent, String systemContent) {
-        JsonObject messageSystem = Json.createObjectBuilder()
-                .add("role", "system")
-                .add("content", systemContent)
-                .build();
+        private String constructGPTMessages(String userContent, String systemContent) {
+                JsonObject messageSystem = Json.createObjectBuilder()
+                                .add("role", "system")
+                                .add("content", systemContent)
+                                .build();
 
-        JsonObject messageUser = Json.createObjectBuilder()
-                .add("role", "user")
-                .add("content", userContent)
-                .build();
+                JsonObject messageUser = Json.createObjectBuilder()
+                                .add("role", "user")
+                                .add("content", userContent)
+                                .build();
 
-        JsonArrayBuilder messages = Json.createArrayBuilder()
-                .add(messageSystem)
-                .add(messageUser);
+                JsonArrayBuilder messages = Json.createArrayBuilder()
+                                .add(messageSystem)
+                                .add(messageUser);
 
-        JsonObject payload = Json.createObjectBuilder()
-                .add("model", modelDefault)
-                .add("messages", messages)
-                .build();
+                JsonObject payload = Json.createObjectBuilder()
+                                .add("model", modelDefault)
+                                .add("messages", messages)
+                                .add("temperature", temperature)
+                                .build();
 
-        return payload.toString();
-    }
+                return payload.toString();
+        }
 }

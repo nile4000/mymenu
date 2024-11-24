@@ -29,7 +29,7 @@ public class OpenAiClient {
     @Inject
     private PayloadBuilder payloadBuilder;
 
-    private JsonArray processResponse(String responseBody, String type) {
+    private JsonArray processResponse(String responseBody) {
         try (JsonReader jsonReader = Json.createReader(new StringReader(responseBody))) {
             JsonObject jsonResponse = jsonReader.readObject();
             JsonArray choices = jsonResponse.getJsonArray("choices");
@@ -47,7 +47,7 @@ public class OpenAiClient {
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
                 System.out.println(contentJson.toString());
-                return contentJson.getJsonArray(type.equals("receipt") ? "ReceiptList" : "ArticleList");
+                return contentJson.getJsonArray("ArticleList");
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing response", e);
@@ -55,9 +55,9 @@ public class OpenAiClient {
         }
     }
 
-    public JsonArray askQuestion(String question, String type) {
+    public JsonArray askQuestion(String question) {
         try {
-            String payload = payloadBuilder.constructPayload(question, type);
+            String payload = payloadBuilder.constructPayload(question);
             LOGGER.info("Payload sent to OpenAI: " + payload);
 
             if (openaiKey == null || openaiKey.trim().isEmpty()) {
@@ -74,7 +74,7 @@ public class OpenAiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             LOGGER.info("Response from OpenAI: " + response.body());
 
-            return processResponse(response.body(), type);
+            return processResponse(response.body());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error in askQuestion", e);
             return Json.createArrayBuilder().build(); // Return an empty JsonArray on error

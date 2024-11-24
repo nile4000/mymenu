@@ -149,7 +149,7 @@ public class ExtractionService {
     private JsonArray getAnswerOpenAI(String extractedText) {
         String fullQuestion = QUESTION_PREFIX + extractedText;
         try {
-            JsonArray response = openAiClient.askQuestion(fullQuestion, "article");
+            JsonArray response = openAiClient.askQuestion(fullQuestion);
             if (response == null || response.isEmpty()) {
                 LOGGER.severe("OpenAI response is null or empty.");
                 return Json.createArrayBuilder().build();
