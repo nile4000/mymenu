@@ -169,6 +169,8 @@ export default defineComponent({
     const message = ref("");
     const messageType = ref("positive");
 
+    let channel: any;
+
     const initialPagination = ref({
       sortBy: "desc",
       descending: false,
@@ -252,8 +254,6 @@ export default defineComponent({
           });
       }
     };
-
-    let channel: any;
 
     onMounted(async () => {
       try {

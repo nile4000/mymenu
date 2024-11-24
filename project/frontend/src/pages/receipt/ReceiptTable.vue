@@ -27,11 +27,9 @@
         </div>
       </template>
       <template v-slot:item="props">
-        <q-card round bordered flat>
-          <q-card-section class="row items-center justify-between">
-            <div class="flex-grow-1 q-mr-md text-weight-bold">
-              Einkauf vom {{ formatDate(props.row.Purchase_Date) }}
-            </div>
+        <q-card class="receipt-card">
+          <!-- Logos -->
+          <div class="q-pa-md row justify-center">
             <q-img
               v-if="props.row.Corp === 'Coop'"
               src="../../assets/coop.png"
@@ -44,16 +42,58 @@
               alt="Migros"
               style="max-width: 55px"
             />
+          </div>
+          <!-- PDF Icon -->
+          <q-card-section class="q-pa-sm">
+            <div class="q-gutter-md q-pa-xs column">
+              <div class="row items-center justify-between">
+                <span class="text-subtitle2">
+                  Eingekauft: {{ formatDateShort(props.row.Purchase_Date) }}
+                </span>
+                <!-- <q-icon
+                  name="attach_money"
+                  color="secondary"
+                  size="sm"
+                /> -->
+              </div>
+              <div class="row items-center justify-between">
+                <span class="text-subtitle2">
+                  Gescannt: {{ formatDateShort(props.row.Created_At) }}
+                </span>
+                <q-icon
+                  name="picture_as_pdf"
+                  color="primary"
+                  size="sm"
+                />
+              </div>
+            </div>
           </q-card-section>
-          <q-card-section class="row items-center justify-between">
+          <!-- PDF Thumbnail -->
+          <q-card-section>
+            <q-img
+              :src="props.row.Thumbnail"
+              alt="PDF Vorschau"
+              style="max-width: 100%; max-height: 150px"
+              v-if="props.row.Thumbnail"
+            />
+          </q-card-section>
+          <!-- Actions -->
+          <q-card-section class="row items-center justify-center">
             <q-btn
               flat
               round
-              icon="delete"
-              color="negative"
-              @click="deleteReceipt(props.row)"
-              side
-            />
+              disabled
+              icon="visibility"
+              @click="viewReceipt(props.row)"
+              ><q-tooltip anchor="center left" class="text-h5"
+                >PDF anzeigen</q-tooltip
+              ></q-btn
+            >
+            <q-btn flat round icon="delete" @click="deleteReceipt(props.row)">
+              <q-tooltip anchor="center left" class="text-h5"
+                >Löschen</q-tooltip
+              >
+            </q-btn>
           </q-card-section>
         </q-card>
       </template>
@@ -67,10 +107,11 @@ import { Column } from "../../helpers/interfaces/column.interface";
 import { defineComponent, ref, onMounted } from "vue";
 import { readAllReceipts } from "../../services/readAllReceipts";
 import { deleteReceiptById } from "../../services/deleteReceipt";
-import { formatDate } from "../../helpers/dateHelpers";
+import { formatDateShort, formatDate } from "../../helpers/dateHelpers";
 import { useQuasar } from "quasar";
 import ScannerPage from "../Scanner.vue";
 import { handleError } from "../../helpers/composables/UseErrors";
+import { subscribeToReceiptChanges } from "../../services/realtimeReceipts";
 
 // Defining the columns
 const columns: Column[] = [
@@ -80,7 +121,7 @@ const columns: Column[] = [
     label: "Receipt Key",
     align: "left",
     field: "Purchase_Date",
-    format: (val: string) => `${formatDate(val)}`,
+    format: (val: string) => `${formatDateShort(val)}`,
     sortable: true,
   },
 ];
@@ -98,6 +139,8 @@ export default defineComponent({
     const selected = ref<string[]>([]);
     const allRows: Receipt[] = [];
 
+    let channel: any;
+
     const initialPagination = ref({
       sortBy: "desc",
       descending: false,
@@ -105,17 +148,53 @@ export default defineComponent({
       rowsPerPage: 500,
     });
 
+    const handleReceiptChange = (payload: any) => {
+      const newReceipt = payload.new as Receipt;
+      const eventType = payload.eventType;
+
+      switch (eventType) {
+        case "INSERT":
+          rows.value.push(newReceipt);
+          break;
+        case "DELETE":
+          // eslint-disable-next-line no-case-declarations
+          const indexToDelete = rows.value.findIndex(
+            (receipt: Receipt) => receipt.Id === newReceipt.Id
+          );
+          if (indexToDelete !== -1) {
+            rows.value.splice(indexToDelete, 1);
+          }
+          break;
+        default:
+          $q.notify({
+            type: "warning",
+            message: `Unknown event type: ${eventType}`,
+          });
+      }
+    };
+
     onMounted(async () => {
       try {
         const data = await readAllReceipts();
         if (data) {
           allRows.splice(0, allRows.length, ...data);
+          // Füge Thumbnails für PDFs hinzu (falls API-Response diese liefert)
+          // allRows.forEach((row) => {
+          //   row.Id = row.Id
+          //     ? `${row.Id}_thumbnail.jpg` // Beispiel: Thumbnail-URL generieren
+          //     : undefined;
+          // });
         }
       } catch (error) {
         handleError("Belege laden", error, $q);
       }
       rows.value = allRows;
+      channel = subscribeToReceiptChanges(handleReceiptChange);
     });
+
+    const viewReceipt = (receipt: any) => {
+      window.open(receipt.Id, "_blank");
+    };
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
@@ -141,6 +220,7 @@ export default defineComponent({
       columns,
       rows,
       formatDate,
+      formatDateShort,
       deleteReceipt,
       initialPagination,
     };
@@ -152,12 +232,102 @@ export default defineComponent({
 .table-custom {
   border-radius: 15px;
   border: 1px solid $primary;
-
   margin: 20px;
   margin-top: 10px;
 }
-.custom-separator {
-  margin-left: 10px;
+
+.receipt-card {
+  position: relative;
+  width: 220px;
+  margin: 10px;
+  transition: background-color 0.3s ease;
+  background-color: $bar-background;
+  border: none;
+  overflow: hidden;
+
+  .q-img {
+    margin-top: 25px;
+  }
+
+  --clip-path: polygon(
+    0% 5%,
+    5% 0%,
+    10% 5%,
+    15% 0%,
+    20% 5%,
+    25% 0%,
+    30% 5%,
+    35% 0%,
+    40% 5%,
+    45% 0%,
+    50% 5%,
+    55% 0%,
+    60% 5%,
+    65% 0%,
+    70% 5%,
+    75% 0%,
+    80% 5%,
+    85% 0%,
+    90% 5%,
+    95% 0%,
+    100% 5%,
+    100% 95%,
+    95% 100%,
+    90% 95%,
+    85% 100%,
+    80% 95%,
+    75% 100%,
+    70% 95%,
+    65% 100%,
+    60% 95%,
+    55% 100%,
+    50% 95%,
+    45% 100%,
+    40% 95%,
+    35% 100%,
+    30% 95%,
+    25% 100%,
+    20% 95%,
+    15% 100%,
+    10% 95%,
+    5% 100%,
+    0% 95%
+  );
+
+  clip-path: var(--clip-path);
+
+  &:hover {
+    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.5);
+    .custom-separator {
+      background-color: $dark;
+    }
+    .q-item:last-child {
+      .q-item__label {
+        color: black;
+      }
+    }
+  }
+}
+
+.q-btn {
+  :deep(.q-icon) {
+    text-decoration: underline;
+    text-decoration-color: $dark;
+    transition: text-decoration-color 0.5s ease;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+    &:hover {
+      background-color: none;
+      text-decoration: underline;
+      text-decoration-color: $negative;
+    }
+  }
+  :deep(.q-focus-helper) {
+    display: none;
+  }
+}
+
+.receipt-card .q-icon {
   margin-right: 10px;
 }
 
@@ -167,29 +337,6 @@ export default defineComponent({
 
 h5 {
   margin-block-end: 0px;
-}
-
-.q-card {
-  max-width: 280px;
-  margin-left: 10px;
-  margin-right: 10px;
-  transition: background-color 0.3s ease;
-  border-radius: 15px;
-  background-color: $bar-background;
-
-  &:hover {
-    cursor: pointer;
-    border-color: $positive;
-    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.5);
-    .custom-separator {
-      background-color: $positive;
-    }
-    .q-item:last-child {
-      .q-item__label {
-        color: black;
-      }
-    }
-  }
 }
 
 .q-item {

@@ -4,10 +4,7 @@
       <RecipeRequest />
       <h5 style="margin-block-end: 30px; margin-block-start: 25px">Rezepte</h5>
     </div>
-    <div
-      class="q-gutter-md row justify-center"
-      style="padding-left: 6px; padding-bottom: 8px"
-    >
+    <div class="row justify-center" style="padding-left: 6px">
       <q-card
         flat
         bordered
@@ -62,14 +59,7 @@
         </q-dialog>
       </template>
     </div>
-    <h5 style="margin-block-end: 0px">Einstellungen</h5>
-    <div class="q-pa-md">
-      <q-badge color="secondary">
-        Anzahl Personen: {{ standard }} (0-10)
-      </q-badge>
 
-      <q-slider v-model="standard" :min="1" :max="10" color="secondary" />
-    </div>
   </div>
 </template>
 
@@ -145,13 +135,11 @@ export default defineComponent({
 
     const selectedRecipe = ref(null);
 
-    // Öffnet das Overlay mit den Rezeptdetails
     const goToRecipe = (recipe: any) => {
       selectedRecipe.value = recipe;
       showDialog.value = true;
     };
 
-    // Schließt das Overlay
     const closeOverlay = () => {
       showDialog.value = false;
       selectedRecipe.value = null;
@@ -186,7 +174,6 @@ export default defineComponent({
 
 .text-h6 {
   font-weight: bold;
-
   font-family: $font-playfair;
 }
 

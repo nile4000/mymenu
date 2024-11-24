@@ -15,6 +15,23 @@ export function formatDate(dateString: string) {
   }).format(date);
 }
 
+export function formatDateShort(dateString: string) {
+  if (!dateString) return dateString || "";
+
+  const date = new Date(dateString.trim());
+
+  if (isNaN(date.getTime())) {
+    return dateString || "";
+  }
+
+  // Format the valid date
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  }).format(date);
+}
+
 export function formatMonth(monthNumber: number): string {
   const monthNames = [
     "Januar",

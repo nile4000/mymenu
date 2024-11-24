@@ -6,6 +6,7 @@ export interface Receipt {
   Total_Receipt: number;
   Total_Calculated?: number;
   Purchase_Date: string;
+  Created_At?: string;
   Articles?: Article[];
   Corp: string;
   Total_R_Open_Ai?: number;
