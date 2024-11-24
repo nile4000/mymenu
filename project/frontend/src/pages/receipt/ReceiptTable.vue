@@ -29,7 +29,7 @@
         <q-card round bordered flat>
           <q-card-section class="row items-center justify-between">
             <div class="flex-grow-1 q-mr-md text-weight-bold">
-              Einkauf vom {{ formatDate(props.row.PurchaseDate) }}
+              Einkauf vom {{ formatDate(props.row.Purchase_Date) }}
             </div>
             <q-img
               v-if="props.row.Corp === 'Coop'"
@@ -74,11 +74,11 @@ import { handleError } from "../../helpers/composables/UseErrors";
 // Defining the columns
 const columns: Column[] = [
   {
-    name: "PurchaseDate",
+    name: "Purchase_Date",
     required: true,
     label: "Receipt Key",
     align: "left",
-    field: "PurchaseDate",
+    field: "Purchase_Date",
     format: (val: string) => `${formatDate(val)}`,
     sortable: true,
   },
@@ -118,7 +118,7 @@ export default defineComponent({
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
-        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.PurchaseDate} löschen wollen?`
+        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.Purchase_Date} löschen wollen?`
       );
       if (confirmed && receipt.Id) {
         try {

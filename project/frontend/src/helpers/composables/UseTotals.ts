@@ -9,7 +9,7 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
   const totalsPerReceipt = computed(() => {
     return Object.values(receipts).map((receipt) => ({
       id: receipt.Id || "",
-      date: receipt.PurchaseDate,
+      date: receipt.Purchase_Date,
       total: parseFloat(receipt.Total_Receipt.toString()),
     }));
   });
@@ -32,7 +32,7 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
 
     // Sort receipts by Purchase_Date
     const sortedReceipts = receiptValues
-      .map((receipt) => new Date(receipt.PurchaseDate))
+      .map((receipt) => new Date(receipt.Purchase_Date))
       .sort((a, b) => a.getTime() - b.getTime());
 
     const firstDate = sortedReceipts[0];
@@ -68,7 +68,7 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
           const receipt = receipts[receiptId];
           acc[receiptId] = {
             total: 0,
-            date: receipt ? receipt.PurchaseDate : "Unbekannt",
+            date: receipt ? receipt.Purchase_Date : "Unbekannt",
           };
         }
         acc[receiptId].total += article.Total;

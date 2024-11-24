@@ -5,7 +5,7 @@ export interface Receipt {
   Uuid?: string;
   Total_Receipt: number;
   Total_Calculated?: number;
-  PurchaseDate: string;
+  Purchase_Date: string;
   Articles?: Article[];
   Corp: string;
   Total_R_Open_Ai?: number;

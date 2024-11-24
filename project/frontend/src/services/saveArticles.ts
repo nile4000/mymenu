@@ -8,7 +8,7 @@ export async function saveArticlesAndReceipt(
   receiptData: Receipt
 ): Promise<any> {
   try {
-    const formattedDate = convertToISODate(receiptData.PurchaseDate);
+    const formattedDate = convertToISODate(receiptData.Purchase_Date);
     // save receipt
     const { data: receiptInsertData, error: receiptInsertError } =
       await supabase

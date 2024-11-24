@@ -53,7 +53,7 @@ public class ExtractionService {
                         .build();
             }
 
-            // Extract text
+            // Extract text from pdf
             String documentContent = FileUtils.getTextFromFile(pdfFile);
             if (documentContent == null) {
                 LOGGER.warning("Failed to extract text from the file.");
@@ -74,7 +74,7 @@ public class ExtractionService {
 
             // OpenAI request
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
-            if (articlesJson == null) {
+            if (articlesJson == null || articlesJson.isEmpty()) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Failed to retrieve articles from OpenAI.")
                         .build();
