@@ -22,13 +22,7 @@
           <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
             <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
           </q-route-tab>
-          <q-route-tab
-            round
-            icon="home"
-            :to="'/recipe'"
-            class="custom-icon3"
-            color="secondary"
-          >
+          <q-route-tab round icon="home" :to="'/recipe'" class="custom-icon3">
             <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
           </q-route-tab>
 
@@ -163,8 +157,7 @@ a {
   text-underline-offset: 4px;
   text-decoration-thickness: 1.5px;
 }
-.title-header .menu-title:hover,
-a:hover {
+.title-header .menu-title:hover {
   text-decoration: underline;
   text-decoration-color: $secondary;
 }
@@ -177,24 +170,24 @@ a:hover {
 
 .custom-icon {
   :deep(.q-tab__content) {
-    .q-icon {
-      color: $amber !important;
+    .q-icon:active {
+      color: $amber;
     }
   }
 }
 
 .custom-icon2 {
   :deep(.q-tab__content) {
-    .q-icon {
-      color: $negative !important;
+    .q-icon:active {
+      color: $negative;
     }
   }
 }
 
 .custom-icon3 {
   :deep(.q-tab__content) {
-    .q-icon {
-      color: $secondary !important;
+    .q-icon:active {
+      color: $secondary;
     }
   }
 }
