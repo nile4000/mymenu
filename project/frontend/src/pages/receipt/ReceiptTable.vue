@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="column items-center">
+    <h5>Scanner</h5>
     <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
     </div>
@@ -162,6 +163,10 @@ export default defineComponent({
 
 .custom-list {
   margin-bottom: 5px;
+}
+
+h5 {
+  margin-block-end: 0px;
 }
 
 .q-card {

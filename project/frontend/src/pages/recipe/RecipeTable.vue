@@ -1,8 +1,11 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md row justify-evenly">
     <RecipeRequest />
-    <h4>Deine Rezepte</h4>
-    <div class="row q-gutter-md">
+    <h5 style="margin-block-end: 30px; margin-block-start: 30px">Deine Rezepte</h5>
+    <div
+      class="row q-gutter-md justify-center"
+      style="padding-left: 6px; padding-bottom: 8px"
+    >
       <q-card
         flat
         bordered
@@ -11,37 +14,43 @@
         class="q-ma-sm cards"
         :class="recipe.color"
       >
-        <q-card-section style="padding-bottom: 0px">
-          <div class="text-h6">{{ recipe.title }}</div>
-          <div class="text-subtitle2">{{ recipe.description }}</div>
-          <div><q-icon name="timer" /> {{ recipe.cookingTime }}</div>
-          <div><q-icon name="category" /> {{ recipe.category }}</div>
-          <div><q-icon name="groups" /> {{ recipe.servings }}</div>
+        <q-card-section  class="row justify-center">
+          <div class="text-h6" style="padding-bottom: 8px;">{{ recipe.title }}</div>
+          <div
+            class="text-subtitle2"
+            style="
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            "
+          >
+            {{ recipe.description }}
+          </div>
+          <div>
+            <q-icon name="schedule" /> {{ recipe.cookingTime }} |
+            <q-icon name="category" /> {{ recipe.category }} |
+            <q-icon name="groups" /> {{ recipe.servings }}
+          </div>
         </q-card-section>
         <q-card-actions align="center" class="q-px-md">
-          <q-btn
-            flat
-            round
-            color="red"
-            icon="favorite"
-            class="btn-background"
-          ></q-btn>
+          <q-btn flat round icon="hub" class="btn-background"></q-btn>
           <q-btn
             flat
             round
             color="primary"
             icon="north_east"
             class="btn-background"
-            @click="goToRecipe(recipe.id)"
+            @click="goToRecipe(recipe)"
           ></q-btn>
         </q-card-actions>
       </q-card>
     </div>
-    <RecipeDetail
-      v-if="selectedRecipe"
-      :recipe="selectedRecipe"
-      @close="selectedRecipe = null"
-    ></RecipeDetail>
+    <template v-if="selectedRecipe">
+      <RecipeDetail
+        :recipe="selectedRecipe"
+        @close="selectedRecipe = null"
+      ></RecipeDetail>
+    </template>
   </div>
 </template>
 
@@ -50,7 +59,6 @@ import { defineComponent, ref } from "vue";
 import { useQuasar } from "quasar";
 import RecipeRequest from "../../components/RecipeRequest.vue";
 import RecipeDetail from "./RecipeDetail.vue";
-import { Receipt } from "../../helpers/interfaces/receipt.interface";
 
 export default defineComponent({
   name: "RecipeTable",
@@ -68,7 +76,7 @@ export default defineComponent({
         id: 4,
         title: "Vegetarische Lasagne",
         description: "Eine köstliche Lasagne mit viel Gemüse und Käse.",
-        cookingTime: "1 Stunde 15 Minuten",
+        cookingTime: "75 Min",
         category: "Vegetarisch",
         servings: 6,
         color: "card-background1",
@@ -84,7 +92,7 @@ export default defineComponent({
         id: 5,
         title: "Kürbiscremesuppe",
         description: "Eine cremige Suppe aus Hokkaido-Kürbis und Kokosmilch.",
-        cookingTime: "40 Minuten",
+        cookingTime: "40 Min",
         category: "Vegan",
         servings: 4,
         color: "card-background2",
@@ -101,7 +109,7 @@ export default defineComponent({
         title: "Quinoa-Salat mit Avocado",
         description:
           "Ein leichter Salat mit Quinoa, Avocado und frischem Gemüse.",
-        cookingTime: "25 Minuten",
+        cookingTime: "25 Min",
         category: "Gesund",
         servings: 2,
         color: "card-background3",
@@ -120,6 +128,7 @@ export default defineComponent({
     const goToRecipe = (recipe: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       selectedRecipe.value = recipe;
+      console.log(selectedRecipe.value);
     };
 
     return {
@@ -138,11 +147,18 @@ export default defineComponent({
 .cards {
   border-radius: 25px;
   height: auto;
-  max-height: 200px;
+  max-width: 320px;
 }
 
 .btn-background {
+  color: $primary;
   background-color: white !important;
+}
+
+.text-h6 {
+  font-weight: bold;
+
+  font-family: $font-playfair;
 }
 
 .btn {

@@ -2,58 +2,54 @@
   <div class="q-pa-md recipe-detail-page">
     <!-- Zurück-Button -->
     <div class="back-button">
-      <q-btn flat round icon="arrow_back" color="primary" @click="$emit('close')" />
-    </div>
-
-    <!-- Bild des Rezepts -->
-    <div class="recipe-image-container">
-      <img
-        :src="recipe.image || 'https://via.placeholder.com/300'"
-        :alt="recipe.title || 'Recipe'"
-        class="recipe-image"
+      <q-btn
+        flat
+        round
+        icon="close"
+        color="primary"
+        @click="$emit('close')"
       />
     </div>
 
     <!-- Rezept-Titel -->
     <div class="recipe-title-container">
       <h3 class="recipe-title">{{ recipe.title }}</h3>
-      <div class="author-container">
-        <q-avatar rounded size="50px" class="author-avatar">
-          <img src="https://via.placeholder.com/50" alt="Author" />
-        </q-avatar>
-        <div class="author-info">
-          <span class="author-name">Syed Raju</span>
-          <span class="author-recipes">(10 recipes)</span>
-        </div>
-        <q-btn flat round icon="favorite" color="red" class="favorite-button" />
-      </div>
+
+      <p class="recipe-description">{{ recipe.description }}</p>
     </div>
 
     <!-- Rezept-Details -->
     <div class="recipe-details">
       <div class="detail-item">
-        <q-icon name="timer" class="detail-icon" />
+        <q-icon name="schedule" class="detail-icon" />
         <span>{{ recipe.cookingTime }}</span>
       </div>
       <div class="detail-item">
-        <q-icon name="list_alt" class="detail-icon" />
+        <q-icon name="room_service" class="detail-icon" />
         <span>{{ recipe.stepsList.length }} Steps</span>
       </div>
       <div class="detail-item">
-        <q-icon name="chef_hat" class="detail-icon" />
+        <q-icon name="menu_book" class="detail-icon" />
         <span>{{ recipe.category }}</span>
       </div>
     </div>
 
     <!-- Inhaltsabschnitt -->
     <div class="ingredients-section">
-      <q-tabs v-model="activeTab" class="ingredients-tabs">
-        <q-tab name="ingredients" label="Ingredients" />
-        <q-tab name="steps" label="Steps" />
+      <q-tabs
+        active-color="dark"
+        indicator-color="transparent"
+        rounded
+        dense
+        v-model="activeTab"
+        class="ingredients-tabs"
+      >
+        <q-tab flat round name="ingredients" label="Zutaten" />
+        <q-tab flat round name="steps" label="So geht's" />
       </q-tabs>
 
-      <q-tab-panels v-model="activeTab">
-        <q-tab-panel name="ingredients">
+      <q-tab-panels rounded dense v-model="activeTab" animated>
+        <q-tab-panel  name="ingredients">
           <div class="ingredient-list">
             <div
               class="ingredient-item"
@@ -84,7 +80,7 @@ export default defineComponent({
   props: {
     recipe: {
       type: Object,
-      required: true,
+      required: false,
     },
   },
   setup() {
@@ -97,101 +93,106 @@ export default defineComponent({
 });
 </script>
 
-
-<style scoped>
+<style scoped lang="scss">
 .recipe-detail-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #f5f5f5;
-  padding: 16px;
+  background-color: $bar-background;
+  border: 1px solid $dark;
+  max-width: 320px;
   border-radius: 16px;
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+.q-tab {
+  text-decoration: none;
+  border-radius: 25px;
+  margin: 2px;
 }
 
 .back-button {
-  align-self: flex-start;
-  margin-bottom: 16px;
-}
-
-.recipe-image-container {
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-.recipe-image {
-  width: 100%;
-  border-radius: 50%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0px;
+  margin-top: 8px;
+  align-self: flex-end;
 }
 
 .recipe-title-container {
   text-align: center;
-  margin: 16px 0;
+  max-width: 320px;
+  margin: 0px;
 }
 
 .recipe-title {
-  font-size: 24px;
   font-weight: bold;
-  margin: 8px 0;
-}
-
-.author-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 8px 0;
-}
-
-.author-avatar {
-  margin-right: 8px;
-}
-
-.author-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-right: auto;
-}
-
-.favorite-button {
-  margin-left: 16px;
+  font-style: italic;
+  font-family: $font-playfair;
+  font-size: 20px;
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+  line-height: 1.2;
 }
 
 .recipe-details {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   width: 100%;
-  max-width: 300px;
-  margin: 16px 0;
+  max-width: 320px;
+  height: 60px;
+  border-radius: 15px;
+  background-color: white;
 }
 
 .detail-item {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .ingredients-section {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 }
 
 .ingredients-tabs {
-  margin-bottom: 16px;
+  background-color: white;
+  border-radius: 25px;
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
+
+.q-tab {
+  text-transform: none;
+}
+
+::v-deep .q-tab--active {
+  margin: 2px;
+  background-color: $bar-background;
+  border-radius: 25px;
+}
+
+.q-tab-panel {
+  padding-bottom: 0px;
+}
+
+.q-tab-panels {
+  border-radius: 15px;
 }
 
 .ingredient-list,
 .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .ingredient-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ingredient-icon {

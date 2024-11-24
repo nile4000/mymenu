@@ -11,45 +11,22 @@
         </q-item>
         <q-space />
         <q-tabs>
-          <template v-if="!isReceipt">
-            <q-route-tab
-              round
-              icon="home"
-              :to="'/recipe'"
-              class="custom-icon2"
-            >
-              <q-tooltip anchor="center left" class="text-h5"
-                >Rezepte</q-tooltip
-              >
-            </q-route-tab>
-            <q-route-tab
-              round
-              icon="receipt_long"
-              :to="'/receipt'"
-              class="custom-icon"
-            >
-              <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
-            </q-route-tab>
-          </template>
-          <template v-else>
-            <q-route-tab
-              round
-              icon="home"
-              :to="'/recipe'"
-              class="custom-icon2"
-            >
-              <q-tooltip anchor="center left" class="text-h5"
-                >Rezepte</q-tooltip
-              >
-            </q-route-tab>
-            <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
-              <q-tooltip anchor="center left" class="text-h5"
-                >Artikel</q-tooltip
-              >
-            </q-route-tab>
-          </template>
+          <q-route-tab round icon="home" :to="'/recipe'" class="custom-icon3">
+            <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
+          </q-route-tab>
+          <q-route-tab
+            round
+            icon="receipt_long"
+            :to="'/receipt'"
+            class="custom-icon"
+          >
+            <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
+          </q-route-tab>
+          <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
+            <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
+          </q-route-tab>
 
-          <q-tab icon="account_circle" round class="custom-icon3">
+          <q-tab round icon="account_circle" class="custom-icon3">
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
           </q-tab>
         </q-tabs>
@@ -175,6 +152,7 @@ export default defineComponent({
 .title-header .menu-title,
 a {
   text-decoration: underline;
+  text-decoration-color: $dark;
   transition: text-decoration-color 0.5s ease;
   text-underline-offset: 4px;
   text-decoration-thickness: 1.5px;

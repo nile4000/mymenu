@@ -7,8 +7,8 @@
       @click="sendCategorizationRequest"
       v-ripple
     >
-      <q-icon size="1.9em" name="flatware" color="secondary" />
-      <div class="text-h6">Rezepte erstellen</div>
+      <q-icon size="1.9em" name="hub" color="secondary" />
+      <div class="text-h6">+ Rezept</div>
     </q-btn>
   </q-btn-group>
 </template>
@@ -188,6 +188,10 @@ export default defineComponent({
   .q-icon {
     margin-right: 10px;
   }
+}
+
+.text-h6 {
+  text-transform: none;
 }
 
 .q-btn-group {
