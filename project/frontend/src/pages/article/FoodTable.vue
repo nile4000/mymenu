@@ -1,100 +1,122 @@
 <template>
-  <div class="q-pa-md row q-gutter-md justify-evenly" style="margin-top: 20px">
-    <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
-    <FoodTotal
-      :totalsPerCategory="totalsPerCategory"
-      :totalsPerReceipt="totalsPerReceipt"
-      :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
-      @update:selectedReceipts="handleSelectedReceipts"
-    />
-    <CategorizationRequest :selectedItems="selected" />
-    <q-table
-      flat
-      bordered
-      :rows="filteredRows"
-      :columns="columns"
-      row-key="Id"
-      :pagination="initialPagination"
-      v-model:selected="selected"
-      selection="multiple"
-      class="table-custom"
-      no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+  <div>
+    <div class="column items-center">
+      <h5>Artikel</h5>
+    </div>
+    <div
+      class="row q-gutter-md q-pa-md justify-evenly"
     >
-      <template v-slot:top>
-        <div style="width: 100%" class="row">
-          <div
-            class="row items-center justify-center q-gutter-sm"
-            style="margin-bottom: 10px"
-          >
-            <q-icon size="1.4em" name="restaurant" color="negative" />
-            <span class="text-h6" style="font-weight: bold"
-              >Artikel ({{ selected.length }} / {{ filteredRows.length }})</span
+      <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
+      <FoodTotal
+        :totalsPerCategory="totalsPerCategory"
+        :totalsPerReceipt="totalsPerReceipt"
+        :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
+        @update:selectedReceipts="handleSelectedReceipts"
+      />
+      <CategorizationRequest :selectedItems="selected" />
+      <q-table
+        flat
+        bordered
+        :rows="filteredRows"
+        :columns="columns"
+        row-key="Id"
+        :pagination="initialPagination"
+        v-model:selected="selected"
+        selection="multiple"
+        class="table-custom"
+        no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+      >
+        <template v-slot:top>
+          <div style="width: 100%" class="row">
+            <div
+              class="row items-center justify-center q-gutter-sm"
+              style="margin-bottom: 10px"
             >
+              <q-icon size="1.4em" name="restaurant" color="negative" />
+              <span class="text-h6" style="font-weight: bold"
+                >Artikel ({{ selected.length }} /
+                {{ filteredRows.length }})</span
+              >
+            </div>
+            <div class="col-12">
+              <q-input
+                rounded
+                dense
+                debounce="400"
+                v-model="search"
+                outlined
+                label="Kaufdatum, Name oder Kategorie"
+              >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
           </div>
-          <div class="col-12">
-            <q-input
-              rounded
-              dense
-              debounce="400"
-              v-model="search"
-              outlined
-              label="Kaufdatum, Name oder Kategorie"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-        </div>
-      </template>
-      <!-- Toggles styled -->
-      <template v-slot:header-selection="scope">
-        <q-toggle v-model="scope.selected" />
-      </template>
-      <template v-slot:body-selection="scope">
-        <q-toggle v-model="scope.selected" />
-      </template>
+        </template>
+        <!-- Toggles styled -->
+        <template v-slot:header-selection="scope">
+          <q-toggle v-model="scope.selected" />
+        </template>
+        <template v-slot:body-selection="scope">
+          <q-toggle v-model="scope.selected" />
+        </template>
 
-      <!-- editable columns -->
-      <template v-slot:body-cell-Category="props">
-        <q-td :props="props" style="text-decoration: underline; cursor: pointer; text-underline-offset: 4px;">
-          {{ props.row.Category }}
-          <q-popup-edit v-model="props.row.Category" v-slot="scope">
-            <q-select
-              v-model="scope.value"
-              :options="categories"
-              dense
-              autofocus
-              @keyup.enter="
-                () => {
-                  scope.set();
-                  updateCategory(props.row);
-                }
-              "
-            />
-          </q-popup-edit>
-        </q-td>
-      </template>
-      <template v-slot:body-cell-Unit="props">
-        <q-td :props="props" style="text-decoration: underline; cursor: pointer;  text-underline-offset: 4px;">
-          {{ props.row.Unit }}
-          <q-popup-edit v-model="props.row.Unit" v-slot="scope">
-            <q-input
-              v-model="scope.value"
-              dense
-              autofocus
-              @keyup.enter="
-                () => {
-                  scope.set();
-                  updateUnit(props.row);
-                }
-              "
-              placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
-            />
-          </q-popup-edit>
-        </q-td>
-      </template>
-    </q-table>
+        <!-- editable columns -->
+        <template v-slot:body-cell-Category="props">
+          <q-td
+            :props="props"
+            style="
+              text-decoration: underline;
+              cursor: pointer;
+              text-underline-offset: 4px;
+            "
+          >
+            {{ props.row.Category }}
+            <q-popup-edit v-model="props.row.Category" v-slot="scope">
+              <q-select
+                v-model="scope.value"
+                :options="categories"
+                dense
+                autofocus
+                @keyup.enter="
+                  () => {
+                    scope.set();
+                    updateCategory(props.row);
+                  }
+                "
+              />
+            </q-popup-edit>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-Unit="props">
+          <q-td
+            :props="props"
+            style="
+              text-decoration: underline;
+              cursor: pointer;
+              text-underline-offset: 4px;
+            "
+          >
+            {{ props.row.Unit }}
+            <q-popup-edit v-model="props.row.Unit" v-slot="scope">
+              <q-input
+                v-model="scope.value"
+                dense
+                autofocus
+                @keyup.enter="
+                  () => {
+                    scope.set();
+                    updateUnit(props.row);
+                  }
+                "
+                placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
+              />
+            </q-popup-edit>
+          </q-td>
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
@@ -335,6 +357,10 @@ export default defineComponent({
   font-size: 14px;
   color: $dark;
   font-weight: bold;
+}
+
+h5 {
+  margin-block-end: 0px;
 }
 
 .q-input {

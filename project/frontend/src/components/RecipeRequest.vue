@@ -8,7 +8,7 @@
       v-ripple
     >
       <q-icon size="1.9em" name="hub" color="secondary" />
-      <div class="text-h6">+ Rezept</div>
+      <div class="text-h6">Rezept</div>
     </q-btn>
   </q-btn-group>
 </template>

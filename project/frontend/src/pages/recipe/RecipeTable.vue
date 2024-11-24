@@ -37,10 +37,8 @@
           </div>
         </q-card-section>
         <q-card-actions align="center" class="q-px-md">
-          <q-btn flat round icon="hub" class="btn-background">
-            <q-tooltip anchor="center left" class="text-h6"
-              >Neu erstellen</q-tooltip
-            >
+          <q-btn disabled flat round icon="hub" class="btn-background">
+            <q-tooltip anchor="center left" class="text-h6">Ändern</q-tooltip>
           </q-btn>
           <q-btn
             flat
@@ -63,6 +61,14 @@
           />
         </q-dialog>
       </template>
+    </div>
+    <h5 style="margin-block-end: 0px">Einstellungen</h5>
+    <div class="q-pa-md">
+      <q-badge color="secondary">
+        Anzahl Personen: {{ standard }} (0-10)
+      </q-badge>
+
+      <q-slider v-model="standard" :min="1" :max="10" color="secondary" />
     </div>
   </div>
 </template>
@@ -160,6 +166,7 @@ export default defineComponent({
       selectedRecipe,
       showDialog,
       closeOverlay,
+      standard: ref(2),
     };
   },
 });

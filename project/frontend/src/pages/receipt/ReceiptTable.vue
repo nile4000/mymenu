@@ -152,7 +152,7 @@ export default defineComponent({
 .table-custom {
   border-radius: 15px;
   border: 1px solid $primary;
-  background-color: $bar-background;
+
   margin: 20px;
   margin-top: 10px;
 }
@@ -175,7 +175,7 @@ h5 {
   margin-right: 10px;
   transition: background-color 0.3s ease;
   border-radius: 15px;
-  background-color: white;
+  background-color: $bar-background;
 
   &:hover {
     cursor: pointer;

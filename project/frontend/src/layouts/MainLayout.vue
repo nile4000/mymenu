@@ -11,22 +11,22 @@
         </q-item>
         <q-space />
         <q-tabs>
-          <q-route-tab round icon="home" :to="'/recipe'" class="custom-icon3">
+          <q-route-tab round icon="home" :to="'/recipe'" class="custom-icon3" color="secondary">
             <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
           </q-route-tab>
           <q-route-tab
             round
-            icon="receipt_long"
+            icon="document_scanner"
             :to="'/receipt'"
             class="custom-icon"
           >
-            <q-tooltip anchor="center left" class="text-h5">Belege</q-tooltip>
+            <q-tooltip anchor="center left" class="text-h5">Scanner</q-tooltip>
           </q-route-tab>
           <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
             <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
           </q-route-tab>
 
-          <q-tab round icon="account_circle" class="custom-icon3">
+          <q-tab round icon="account_circle" class="custom-icon4">
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
           </q-tab>
         </q-tabs>
@@ -186,6 +186,14 @@ a:hover {
 }
 
 .custom-icon3 {
+  :deep(.q-tab__content) {
+    .q-icon {
+      color: $secondary !important;
+    }
+  }
+}
+
+.custom-icon4 {
   :deep(.q-tab__content) {
     .q-icon {
       color: $profile !important;

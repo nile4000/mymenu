@@ -141,8 +141,7 @@ export default defineComponent({
 .custom-card {
   border-radius: 25px;
   max-width: 300px;
-  height: auto;
-  max-height: 200px;
+  height: 200px;
 }
 
 .q-card__section {
