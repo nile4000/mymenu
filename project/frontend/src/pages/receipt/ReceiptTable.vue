@@ -48,23 +48,21 @@
             <div class="q-gutter-md q-pa-xs column">
               <div class="row items-center justify-between">
                 <span class="text-subtitle2">
-                  Eingekauft: {{ formatDateShort(props.row.Purchase_Date) }}
+                  Eingekauft am: {{ formatDateShort(props.row.Purchase_Date) }}
                 </span>
-                <!-- <q-icon
-                  name="attach_money"
-                  color="secondary"
-                  size="sm"
-                /> -->
+
               </div>
               <div class="row items-center justify-between">
                 <span class="text-subtitle2">
-                  Gescannt: {{ formatDateShort(props.row.Created_At) }}
+                  Gescannt am: {{ formatDateShort(props.row.Created_At) }}
                 </span>
-                <q-icon
-                  name="picture_as_pdf"
-                  color="primary"
-                  size="sm"
-                />
+
+              </div>
+
+              <div class="row items-center justify-between">
+                <span class="text-subtitle2">
+                  Total CHF: {{ props.row.Total_Receipt.toFixed(2) }}
+                </span>
               </div>
             </div>
           </q-card-section>

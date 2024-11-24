@@ -133,7 +133,7 @@ export default defineComponent({
     };
 
     const returnHome = () => {
-      void router.push("/");
+      void router.push("/recipe");
     };
     return {
       email,
