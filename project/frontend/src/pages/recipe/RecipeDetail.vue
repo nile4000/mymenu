@@ -1,14 +1,8 @@
 <template>
-  <div class="q-pa-md recipe-detail-page">
+  <div class="q-ma-sm recipe-detail-page">
     <!-- Zurück-Button -->
     <div class="back-button">
-      <q-btn
-        flat
-        round
-        icon="close"
-        color="primary"
-        @click="$emit('close')"
-      />
+      <q-btn flat round icon="close" color="primary" @click="$emit('close')" />
     </div>
 
     <!-- Rezept-Titel -->
@@ -21,15 +15,15 @@
     <!-- Rezept-Details -->
     <div class="recipe-details">
       <div class="detail-item">
-        <q-icon name="schedule" class="detail-icon" />
+        <q-icon size="xs" name="schedule" class="detail-icon" color="negative" />
         <span>{{ recipe.cookingTime }}</span>
       </div>
       <div class="detail-item">
-        <q-icon name="room_service" class="detail-icon" />
+        <q-icon size="xs" name="room_service" class="detail-icon" color="amber"/>
         <span>{{ recipe.stepsList.length }} Steps</span>
       </div>
       <div class="detail-item">
-        <q-icon name="menu_book" class="detail-icon" />
+        <q-icon size="xs" name="menu_book" class="detail-icon" color="secondary" />
         <span>{{ recipe.category }}</span>
       </div>
     </div>
@@ -49,7 +43,7 @@
       </q-tabs>
 
       <q-tab-panels rounded dense v-model="activeTab" animated>
-        <q-tab-panel  name="ingredients">
+        <q-tab-panel name="ingredients">
           <div class="ingredient-list">
             <div
               class="ingredient-item"
@@ -98,11 +92,12 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background-color: $bar-background;
   border: 1px solid $dark;
-  max-width: 320px;
+  max-width: 400px;
   border-radius: 16px;
-  margin-top: 0px;
+  margin: 10px;
   padding-top: 0px;
 }
 
@@ -130,7 +125,7 @@ export default defineComponent({
   font-family: $font-playfair;
   font-size: 20px;
   margin-block-start: 0px;
-  margin-block-end: 0px;
+  margin-block-end: 10px;
   line-height: 1.2;
 }
 
@@ -138,7 +133,7 @@ export default defineComponent({
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  max-width: 320px;
+  max-width: 300px;
   height: 60px;
   border-radius: 15px;
   background-color: white;
@@ -154,7 +149,7 @@ export default defineComponent({
 
 .ingredients-section {
   width: 100%;
-  max-width: 320px;
+  max-width: 300px;
 }
 
 .ingredients-tabs {
@@ -162,6 +157,7 @@ export default defineComponent({
   border-radius: 25px;
   margin-bottom: 12px;
   margin-top: 12px;
+
 }
 
 .q-tab {
@@ -180,6 +176,8 @@ export default defineComponent({
 
 .q-tab-panels {
   border-radius: 15px;
+  border: 1px solid $primary;
+  margin-block-end: 8px;
 }
 
 .ingredient-list,

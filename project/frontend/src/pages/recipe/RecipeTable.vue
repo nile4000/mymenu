@@ -1,9 +1,11 @@
 <template>
-  <div class="q-pa-md row justify-evenly">
-    <RecipeRequest />
-    <h5 style="margin-block-end: 30px; margin-block-start: 30px">Deine Rezepte</h5>
+  <div>
+    <div class="q-pa-md row justify-center">
+      <RecipeRequest />
+      <h5 style="margin-block-end: 30px; margin-block-start: 25px">Rezepte</h5>
+    </div>
     <div
-      class="row q-gutter-md justify-center"
+      class="q-gutter-md row justify-center"
       style="padding-left: 6px; padding-bottom: 8px"
     >
       <q-card
@@ -14,8 +16,10 @@
         class="q-ma-sm cards"
         :class="recipe.color"
       >
-        <q-card-section  class="row justify-center">
-          <div class="text-h6" style="padding-bottom: 8px;">{{ recipe.title }}</div>
+        <q-card-section class="row justify-center">
+          <div class="text-h6" style="padding-bottom: 8px">
+            {{ recipe.title }}
+          </div>
           <div
             class="text-subtitle2"
             style="
@@ -33,7 +37,11 @@
           </div>
         </q-card-section>
         <q-card-actions align="center" class="q-px-md">
-          <q-btn flat round icon="hub" class="btn-background"></q-btn>
+          <q-btn flat round icon="hub" class="btn-background">
+            <q-tooltip anchor="center left" class="text-h6"
+              >Neu erstellen</q-tooltip
+            >
+          </q-btn>
           <q-btn
             flat
             round
@@ -41,16 +49,21 @@
             icon="north_east"
             class="btn-background"
             @click="goToRecipe(recipe)"
-          ></q-btn>
+            ><q-tooltip anchor="center left" class="text-h6">Details</q-tooltip>
+          </q-btn>
         </q-card-actions>
       </q-card>
+      <template v-if="selectedRecipe">
+        <!-- Overlay für Rezeptdetails -->
+        <q-dialog v-model="showDialog" persistent>
+          <RecipeDetail
+            v-if="selectedRecipe"
+            :recipe="selectedRecipe"
+            @close="closeOverlay"
+          />
+        </q-dialog>
+      </template>
     </div>
-    <template v-if="selectedRecipe">
-      <RecipeDetail
-        :recipe="selectedRecipe"
-        @close="selectedRecipe = null"
-      ></RecipeDetail>
-    </template>
   </div>
 </template>
 
@@ -70,6 +83,7 @@ export default defineComponent({
     const $q = useQuasar();
     const activeTab = ref("yours");
     const selectedOption = ref(null);
+    const showDialog = ref(false);
 
     const yourRecipes = ref([
       {
@@ -125,10 +139,16 @@ export default defineComponent({
 
     const selectedRecipe = ref(null);
 
+    // Öffnet das Overlay mit den Rezeptdetails
     const goToRecipe = (recipe: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       selectedRecipe.value = recipe;
-      console.log(selectedRecipe.value);
+      showDialog.value = true;
+    };
+
+    // Schließt das Overlay
+    const closeOverlay = () => {
+      showDialog.value = false;
+      selectedRecipe.value = null;
     };
 
     return {
@@ -138,6 +158,8 @@ export default defineComponent({
       yourRecipes,
       goToRecipe,
       selectedRecipe,
+      showDialog,
+      closeOverlay,
     };
   },
 });

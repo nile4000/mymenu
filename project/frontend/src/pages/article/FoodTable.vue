@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md row q-gutter-md justify-evenly">
+  <div class="q-pa-md row q-gutter-md justify-evenly" style="margin-top: 20px">
     <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
     <FoodTotal
       :totalsPerCategory="totalsPerCategory"
