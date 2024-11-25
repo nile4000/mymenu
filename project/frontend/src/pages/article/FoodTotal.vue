@@ -1,8 +1,5 @@
 <template>
-  <q-list
-    class="q-gutter-md justify-center"
-    style="display: flex; flex-direction: row; flex-wrap: wrap;"
-  >
+  <q-list class="justify-center custom-list">
     <!-- Total pro Beleg -->
     <q-expansion-item
       :dense="false"
@@ -33,7 +30,7 @@
         />
       </div>
 
-      <q-scroll-area style="height: 300px">
+      <q-scroll-area style="height: 200px">
         <q-list>
           <q-item v-for="receipt in sortedTotalsPerReceipt" :key="receipt.id">
             <q-item-section>
@@ -66,11 +63,7 @@
     </q-expansion-item>
 
     <!-- Total pro Kategorie -->
-    <q-expansion-item
-      color="primary"
-      :dense="false"
-      class="my-card"
-    >
+    <q-expansion-item color="primary" :dense="false" class="my-card">
       <template v-slot:header>
         <q-item-section avatar>
           <q-avatar icon="hub" class="colored-icon" />
@@ -206,12 +199,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
 .my-card {
   color: $dark;
   height: fit-content;
   border-radius: 15px;
   border: 1px solid $primary;
+  margin-bottom: 12px;
+}
+
+.custom-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 8px;
 }
 .q-item:focus {
   background-color: none;

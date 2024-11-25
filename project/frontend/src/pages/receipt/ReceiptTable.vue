@@ -4,28 +4,17 @@
     <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
     </div>
+    <h5 style="margin-block-start: 15px">Belege</h5>
     <q-table
       flat
       bordered
+      grid
       :rows="rows"
       :columns="columns"
-      grid
       hide-header
-      class="table-custom q-pa-md"
       no-data-label="Keine Daten gefunden"
       :pagination="initialPagination"
     >
-      <template v-slot:top>
-        <div style="width: 100%" class="row">
-          <div
-            class="row items-center justify-center q-gutter-sm"
-            style="margin-bottom: 10px"
-          >
-            <q-icon size="1.4em" name="receipt_long" color="primary" />
-            <span class="text-h6" style="font-weight: bold">Belege</span>
-          </div>
-        </div>
-      </template>
       <template v-slot:item="props">
         <q-card class="receipt-card">
           <!-- Logos -->
@@ -50,13 +39,11 @@
                 <span class="text-subtitle2">
                   Eingekauft am: {{ formatDateShort(props.row.Purchase_Date) }}
                 </span>
-
               </div>
               <div class="row items-center justify-between">
                 <span class="text-subtitle2">
                   Gescannt am: {{ formatDateShort(props.row.Created_At) }}
                 </span>
-
               </div>
 
               <div class="row items-center justify-between">
@@ -143,7 +130,7 @@ export default defineComponent({
       sortBy: "desc",
       descending: false,
       page: 1,
-      rowsPerPage: 500,
+      rowsPerPage: 50,
     });
 
     const handleReceiptChange = (payload: any) => {
@@ -227,11 +214,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.table-custom {
-  border-radius: 15px;
-  border: 1px solid $primary;
-  margin: 20px;
-  margin-top: 10px;
+:deep(.q-table--grid) .q-table__grid-content {
+  justify-content: center;
 }
 
 .receipt-card {
@@ -334,6 +318,7 @@ export default defineComponent({
 }
 
 h5 {
+  margin-block-start: 25px;
   margin-block-end: 0px;
 }
 

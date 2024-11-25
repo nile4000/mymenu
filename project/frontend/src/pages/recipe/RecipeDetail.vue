@@ -1,33 +1,43 @@
 <template>
-  <div class="q-ma-sm recipe-detail-page">
-    <!-- Zurück-Button -->
+  <div class="recipe-detail-page">
     <div class="back-button">
       <q-btn flat round icon="close" color="primary" @click="$emit('close')" />
     </div>
-
     <!-- Rezept-Titel -->
     <div class="recipe-title-container">
       <h3 class="recipe-title">{{ recipe.title }}</h3>
-
       <p class="recipe-description">{{ recipe.description }}</p>
     </div>
-
     <!-- Rezept-Details -->
     <div class="recipe-details">
       <div class="detail-item">
-        <q-icon size="xs" name="schedule" class="detail-icon" color="negative" />
+        <q-icon
+          size="xs"
+          name="schedule"
+          class="detail-icon"
+          color="negative"
+        />
         <span>{{ recipe.cookingTime }}</span>
       </div>
       <div class="detail-item">
-        <q-icon size="xs" name="room_service" class="detail-icon" color="amber"/>
+        <q-icon
+          size="xs"
+          name="room_service"
+          class="detail-icon"
+          color="amber"
+        />
         <span>{{ recipe.stepsList.length }} Steps</span>
       </div>
       <div class="detail-item">
-        <q-icon size="xs" name="menu_book" class="detail-icon" color="secondary" />
+        <q-icon
+          size="xs"
+          name="menu_book"
+          class="detail-icon"
+          color="secondary"
+        />
         <span>{{ recipe.category }}</span>
       </div>
     </div>
-
     <!-- Inhaltsabschnitt -->
     <div class="ingredients-section">
       <q-tabs
@@ -95,10 +105,8 @@ export default defineComponent({
   justify-content: center;
   background-color: $bar-background;
   border: 1px solid $dark;
-  max-width: 400px;
   border-radius: 16px;
-  margin: 10px;
-  padding-top: 0px;
+  width: 100%;
 }
 
 .q-tab {
@@ -115,8 +123,7 @@ export default defineComponent({
 
 .recipe-title-container {
   text-align: center;
-  max-width: 320px;
-  margin: 0px;
+  max-width: 300px;
 }
 
 .recipe-title {
@@ -155,29 +162,28 @@ export default defineComponent({
 .ingredients-tabs {
   background-color: white;
   border-radius: 25px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   margin-top: 12px;
-
 }
 
 .q-tab {
   text-transform: none;
 }
 
-::v-deep .q-tab--active {
-  margin: 2px;
-  background-color: $bar-background;
-  border-radius: 25px;
+.q-tab-panel {
+  padding-bottom: 4px;
 }
 
-.q-tab-panel {
-  padding-bottom: 0px;
+::v-deep .q-tab--active {
+  margin: 3px;
+  background-color: $bar-background;
+  border-radius: 25px;
 }
 
 .q-tab-panels {
   border-radius: 15px;
   border: 1px solid $primary;
-  margin-block-end: 8px;
+  margin-block-end:20px;
 }
 
 .ingredient-list,

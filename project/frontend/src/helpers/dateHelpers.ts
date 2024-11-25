@@ -34,18 +34,18 @@ export function formatDateShort(dateString: string) {
 
 export function formatMonth(monthNumber: number): string {
   const monthNames = [
-    "Januar",
-    "Februar",
+    "Jan.",
+    "Feb.",
     "März",
     "April",
     "Mai",
     "Juni",
     "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
+    "Aug.",
+    "Sept.",
+    "Okt.",
+    "Nov.",
+    "Dez.",
   ];
   return monthNames[monthNumber - 1] || "Unbekannt";
 }

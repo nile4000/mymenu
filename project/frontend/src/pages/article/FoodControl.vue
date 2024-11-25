@@ -1,14 +1,11 @@
 <template>
-  <div
-    class="q-gutter-md custom-container"
-    style="display: flex; flex-wrap: wrap"
-  >
-    <q-card flat bordered class="first custom-card">
+  <div class="custom-container">
+    <q-card flat class="first custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px"
           >Gesamtausgaben</q-item-label
         >
-        <q-item-label class="text-h6" caption style="min-height: 70px">
+        <q-item-label class="text-h6" caption>
           <template v-if="totalExpenses.firstMonth">
             vom {{ formatMonth(totalExpenses.firstMonth) }}
             {{ totalExpenses.firstYear }}
@@ -19,12 +16,12 @@
         >
       </q-card-section>
       <q-card-actions align="center">
-        <q-item class="text-h5">
+        <q-item class="text-h5" style="font-weight: bold">
           <div>{{ totalExpenses.sum.toFixed(2) }} CHF</div>
         </q-item>
       </q-card-actions>
     </q-card>
-    <q-card flat bordered class="second custom-card">
+    <q-card flat class="second custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px"
           >Top Kategorie</q-item-label
@@ -38,29 +35,34 @@
         >
       </q-card-section>
       <q-card-actions align="center">
-        <q-item class="text-h5">
+        <q-item class="text-h5" style="font-weight: bold">
           <div>{{ topCategory.total.toFixed(2) }} CHF</div>
         </q-item>
       </q-card-actions>
     </q-card>
-    <q-card flat bordered class="third custom-card">
+    <q-card flat class="third custom-card">
       <q-card-section>
         <q-item-label class="text-h6" style="font-size: 16px">
           Top 5 Artikel
         </q-item-label>
       </q-card-section>
       <q-card-section align="left">
-        <q-list>
+        <q-list style="padding-bottom: 5px">
           <q-item
             v-for="(item, index) in topFiveItems"
             :key="index"
             style="min-height: auto; padding: 0"
           >
             <q-item-section>
-              <q-item-label style="font-size: 12px"
-                >{{ item.Name.slice(0, 12) + ".." || "xxx"
-                }}<q-tooltip anchor="center left" class="text-h5"
-                  >{{ item.Name }},
+              <q-item-label style="font-size: 14px"
+                ><span class="label-desktop">{{
+                  item.Name.slice(0, 12) + ".." || "xxx"
+                }}</span
+                ><span class="label-mobile">{{
+                  item.Name.slice(0, 21) + ".." || "xxx"
+                }}</span>
+                <q-tooltip anchor="center left" class="text-h5"
+                  >{{ item.Name }} |
                   {{ formatDate(item.Purchase_Date) }}</q-tooltip
                 >
               </q-item-label>
@@ -128,20 +130,43 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@media (max-width: 700px) {
-  .custom-container {
-    flex-direction: column;
-  }
-}
-@media (min-width: 700px) {
-  .custom-card {
-    width: 200px;
-  }
+.custom-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 8px;
+  padding-top: 8px;
 }
 .custom-card {
   border-radius: 25px;
-  max-width: 300px;
-  height: 200px;
+  width: 240px;
+  margin-bottom: 12px;
+}
+.label-desktop {
+  display: block;
+}
+.label-mobile {
+  display: none;
+}
+@media (max-width: 700px) {
+  .custom-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .label-desktop {
+    display: none;
+  }
+  .label-mobile {
+    display: block;
+  }
+  .custom-container {
+    flex-wrap: wrap;
+  }
+  .custom-card {
+    width: 340px;
+    height: auto;
+  }
 }
 
 .q-card__section {
@@ -160,17 +185,17 @@ export default defineComponent({
   background-color: $amber;
 }
 
-.text-h5 {
-  color: $dark;
-}
-
 .text-caption {
   font-size: 15px;
 }
 
+.text-h5 {
+  color: $dark;
+}
+
 .text-h6 {
   font-weight: bold;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .q-pa-md {

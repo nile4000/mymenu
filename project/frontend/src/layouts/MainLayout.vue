@@ -19,10 +19,15 @@
           >
             <q-tooltip anchor="center left" class="text-h5">Scanner</q-tooltip>
           </q-route-tab>
-          <q-route-tab round icon="restaurant" :to="'/'" class="custom-icon2">
+          <q-route-tab round icon="receipt_long" :to="'/'" class="custom-icon2">
             <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
           </q-route-tab>
-          <q-route-tab round icon="home" :to="'/recipe'" class="custom-icon3">
+          <q-route-tab
+            round
+            icon="restaurant"
+            :to="'/recipe'"
+            class="custom-icon3"
+          >
             <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
           </q-route-tab>
 
@@ -149,7 +154,6 @@ export default defineComponent({
 .color-primary {
   color: $primary;
 }
-.title-header .menu-title,
 a {
   text-decoration: underline;
   text-decoration-color: $dark;
@@ -219,6 +223,12 @@ a {
 }
 
 @media (max-width: 431px) {
+  .q-toolbar {
+    padding-right: 6px;
+  }
+  .menu-title {
+    display: none;
+  }
   .title-part {
     font-size: 12px;
   }

@@ -3,12 +3,12 @@ import { Column } from "../interfaces/column.interface";
 
 export const articleColumns: Column[] = [
   {
-    name: "Purchase_Date",
-    label: "Kaufdatum",
-    field: "Purchase_Date",
-    format: (val: string) => formatDate(val),
-    sortable: true,
+    name: "Name",
+    required: true,
+    label: "Name",
     align: "left",
+    field: "Name",
+    sortable: true,
   },
   {
     name: "Category",
@@ -19,12 +19,13 @@ export const articleColumns: Column[] = [
     icon: "edit",
   },
   {
-    name: "Name",
-    required: true,
-    label: "Name",
-    align: "left",
-    field: "Name",
+    name: "Purchase_Date",
+    label: "Kaufdatum",
+    field: "Purchase_Date",
+    format: (val: string) => formatDate(val),
     sortable: true,
+    style: 'width: 100px',
+    align: "left",
   },
   // {
   //   name: "Price",
@@ -65,7 +66,7 @@ export const articleColumns: Column[] = [
   // },
   {
     name: "Total",
-    label: "Total CHF (nach Rabatt)",
+    label: "Total CHF",
     field: "Total",
     sortable: true,
   },

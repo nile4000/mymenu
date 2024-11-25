@@ -2,9 +2,9 @@
   <div>
     <div class="q-pa-md row justify-center">
       <RecipeRequest />
-      <h5 style="margin-block-end: 30px; margin-block-start: 25px">Rezepte</h5>
+      <h5>Rezepte</h5>
     </div>
-    <div class="row justify-center" style="padding-left: 6px">
+    <div class="row justify-center">
       <q-card
         flat
         bordered
@@ -17,14 +17,7 @@
           <div class="text-h6" style="padding-bottom: 8px">
             {{ recipe.title }}
           </div>
-          <div
-            class="text-subtitle2"
-            style="
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            "
-          >
+          <div class="text-subtitle2">
             {{ recipe.description }}
           </div>
           <div>
@@ -50,7 +43,12 @@
       </q-card>
       <template v-if="selectedRecipe">
         <!-- Overlay für Rezeptdetails -->
-        <q-dialog v-model="showDialog" persistent>
+        <q-dialog
+          v-model="showDialog"
+          persistent
+          transition-show="slide-up"
+          transition-hide="slide-down"
+        >
           <RecipeDetail
             v-if="selectedRecipe"
             :recipe="selectedRecipe"
@@ -59,7 +57,6 @@
         </q-dialog>
       </template>
     </div>
-
   </div>
 </template>
 
@@ -165,6 +162,17 @@ export default defineComponent({
   border-radius: 25px;
   height: auto;
   max-width: 320px;
+}
+
+h5 {
+  margin-block-start: 25px;
+  margin-block-end: 5px;
+}
+
+.text-subtitle2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-background {

@@ -1,6 +1,11 @@
 <template>
   <div>
-    <q-dialog v-model="showDialogRecipe" persistent>
+    <q-dialog
+      v-model="showDialogRecipe"
+      persistent
+      transition-show="slide-up"
+      transition-hide="slide-down"
+    >
       <q-card class="custom-card">
         <q-card-section class="column items-center">
           <h5 style="margin-block-end: 20px">Einstellungen</h5>
@@ -36,7 +41,13 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Abbrechen" color="negative" v-close-popup />
-          <q-btn flat label="Erstellen" color="primary" style="font-weight: bold" v-close-popup />
+          <q-btn
+            flat
+            label="Erstellen"
+            color="primary"
+            style="font-weight: bold"
+            v-close-popup
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -205,7 +216,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .card-example {
-  max-width: 400px;
   margin: 0 auto;
 }
 
