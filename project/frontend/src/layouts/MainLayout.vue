@@ -37,7 +37,7 @@
         </q-tabs>
       </q-toolbar>
     </q-header>
-    <q-footer reveal>
+    <!-- <q-footer reveal>
       <q-toolbar>
         <q-toolbar-title class="title-footer"
           >AI Essensplaner
@@ -52,7 +52,7 @@
           ></q-toolbar-title
         >
       </q-toolbar>
-    </q-footer>
+    </q-footer> -->
 
     <q-page-container>
       <router-view />

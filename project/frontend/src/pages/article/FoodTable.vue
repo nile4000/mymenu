@@ -22,6 +22,7 @@
     <q-table
       flat
       bordered
+      grid
       :rows="filteredRows"
       :columns="columns"
       row-key="Id"
@@ -47,70 +48,58 @@
           </q-input>
         </div>
       </template>
-      <!-- Toggles styled -->
-      <template v-slot:header-selection="scope">
-        <q-toggle v-model="scope.selected" />
-      </template>
-      <template v-slot:body-selection="scope">
-        <q-toggle v-model="scope.selected" />
-      </template>
-
-      <!-- editable columns -->
-      <template v-slot:body-cell-Category="props">
-        <q-td
-          :props="props"
-          style="
-            text-decoration: underline;
-            cursor: pointer;
-            text-underline-offset: 4px;
-          "
+      <template v-slot:item="props">
+        <div
+          class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
         >
-          {{ props.row.Category }}
-          <q-popup-edit v-model="props.row.Category" v-slot="scope">
-            <q-select
-              v-model="scope.value"
-              :options="categories"
-              dense
-              autofocus
-              @keyup.enter="
-                () => {
-                  scope.set();
-                  updateCategory(props.row);
-                }
-              "
-            />
-          </q-popup-edit>
-        </q-td>
-      </template>
-      <template v-slot:body-cell-Unit="props">
-        <q-td
-          :props="props"
-          style="
-            text-decoration: underline;
-            cursor: pointer;
-            text-underline-offset: 4px;
-          "
-        >
-          {{ props.row.Unit }}
-          <q-popup-edit v-model="props.row.Unit" v-slot="scope">
-            <q-input
-              v-model="scope.value"
-              dense
-              autofocus
-              @keyup.enter="
-                () => {
-                  scope.set();
-                  updateUnit(props.row);
-                }
-              "
-              placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
-            />
-          </q-popup-edit>
-        </q-td>
+          <q-card
+            bordered
+            flat
+            dense
+            :class="
+              props.selected
+                ? $q.dark.isActive
+                  ? '$positive'
+                  : 'bg-grey-2'
+                : ''
+            "
+          >
+            <q-card-section class="q-pa-xs row justify-between">
+              <q-checkbox
+                v-model="props.selected"
+                checked-icon="radio_button_checked"
+                unchecked-icon="radio_button_unchecked"
+                :label="props.row.Name"
+              />
+              <q-icon
+                :name="getCategoryIcon(props.row.Category)"
+                :color="getCategoryColor(props.row.Category)"
+                size="md"
+                ><q-tooltip anchor="center left" class="text-h6">{{
+                  props.row.Category
+                }}</q-tooltip>
+              </q-icon>
+            </q-card-section>
+            <q-list dense style="padding-bottom: 7px">
+              <q-item
+                v-for="col in props.cols.filter((col) => col.name !== 'desc')"
+                :key="col.name"
+              >
+                <q-item-section>
+                  <q-item-label style="font-weight: bold">{{
+                    col.label
+                  }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label caption>{{ col.value }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
       </template>
     </q-table>
   </div>
-  <!-- </div> -->
 </template>
 
 <script lang="ts">
@@ -138,7 +127,10 @@ import { Receipt } from "../../helpers/interfaces/receipt.interface";
 import { articleColumns } from "../../helpers/columns/articleColumns";
 import { useTotals } from "../../helpers/composables/UseTotals";
 import { useQuasar } from "quasar";
-import { categories } from "../../components/prompts/categorization";
+import {
+  categories,
+  categoryIcon,
+} from "../../components/prompts/categorization";
 import {
   upsertArticleCategory,
   upsertArticleUnit,
@@ -318,6 +310,16 @@ export default defineComponent({
       selectedReceiptIds.value = selectedIds;
     };
 
+    const getCategoryIcon = (categoryName: string): string => {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.icon : "help_outline"; // "help_outline" als Standard-Icon
+    };
+
+    const getCategoryColor = (categoryName: string): string => {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.color : "primary";
+    };
+
     return {
       columns: articleColumns,
       filteredRows,
@@ -335,7 +337,8 @@ export default defineComponent({
       selectedReceiptIds,
       updateCategory,
       updateUnit,
-      visibleColumns: ref(["Name", "Category", "Unit", "Price"]),
+      getCategoryIcon,
+      getCategoryColor,
     };
   },
 });
@@ -351,6 +354,11 @@ export default defineComponent({
   font-size: 14px;
   color: $dark;
   font-weight: bold;
+}
+
+.q-card {
+  border-radius: 15px;
+  border: 1px solid $primary;
 }
 
 h5 {

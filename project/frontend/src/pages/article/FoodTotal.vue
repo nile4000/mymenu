@@ -92,6 +92,13 @@
         <q-list>
           <q-item v-for="item in sortedTotalsPerCategory" :key="item.category">
             <q-item-section>
+              <q-icon
+                size="sm"
+                :name="getCategoryIcon(item.category)"
+                :color="getCategoryColor(item.category)"
+              />
+            </q-item-section>
+            <q-item-section>
               {{ item.category }}
             </q-item-section>
             <q-item-section side>
@@ -107,6 +114,7 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, watch, computed, ref } from "vue";
 import { formatDate } from "../../helpers/dateHelpers";
+import { categoryIcon } from "../../components/prompts/categorization";
 
 export default defineComponent({
   name: "FoodTotal",
@@ -162,6 +170,16 @@ export default defineComponent({
       selectedReceipts[id] = value;
     };
 
+    const getCategoryIcon = (categoryName: string): string => {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.icon : "help_outline"; // "help_outline" als Standard-Icon
+    };
+
+    const getCategoryColor = (categoryName: string): string => {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.color : "primary";
+    };
+
     watch(
       () => props.totalsPerReceipt,
       (newReceipts) => {
@@ -193,6 +211,8 @@ export default defineComponent({
       sortedTotalsPerCategory,
       receiptSortCriteria,
       categorySortCriteria,
+      getCategoryIcon,
+      getCategoryColor,
     };
   },
 });
@@ -205,6 +225,10 @@ export default defineComponent({
   border-radius: 15px;
   border: 1px solid $primary;
   margin-bottom: 12px;
+}
+
+.q-item__section--main {
+  flex: none !important;
 }
 
 .custom-list {
@@ -233,31 +257,6 @@ export default defineComponent({
 
 .text-h6 {
   font-weight: bold;
-}
-
-.q-icon {
-  color: $secondary !important;
-}
-.colored-icon {
-  :deep(.q-avatar__content) {
-    .q-icon {
-      color: $secondary !important;
-    }
-  }
-}
-
-.colored-icon2 {
-  :deep(.q-avatar__content) {
-    .q-icon {
-      color: $primary !important;
-    }
-  }
-}
-
-:deep(.q-expansion-item__content) {
-  .q-icon {
-    color: $negative !important;
-  }
 }
 
 .custom-label {

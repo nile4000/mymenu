@@ -2,22 +2,22 @@ import { formatDate } from "../dateHelpers";
 import { Column } from "../interfaces/column.interface";
 
 export const articleColumns: Column[] = [
-  {
-    name: "Name",
-    required: true,
-    label: "Name",
-    align: "left",
-    field: "Name",
-    sortable: true,
-  },
-  {
-    name: "Category",
-    label: "Kategorie",
-    field: "Category",
-    sortable: true,
-    align: "center",
-    icon: "edit",
-  },
+  // {
+  //   name: "Name",
+  //   required: true,
+  //   label: "Name",
+  //   align: "left",
+  //   field: "Name",
+  //   sortable: true,
+  // },
+  // {
+  //   name: "Category",
+  //   label: "Kategorie",
+  //   field: "Category",
+  //   sortable: true,
+  //   align: "center",
+  //   icon: "edit",
+  // },
   {
     name: "Purchase_Date",
     label: "Kaufdatum",

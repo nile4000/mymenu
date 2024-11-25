@@ -7,7 +7,7 @@
       @click="sendCategorizationRequest"
       v-ripple
     >
-      <q-icon size="1.9em" name="hub" color="secondary" />
+      <q-icon size="1.9em" name="replay" color="secondary" />
       <q-tooltip class="text-h6">
         Klassifikation: {{ selectedItems.length }}</q-tooltip
       >
@@ -208,6 +208,7 @@ export default defineComponent({
   position: fixed;
   bottom: 0;
   right: 25px;
+  height: 50px;
   margin-bottom: 10px;
   z-index: 1000;
   background-color: $bar-background;

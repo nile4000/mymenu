@@ -12,6 +12,7 @@
       :rows="rows"
       :columns="columns"
       hide-header
+      hide-bottom
       no-data-label="Keine Daten gefunden"
       :pagination="initialPagination"
     >
@@ -130,7 +131,7 @@ export default defineComponent({
       sortBy: "desc",
       descending: false,
       page: 1,
-      rowsPerPage: 50,
+      rowsPerPage: 500,
     });
 
     const handleReceiptChange = (payload: any) => {
