@@ -3,6 +3,7 @@
     <div class="column items-center">
       <h5>Übersicht</h5>
     </div>
+
     <div class="row q-pa-md justify-evenly">
       <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
       <FoodTotal
@@ -12,93 +13,209 @@
         @update:selectedReceipts="handleSelectedReceipts"
       />
       <CategorizationRequest :selectedItems="selected" />
+      <!-- Button zum Wechseln der Ansicht -->
+      <q-btn
+        @click="toggleView"
+        unelevated
+        rounded
+        :label="
+          isGridView
+            ? 'Zur Tabellenansicht wechseln'
+            : 'Zur Grid-Ansicht wechseln'
+        "
+        color="primary"
+      />
     </div>
+
     <h5
       class="column items-center"
       style="margin-block-start: 10px; margin-bottom: 20px"
     >
       Artikel ({{ selected.length }} / {{ filteredRows.length }})
     </h5>
-    <q-table
-      flat
-      bordered
-      grid
-      :rows="filteredRows"
-      :columns="columns"
-      row-key="Id"
-      :pagination="initialPagination"
-      v-model:selected="selected"
-      selection="multiple"
-      class="table-custom"
-      no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
-    >
-      <template v-slot:top>
-        <div style="width: 100%">
-          <q-input
-            rounded
-            dense
-            debounce="400"
-            v-model="search"
-            outlined
-            label="Kaufdatum, Name oder Kategorie"
+
+    <!-- Grid-Ansicht -->
+    <div v-if="isGridView">
+      <q-table
+        flat
+        bordered
+        grid
+        :rows="filteredRows"
+        :columns="columns"
+        row-key="Id"
+        :pagination="initialPagination"
+        v-model:selected="selected"
+        selection="multiple"
+        class="table-custom"
+        no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+      >
+        <template v-slot:top>
+          <div style="width: 100%">
+            <q-input
+              rounded
+              dense
+              debounce="400"
+              v-model="search"
+              outlined
+              label="Kaufdatum, Name oder Kategorie"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </template>
+        <template v-slot:item="props">
+          <div
+            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
           >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </div>
-      </template>
-      <template v-slot:item="props">
-        <div
-          class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
-        >
-          <q-card
-            bordered
-            flat
-            dense
-            :class="
-              props.selected
-                ? $q.dark.isActive
-                  ? '$positive'
-                  : 'bg-grey-2'
-                : ''
+            <q-card
+              bordered
+              flat
+              dense
+              :class="
+                props.selected
+                  ? $q.dark.isActive
+                    ? '$positive'
+                    : 'bg-grey-2'
+                  : ''
+              "
+            >
+              <q-card-section class="q-pa-xs row justify-between">
+                <q-checkbox
+                  style="white-space: break-all; width: 80%"
+                  v-model="props.selected"
+                  checked-icon="radio_button_checked"
+                  unchecked-icon="radio_button_unchecked"
+                  :label="props.row.Name"
+                />
+                <q-icon
+                  :name="getCategoryIcon(props.row.Category)"
+                  :color="getCategoryColor(props.row.Category)"
+                  size="md"
+                  ><q-tooltip anchor="center left" class="text-h6">{{
+                    props.row.Category
+                  }}</q-tooltip>
+                </q-icon>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-list dense style="padding-bottom: 7px">
+                <q-item
+                  v-for="col in props.cols.filter((col) => col.name !== 'desc')"
+                  :key="col.name"
+                >
+                  <q-item-section>
+                    <q-item-label style="font-weight: bold">{{
+                      col.label
+                    }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption>{{ col.value }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+        </template>
+      </q-table>
+    </div>
+
+    <!-- Tabellenansicht -->
+    <div v-else>
+      <q-table
+        flat
+        bordered
+        :rows="filteredRows"
+        :columns="columnsList"
+        row-key="Id"
+        :pagination="initialPagination"
+        v-model:selected="selected"
+        selection="multiple"
+        class="table-custom"
+        no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+      >
+        <template v-slot:top>
+          <div style="width: 100%">
+            <q-input
+              rounded
+              dense
+              debounce="400"
+              v-model="search"
+              outlined
+              label="Kaufdatum, Name oder Kategorie"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </template>
+
+        <!-- Toggles styled -->
+        <template v-slot:header-selection="scope">
+          <q-toggle v-model="scope.selected" />
+        </template>
+        <template v-slot:body-selection="scope">
+          <q-toggle v-model="scope.selected" />
+        </template>
+
+        <!-- Editable columns -->
+        <template v-slot:body-cell-Category="props">
+          <q-td
+            :props="props"
+            style="
+              text-decoration: underline;
+              cursor: pointer;
+              text-underline-offset: 4px;
             "
           >
-            <q-card-section class="q-pa-xs row justify-between">
-              <q-checkbox
-                v-model="props.selected"
-                checked-icon="radio_button_checked"
-                unchecked-icon="radio_button_unchecked"
-                :label="props.row.Name"
+            {{ props.row.Category }}
+            <q-popup-edit v-model="props.row.Category" v-slot="scope">
+              <q-select
+                v-model="scope.value"
+                :options="categories"
+                dense
+                autofocus
+                @keyup.enter="
+                  () => {
+                    scope.set();
+                    updateCategory(props.row);
+                  }
+                "
               />
-              <q-icon
-                :name="getCategoryIcon(props.row.Category)"
-                :color="getCategoryColor(props.row.Category)"
-                size="md"
-                ><q-tooltip anchor="center left" class="text-h6">{{
-                  props.row.Category
-                }}</q-tooltip>
-              </q-icon>
-            </q-card-section>
-            <q-list dense style="padding-bottom: 7px">
-              <q-item
-                v-for="col in props.cols.filter((col) => col.name !== 'desc')"
-                :key="col.name"
-              >
-                <q-item-section>
-                  <q-item-label style="font-weight: bold">{{
-                    col.label
-                  }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-item-label caption>{{ col.value }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card>
-        </div>
-      </template>
-    </q-table>
+            </q-popup-edit>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-Unit="props">
+          <q-td
+            :props="props"
+            style="
+              text-decoration: underline;
+              cursor: pointer;
+              text-underline-offset: 4px;
+            "
+          >
+            {{ props.row.Unit }}
+            <q-popup-edit v-model="props.row.Unit" v-slot="scope">
+              <q-input
+                v-model="scope.value"
+                dense
+                autofocus
+                @keyup.enter="
+                  () => {
+                    scope.set();
+                    updateUnit(props.row);
+                  }
+                "
+                placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
+              />
+            </q-popup-edit>
+          </q-td>
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
@@ -124,7 +241,10 @@ import FoodTotal from "./FoodTotal.vue";
 import FoodControl from "./FoodControl.vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
-import { articleColumns } from "../../helpers/columns/articleColumns";
+import {
+  articleColumns,
+  articleColumnsList,
+} from "../../helpers/columns/articleColumns";
 import { useTotals } from "../../helpers/composables/UseTotals";
 import { useQuasar } from "quasar";
 import {
@@ -153,6 +273,14 @@ export default defineComponent({
     const receipts = reactive<Record<string, Receipt>>({});
     const message = ref("");
     const messageType = ref("positive");
+
+    // Neuer Zustand für die Ansicht
+    const isGridView = ref(true);
+
+    // Methode zum Wechseln der Ansicht
+    const toggleView = () => {
+      isGridView.value = !isGridView.value;
+    };
 
     let channel: any;
 
@@ -259,6 +387,8 @@ export default defineComponent({
       }
     });
 
+    // ToDo: implement again
+
     const updateCategory = async (article: Article) => {
       try {
         await upsertArticleCategory(article);
@@ -312,7 +442,7 @@ export default defineComponent({
 
     const getCategoryIcon = (categoryName: string): string => {
       const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.icon : "help_outline"; // "help_outline" als Standard-Icon
+      return category ? category.icon : "help_outline";
     };
 
     const getCategoryColor = (categoryName: string): string => {
@@ -321,6 +451,7 @@ export default defineComponent({
     };
 
     return {
+      columnsList: articleColumnsList,
       columns: articleColumns,
       filteredRows,
       search,
@@ -339,6 +470,9 @@ export default defineComponent({
       updateUnit,
       getCategoryIcon,
       getCategoryColor,
+      // Neuer Zustand und Methode
+      isGridView,
+      toggleView,
     };
   },
 });
