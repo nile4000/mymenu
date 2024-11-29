@@ -63,7 +63,7 @@
     </q-expansion-item>
 
     <!-- Total pro Kategorie -->
-    <q-expansion-item color="primary" :dense="false" class="my-card">
+    <q-expansion-item default-opened color="primary" :dense="false" class="my-card">
       <template v-slot:header>
         <q-item-section avatar>
           <q-avatar icon="hub" class="colored-icon" />
@@ -221,14 +221,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .my-card {
   color: $dark;
-  height: fit-content;
   border-radius: 15px;
   border: 1px solid $primary;
   margin-bottom: 12px;
+  max-width: fit-content;
+  height: fit-content;
 }
 
 .q-item__section--main {
-  flex: none !important;
+  flex: auto 1 !important;
 }
 
 .custom-list {

@@ -198,7 +198,7 @@
             "
           >
             {{ props.row.Unit }}
-            <q-popup-edit v-model="props.row.Unit" v-slot="scope">
+            <q-popup-edit v-model="props.row.Unit" auto-save v-slot="scope">
               <q-input
                 v-model="scope.value"
                 dense

@@ -74,7 +74,6 @@ export default defineComponent({
   },
   setup() {
     const $q = useQuasar();
-    const activeTab = ref("yours");
     const selectedOption = ref(null);
     const showDialog = ref(false);
 
@@ -144,7 +143,6 @@ export default defineComponent({
 
     return {
       $q,
-      activeTab,
       selectedOption,
       yourRecipes,
       goToRecipe,

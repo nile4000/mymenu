@@ -142,6 +142,7 @@ export default defineComponent({
   border-radius: 25px;
   width: 240px;
   margin-bottom: 12px;
+  max-height: 173px;
 }
 .label-desktop {
   display: block;
