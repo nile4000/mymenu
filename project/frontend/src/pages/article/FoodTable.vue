@@ -11,10 +11,11 @@
         :totalsPerReceipt="totalsPerReceipt"
         :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
         @update:selectedReceipts="handleSelectedReceipts"
+        @update:selectedCategory="handleSelectedCategory"
       />
       <CategorizationRequest :selectedItems="selected" />
     </div>
-    <!-- Button zum Wechseln der Ansicht -->
+
     <div class="column items-center">
       <q-btn
         @click="toggleView"
@@ -36,8 +37,8 @@
       Artikel ({{ selected.length }} / {{ filteredRows.length }})
     </h5>
 
-    <!-- Grid-Ansicht -->
     <div v-if="isGridView">
+      <!-- Grid Ansicht -->
       <q-table
         flat
         bordered
@@ -67,65 +68,19 @@
             </q-input>
           </div>
         </template>
+
         <template v-slot:item="props">
-          <div
-            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
-          >
-            <q-card
-              bordered
-              flat
-              dense
-              :class="
-                props.selected
-                  ? $q.dark.isActive
-                    ? '$positive'
-                    : 'bg-grey-2'
-                  : ''
-              "
-            >
-              <q-card-section class="q-pa-xs row justify-between">
-                <q-checkbox
-                  style="white-space: break-all; width: 80%"
-                  v-model="props.selected"
-                  checked-icon="radio_button_checked"
-                  unchecked-icon="radio_button_unchecked"
-                  :label="props.row.Name"
-                />
-                <q-icon
-                  :name="getCategoryIcon(props.row.Category)"
-                  :color="getCategoryColor(props.row.Category)"
-                  size="md"
-                  ><q-tooltip anchor="center left" class="text-h6">{{
-                    props.row.Category
-                  }}</q-tooltip>
-                </q-icon>
-              </q-card-section>
-
-              <q-separator />
-
-              <q-list dense style="padding-bottom: 7px">
-                <q-item
-                  v-for="col in props.cols.filter((col) => col.name !== 'desc')"
-                  :key="col.name"
-                >
-                  <q-item-section>
-                    <q-item-label style="font-weight: bold">{{
-                      col.label
-                    }}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side>
-                    <q-item-label caption>{{ col.value }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card>
-          </div>
+          <FoodGrid
+            :row="props.row"
+            :cols="props.cols"
+            v-model:selected="props.selected"
+          />
         </template>
       </q-table>
     </div>
 
-    <!-- Tabellenansicht -->
     <div v-else>
+      <!-- Tabellenansicht -->
       <q-table
         flat
         bordered
@@ -165,56 +120,22 @@
 
         <!-- Editable columns -->
         <template v-slot:body-cell-Category="props">
-          <q-td
+          <EditableCell
             :props="props"
-            style="
-              text-decoration: underline;
-              cursor: pointer;
-              text-underline-offset: 4px;
-            "
-          >
-            {{ props.row.Category }}
-            <q-popup-edit v-model="props.row.Category" v-slot="scope">
-              <q-select
-                v-model="scope.value"
-                :options="categories"
-                dense
-                autofocus
-                @keyup.enter="
-                  () => {
-                    scope.set();
-                    updateCategory(props.row);
-                  }
-                "
-              />
-            </q-popup-edit>
-          </q-td>
+            fieldName="Category"
+            :categories="categories"
+            :updateCategory="updateCategory"
+            :updateUnit="updateUnit"
+          />
         </template>
+
         <template v-slot:body-cell-Unit="props">
-          <q-td
+          <EditableCell
             :props="props"
-            style="
-              text-decoration: underline;
-              cursor: pointer;
-              text-underline-offset: 4px;
-            "
-          >
-            {{ props.row.Unit }}
-            <q-popup-edit v-model="props.row.Unit" auto-save v-slot="scope">
-              <q-input
-                v-model="scope.value"
-                dense
-                autofocus
-                @keyup.enter="
-                  () => {
-                    scope.set();
-                    updateUnit(props.row);
-                  }
-                "
-                placeholder="Einheit in stk/kg/g/ml/cl/l eingeben"
-              />
-            </q-popup-edit>
-          </q-td>
+            fieldName="Unit"
+            :updateUnit="updateUnit"
+            :updateCategory="updateCategory"
+          />
         </template>
       </q-table>
     </div>
@@ -222,69 +143,61 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  onUnmounted,
-  reactive,
-  computed,
-} from "vue";
-import { Article } from "../../helpers/interfaces/article.interface";
-import {
-  readAllArticles,
-  readReceiptsByIds,
-} from "../../services/readAllArticles";
-import {
-  subscribeToArticleChanges,
-  unsubscribeFromArticleChanges,
-} from "../../services/realtimeArticles";
-import FoodTotal from "./FoodTotal.vue";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import FoodControl from "./FoodControl.vue";
+import FoodTotal from "./FoodTotal.vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
-import { Receipt } from "../../helpers/interfaces/receipt.interface";
+import { useQuasar } from "quasar";
+import { useTotals } from "../../helpers/composables/UseTotals";
+import FoodGrid from "./FoodGrid.vue";
 import {
   articleColumns,
   articleColumnsList,
 } from "../../helpers/columns/articleColumns";
-import { useTotals } from "../../helpers/composables/UseTotals";
-import { useQuasar } from "quasar";
 import {
   categories,
   categoryIcon,
 } from "../../components/prompts/categorization";
-import {
-  upsertArticleCategory,
-  upsertArticleUnit,
-} from "../../services/updateArticle";
+import { Article } from "../../helpers/interfaces/article.interface";
 import { handleError } from "../../helpers/composables/UseErrors";
+import { useArticles } from "../../helpers/composables/UseArticles";
+import { useFilters } from "../../helpers/composables/UseFilters";
+import { useViewMode } from "../../helpers/composables/UseViewMode";
+import EditableCell from "./EditableCell.vue";
 
 export default defineComponent({
   name: "FoodTable",
   components: {
-    CategorizationRequest,
-    FoodTotal,
     FoodControl,
+    FoodTotal,
+    CategorizationRequest,
+    FoodGrid,
+    EditableCell,
   },
   setup() {
     const $q = useQuasar();
 
-    const search = ref("");
+    // Artikel laden & verwalten
+    const {
+      rows,
+      receipts,
+      loadArticles,
+      subscribeToArticles,
+      unsubscribeArticles,
+      updateCategory,
+      updateUnit,
+    } = useArticles($q);
+
+    // Filter-Logik
+    const { search, selectedCategory, selectedReceiptIds, filteredRows } =
+      useFilters(rows);
+
+    // View-Modus (Grid/Tabelle)
+    const { isGridView, toggleView } = useViewMode();
+
     const selected = ref<Article[]>([]);
-    const rows = reactive<Article[]>([]);
-    const receipts = reactive<Record<string, Receipt>>({});
     const message = ref("");
     const messageType = ref("positive");
-
-    // Neuer Zustand für die Ansicht
-    const isGridView = ref(true);
-
-    // Methode zum Wechseln der Ansicht
-    const toggleView = () => {
-      isGridView.value = !isGridView.value;
-    };
-
-    let channel: any;
 
     const initialPagination = ref({
       sortBy: "desc",
@@ -300,157 +213,36 @@ export default defineComponent({
       calculatedTotalPerReceipt,
     } = useTotals(rows, receipts);
 
-    const filterFields = ["Name", "Purchase_Date", "Category"] as const;
+    function handleSelectedReceipts(ids: string[]) {
+      selectedReceiptIds.value = ids;
+    }
 
-    const selectedReceiptIds = ref<string[]>([]);
+    function handleSelectedCategory(cat: string | null) {
+      selectedCategory.value = cat;
+    }
 
-    const filteredRows = computed(() => {
-      let filtered = rows;
+    function getCategoryIcon(categoryName: string): string {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.icon : "help_outline";
+    }
 
-      const cleanedSearch = search.value.trim().toLowerCase();
-      if (cleanedSearch) {
-        filtered = filtered.filter((row) => {
-          return filterFields.some((field) => {
-            const fieldValue = row[field];
-            return (
-              fieldValue &&
-              String(fieldValue).toLowerCase().includes(cleanedSearch)
-            );
-          });
-        });
-      }
-
-      if (selectedReceiptIds.value.length > 0) {
-        filtered = filtered.filter(
-          (row) =>
-            row.Receipt_Id &&
-            selectedReceiptIds.value.includes(String(row.Receipt_Id))
-        );
-      } else {
-        filtered = [];
-      }
-
-      return filtered;
-    });
-
-    const handleArticleChange = (payload: any) => {
-      const newArticle = payload.new as Article;
-      const eventType = payload.eventType;
-
-      switch (eventType) {
-        case "INSERT":
-          rows.push(newArticle);
-          break;
-        case "DELETE":
-          // eslint-disable-next-line no-case-declarations
-          const indexToDelete = rows.findIndex(
-            (article: Article) => article.Id === newArticle.Id
-          );
-          if (indexToDelete !== -1) {
-            rows.splice(indexToDelete, 1);
-          }
-          break;
-
-        case "UPDATE":
-          // eslint-disable-next-line no-case-declarations
-          const updateIndex = rows.findIndex(
-            (article: Article) => article.Id === newArticle.Id
-          );
-          if (updateIndex !== -1) {
-            rows[updateIndex] = newArticle;
-          } else {
-            rows.push(newArticle);
-          }
-          break;
-        default:
-          $q.notify({
-            type: "warning",
-            message: `Unknown event type: ${eventType}`,
-          });
-      }
-    };
+    function getCategoryColor(categoryName: string): string {
+      const category = categoryIcon.find((c) => c.name === categoryName);
+      return category ? category.color : "primary";
+    }
 
     onMounted(async () => {
       try {
-        const data = await readAllArticles();
-        if (data) {
-          rows.splice(0, rows.length, ...data);
-          await fetchReceiptsForArticles(data);
-        }
+        await loadArticles();
       } catch (error) {
         handleError("Belege laden", error, $q);
       }
-      channel = subscribeToArticleChanges(handleArticleChange);
+      subscribeToArticles();
     });
 
     onUnmounted(() => {
-      if (channel) {
-        unsubscribeFromArticleChanges(channel);
-      }
+      unsubscribeArticles();
     });
-
-    // ToDo: implement again
-
-    const updateCategory = async (article: Article) => {
-      try {
-        await upsertArticleCategory(article);
-        $q.notify({
-          type: "positive",
-          message: "Kategorie aktualisiert",
-        });
-      } catch (error) {
-        handleError("Kategorie aktualisieren", error, $q);
-      }
-    };
-
-    const updateUnit = async (article: Article) => {
-      try {
-        await upsertArticleUnit(article.Id, article.Unit);
-        $q.notify({
-          type: "positive",
-          message: "Einheit aktualisiert",
-        });
-      } catch (error) {
-        handleError("Einheit aktualisieren", error, $q);
-      }
-    };
-
-    const fetchReceiptsForArticles = async (articles: Article[]) => {
-      const uniqueReceiptIds = [
-        ...new Set(
-          articles
-            .map((article) => article.Receipt_Id)
-            .filter((id): id is string => !!id)
-        ),
-      ];
-      const idsToFetch = uniqueReceiptIds.filter((id) => !receipts[id]);
-      if (idsToFetch.length > 0) {
-        try {
-          const fetchedReceipts = await readReceiptsByIds(idsToFetch);
-          fetchedReceipts.forEach((receipt) => {
-            if (receipt.Id) {
-              receipts[receipt.Id] = receipt;
-            }
-          });
-        } catch (error) {
-          handleError("Belege laden", error, $q);
-        }
-      }
-    };
-
-    const handleSelectedReceipts = (selectedIds: string[]) => {
-      selectedReceiptIds.value = selectedIds;
-    };
-
-    const getCategoryIcon = (categoryName: string): string => {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.icon : "help_outline";
-    };
-
-    const getCategoryColor = (categoryName: string): string => {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.color : "primary";
-    };
 
     return {
       columnsList: articleColumnsList,
@@ -467,13 +259,13 @@ export default defineComponent({
       calculatedTotalPerReceipt,
       categories,
       handleSelectedReceipts,
-      selectedReceiptIds,
       updateCategory,
       updateUnit,
       getCategoryIcon,
       getCategoryColor,
       isGridView,
       toggleView,
+      handleSelectedCategory,
     };
   },
 });
@@ -485,6 +277,7 @@ export default defineComponent({
   border-radius: 15px;
   border: 1px solid $primary;
 }
+
 :deep(th) {
   font-size: 14px;
   color: $dark;
@@ -513,6 +306,7 @@ h5 {
 .q-mt-md {
   margin-top: 16px;
 }
+
 .q-mb-md {
   margin-bottom: 16px;
 }

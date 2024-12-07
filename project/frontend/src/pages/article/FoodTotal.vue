@@ -63,7 +63,12 @@
     </q-expansion-item>
 
     <!-- Total pro Kategorie -->
-    <q-expansion-item default-opened color="primary" :dense="false" class="my-card">
+    <q-expansion-item
+      default-opened
+      color="primary"
+      :dense="false"
+      class="my-card"
+    >
       <template v-slot:header>
         <q-item-section avatar>
           <q-avatar icon="hub" class="colored-icon" />
@@ -79,7 +84,7 @@
           v-model="categorySortCriteria"
           :options="[
             { label: 'Name', value: 'Name' },
-            { label: 'Total', value: '^Total' },
+            { label: 'Total', value: 'Total' },
           ]"
           label="Sortieren nach"
           dense
@@ -90,7 +95,12 @@
 
       <q-scroll-area style="height: 300px">
         <q-list>
-          <q-item v-for="item in sortedTotalsPerCategory" :key="item.category">
+          <q-item
+            v-for="item in sortedTotalsPerCategory"
+            :key="item.category"
+            clickable
+            @click="toggleCategorySelection(item.category)"
+          >
             <q-item-section>
               <q-icon
                 size="sm"
@@ -98,8 +108,10 @@
                 :color="getCategoryColor(item.category)"
               />
             </q-item-section>
-            <q-item-section style="margin-left: 18px;">
-              {{ item.category }}
+            <q-item-section style="margin-left: 18px">
+              <div :style="{ 'font-weight': selectedCategory === item.category ? 'bold' : 'normal' }">
+                {{ item.category }}
+              </div>
             </q-item-section>
             <q-item-section side>
               <div class="text-body1">{{ item.total.toFixed(2) }}.-</div>
@@ -134,12 +146,12 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["update:selectedReceipts"],
+  emits: ["update:selectedReceipts", "update:selectedCategory"],
   setup(props, { emit }) {
     const selectedReceipts = reactive<Record<string, boolean>>({});
-
     const receiptSortCriteria = ref<"Datum" | "Total">("Datum");
     const categorySortCriteria = ref<"Name" | "Total">("Name");
+    const selectedCategory = ref<string | null>(null);
 
     const sortedTotalsPerReceipt = computed(() => {
       return [...props.totalsPerReceipt].sort((a, b) => {
@@ -150,6 +162,7 @@ export default defineComponent({
         }
       });
     });
+
     const sortedTotalsPerCategory = computed(() => {
       const categoriesArray = Object.entries(props.totalsPerCategory).map(
         ([category, total]) => ({
@@ -170,9 +183,18 @@ export default defineComponent({
       selectedReceipts[id] = value;
     };
 
+    const toggleCategorySelection = (category: string) => {
+      // Wenn erneut auf dieselbe Kategorie geklickt wird, Filter wieder entfernen
+      if (selectedCategory.value === category) {
+        selectedCategory.value = null;
+      } else {
+        selectedCategory.value = category;
+      }
+    };
+
     const getCategoryIcon = (categoryName: string): string => {
       const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.icon : "help_outline"; // "help_outline" als Standard-Icon
+      return category ? category.icon : "help_outline";
     };
 
     const getCategoryColor = (categoryName: string): string => {
@@ -203,9 +225,14 @@ export default defineComponent({
       { immediate: true, deep: true }
     );
 
+    watch(selectedCategory, (newVal) => {
+      emit("update:selectedCategory", newVal);
+    });
+
     return {
       selectedReceipts,
       toggleReceiptSelection,
+      toggleCategorySelection,
       formatDate,
       sortedTotalsPerReceipt,
       sortedTotalsPerCategory,
@@ -213,6 +240,7 @@ export default defineComponent({
       categorySortCriteria,
       getCategoryIcon,
       getCategoryColor,
+      selectedCategory,
     };
   },
 });
