@@ -470,7 +470,6 @@ export default defineComponent({
       updateUnit,
       getCategoryIcon,
       getCategoryColor,
-      // Neuer Zustand und Methode
       isGridView,
       toggleView,
     };
@@ -514,5 +513,9 @@ h5 {
 }
 .q-mb-md {
   margin-bottom: 16px;
+}
+
+.q-btn {
+  height: 45px;
 }
 </style>

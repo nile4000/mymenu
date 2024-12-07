@@ -26,7 +26,7 @@
           class="detail-icon"
           color="amber"
         />
-        <span>{{ recipe.stepsList.length }} Steps</span>
+        <span>{{ recipe.stepsList.length }} Schritte</span>
       </div>
       <div class="detail-item">
         <q-icon

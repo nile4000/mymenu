@@ -5,7 +5,7 @@
         <q-item-label class="text-h6" style="font-size: 16px"
           >Gesamtausgaben</q-item-label
         >
-        <q-item-label class="text-h6" caption style="min-height: 70px">
+        <q-item-label class="text-h6" caption style="min-height: fit-content">
           <template v-if="totalExpenses.firstMonth">
             vom {{ formatMonth(totalExpenses.firstMonth) }}
             {{ totalExpenses.firstYear }}
@@ -27,7 +27,7 @@
           >Top Kategorie</q-item-label
         >
 
-        <q-item-label class="text-h6" caption style="min-height: 70px"
+        <q-item-label class="text-h6" caption style="min-height: fit-content"
           ><template v-if="topCategory.name">
             <q-icon size="1.9em" name="star" color="amber" />
             {{ topCategory.name }}</template
