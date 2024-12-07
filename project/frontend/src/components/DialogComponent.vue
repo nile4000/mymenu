@@ -43,33 +43,34 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, PropType } from "vue";
+import { useQuasar } from "quasar";
+import { computed, defineComponent, PropType, ref, Ref } from "vue";
+import { handleError } from "../helpers/composables/UseErrors";
+import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
 import { Column } from "../helpers/interfaces/column.interface";
-import { saveArticlesAndReceipt } from "../services/saveArticles";
+import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { ResponseItem } from "../helpers/interfaces/response-item.interface";
 import {
   createBatches,
   prepareArticlesPrices,
   prepareDialogArticles,
-  processAllBatches,
+  processAllBatches
 } from "../services/aiRequest.service";
-import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
-import { useQuasar } from "quasar";
+import { saveArticlesAndReceipt } from "../services/saveArticles";
 import {
   upsertArticleCategories,
-  upsertArticleUnits,
+  upsertArticleUnits
 } from "../services/updateArticle";
 import {
   categorizationPrompt,
   categorySystemPrompt,
-  validateExtractedCategories,
+  validateExtractedCategories
 } from "./prompts/categorization";
 import {
   detailExtractionPrompt,
   detailSystemPrompt,
-  validateExtractedDetails,
+  validateExtractedDetails
 } from "./prompts/detailExtraction";
-import { handleError } from "../helpers/composables/UseErrors";
 
 const columns: Column[] = [
   {
@@ -99,7 +100,7 @@ export default defineComponent({
 
     const $q = useQuasar();
 
-    const receiptData = computed(() => ({
+    const receiptData: Ref<Receipt> = computed(() => ({
       Uuid: props.response[0].UID,
       Purchase_Date: props.response[0].Purchase_Date,
       Created_At: props.response[0].Created_At,

@@ -8,30 +8,26 @@ export function useFilters(rows: Article[]) {
   const filterFields = ["Name", "Purchase_Date", "Category"] as const;
 
   const filteredRows = computed(() => {
-    let filtered = rows;
     const cleanedSearch = search.value.trim().toLowerCase();
-    if (cleanedSearch) {
-      filtered = filtered.filter((row) =>
-        filterFields.some((field) => {
-          const fieldValue = row[field];
-          return fieldValue && String(fieldValue).toLowerCase().includes(cleanedSearch);
-        })
-      );
-    }
 
-    if (selectedReceiptIds.value.length > 0) {
-      filtered = filtered.filter(
-        (row) => row.Receipt_Id && selectedReceiptIds.value.includes(String(row.Receipt_Id))
-      );
-    } else {
-      filtered = [];
-    }
+    return rows.filter((row) => {
+      const matchesSearch =
+        !cleanedSearch ||
+        filterFields.some((field) =>
+          row[field]
+            ? String(row[field]).toLowerCase().includes(cleanedSearch)
+            : false
+        );
 
-    if (selectedCategory.value) {
-      filtered = filtered.filter((row) => row.Category === selectedCategory.value);
-    }
+      const matchesReceipt =
+        selectedReceiptIds.value.length === 0 ||
+        (row.Receipt_Id && selectedReceiptIds.value.includes(String(row.Receipt_Id)));
 
-    return filtered;
+      const matchesCategory =
+        !selectedCategory.value || row.Category === selectedCategory.value;
+
+      return matchesSearch && matchesReceipt && matchesCategory;
+    });
   });
 
   return {

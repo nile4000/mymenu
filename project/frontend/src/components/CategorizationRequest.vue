@@ -34,24 +34,26 @@ import { handleError } from "../helpers/composables/UseErrors";
 import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
 import { Article } from "../helpers/interfaces/article.interface";
 import {
-  createBatches, prepareArticles, prepareArticlesPrices, processAllBatches
+  createBatches,
+  prepareArticles,
+  prepareArticlesPrices,
+  processAllBatches,
 } from "../services/aiRequest.service";
 import { deleteArticleById } from "../services/deleteArticle";
 import {
   upsertArticleCategories,
-  upsertArticleUnits
+  upsertArticleUnits,
 } from "../services/updateArticle";
 import {
   categorizationPrompt,
   categorySystemPrompt,
-  validateExtractedCategories
+  validateExtractedCategories,
 } from "./prompts/categorization";
 import {
   detailExtractionPrompt,
   detailSystemPrompt,
-  validateExtractedDetails
+  validateExtractedDetails,
 } from "./prompts/detailExtraction";
-
 
 export default defineComponent({
   name: "CategorizationRequest",
@@ -163,6 +165,10 @@ export default defineComponent({
     const deleteArticle = async (id: string) => {
       try {
         await deleteArticleById(id);
+        $q.notify({
+          type: "positive",
+          message: "Artikel gelöscht!",
+        });
       } catch (error) {
         handleError("Artikel löschen", error, $q);
       }

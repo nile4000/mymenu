@@ -17,7 +17,7 @@ import { QVueGlobals } from "quasar";
 import { RealtimeChannel } from "@supabase/supabase-js";
 
 export function useArticles($q: QVueGlobals) {
-  const rows = reactive<any>([]);
+  const rows = reactive<Article[]>([]);
   const receipts = reactive<Record<string, Receipt>>({});
   let channel: RealtimeChannel;
 
