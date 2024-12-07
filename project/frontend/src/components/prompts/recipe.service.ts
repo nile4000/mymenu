@@ -2,7 +2,38 @@ import { AxiosResponse } from "axios";
 import { Article } from "../../helpers/interfaces/article.interface";
 import { callOpenAiApi } from "../../services/aiRequest.service";
 
-const systemPrompt = `You are a cooking-recipe assistant. You will receive a list of ingredients and should return a single JSON without explanation, in this exact structure: {"id": number, "title": string, "description": string, "cookingTime": string, "category": string, "servings": number, "color": string, "ingredients": string[], "stepsList": string[], "image": string } Use only the given ingredients. Make sure the JSON is valid and does not contain any additional text. If you cannot comply, return an empty JSON {}.`;
+const RECIPE_STRUCTURE = {
+  title: "string",
+  description: "string",
+  cookingTime: "string",
+  category: "string",
+  servings: "number",
+  color: "string",
+  ingredients: ["string"],
+  stepsList: ["string"],
+  image: "string",
+};
+
+const systemPrompt = `You are a cooking-recipe assistant. You will receive a list of ingredients and should return a single JSON without explanation, in this exact structure: ${JSON.stringify(
+  RECIPE_STRUCTURE
+)} Use only the given ingredients. Make sure the JSON is valid and does not contain any additional text. If you cannot comply, return an empty JSON {}.`;
+
+function createExampleRecipeJson(servings: number): string {
+  // set placeholder values
+  const example = {
+    title: "Titel des Rezepts",
+    description: "Kurze Beschreibung des Gerichts",
+    cookingTime: "45 Min",
+    category: "Kategorie des Gerichts",
+    servings: servings,
+    color: "card-background1",
+    ingredients: ["Zutat 1", "Zutat 2"],
+    stepsList: ["Schritt 1", "Schritt 2"],
+    image: "https://example.com/image.jpg",
+  };
+
+  return JSON.stringify(example, null, 2);
+}
 
 export function createRecipePrompt(
   articles: Article[],
@@ -17,23 +48,14 @@ export function createRecipePrompt(
     )
     .join("\n");
 
+  const exampleJson = createExampleRecipeJson(servings);
+
   return `Hier sind meine verfügbaren Zutaten:
 ${ingredientsList}
 
 Erstelle ein Rezept für ca. ${servings} Personen, das diese Zutaten verwendet. Gib nur ein gültiges JSON im folgenden Format zurück, ohne weitere Erklärungen:
 
-{
-  "id": 1,
-  "title": "Titel des Rezepts",
-  "description": "Kurze Beschreibung des Gerichts",
-  "cookingTime": "Zubereitungszeit, z.B. 45 Min",
-  "category": "Kategorie des Gerichts",
-  "servings": ${servings},
-  "color": "card-background1",
-  "ingredients": ["Zutat 1", "Zutat 2"],
-  "stepsList": ["Schritt 1", "Schritt 2"],
-  "image": "https://example.com/image.jpg"
-}
+${exampleJson}
 
 Bitte mache keine anderen Ausgaben, nur dieses JSON.`;
 }

@@ -77,7 +77,7 @@ export default defineComponent({
     },
   },
   emits: ["update:selected"],
-  setup(props, { emit }) {
+  setup() {
     const $q = useQuasar();
 
     const getCategoryIcon = (categoryName: string): string => {
