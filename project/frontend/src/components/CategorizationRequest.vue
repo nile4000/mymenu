@@ -63,7 +63,8 @@ export default defineComponent({
       default: () => [],
     },
   },
-  setup(props) {
+  emits: ["article-deleted"],
+  setup(props, { emit }) {
     const $q = useQuasar();
     const isLoading = ref(false);
 
@@ -165,6 +166,7 @@ export default defineComponent({
     const deleteArticle = async (id: string) => {
       try {
         await deleteArticleById(id);
+        emit("article-deleted", id);
         $q.notify({
           type: "positive",
           message: "Artikel gelöscht!",

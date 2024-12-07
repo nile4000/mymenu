@@ -13,7 +13,10 @@
         @update:selectedReceipts="handleSelectedReceipts"
         @update:selectedCategory="handleSelectedCategory"
       />
-      <CategorizationRequest :selectedItems="selected" />
+      <CategorizationRequest
+        :selectedItems="selected"
+        @article-deleted="onArticleDeleted"
+      />
     </div>
 
     <div class="column items-center">
@@ -47,7 +50,7 @@
         :columns="columns"
         row-key="Id"
         :pagination="initialPagination"
-        v-model="selected"
+        v-model:selected="selected"
         selection="multiple"
         class="table-custom"
         no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
@@ -149,11 +152,11 @@ import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import {
   categories,
-  categoryIcon
+  categoryIcon,
 } from "../../components/prompts/categorization";
 import {
   articleColumns,
-  articleColumnsList
+  articleColumnsList,
 } from "../../helpers/columns/articleColumns";
 import { useArticles } from "../../helpers/composables/UseArticles";
 import { handleError } from "../../helpers/composables/UseErrors";
@@ -214,6 +217,10 @@ export default defineComponent({
       calculatedTotalPerReceipt,
     } = useTotals(rows, receipts);
 
+    function onArticleDeleted(id: string) {
+      selected.value = selected.value.filter((item) => item.Id !== id);
+    }
+
     function handleSelectedReceipts(ids: string[]) {
       selectedReceiptIds.value = ids;
     }
@@ -268,6 +275,7 @@ export default defineComponent({
       calculatedTotalPerReceipt,
       categories,
       onItemSelected,
+      onArticleDeleted,
       handleSelectedReceipts,
       updateCategory,
       updateUnit,

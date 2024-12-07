@@ -9,9 +9,9 @@
       :class="selected ? ($q.dark.isActive ? '$positive' : 'bg-grey-2') : ''"
     >
       <q-card-section class="q-pa-xs row justify-between">
-        <!-- ToDo: selected @click.stop="$emit('update:selected', !selected)" -->
         <div
           style="margin: 5px; white-space: break-all; width: 80%"
+          @click.stop="$emit('update:selected', !selected)"
         >
           {{ row.Name }}
         </div>
