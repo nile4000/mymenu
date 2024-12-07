@@ -48,6 +48,7 @@ export function useArticles($q: QVueGlobals) {
 
   function handleArticleChange(payload: any) {
     const newArticle = payload.new as Article;
+    const oldArticle = payload.old as Article;
     const eventType = payload.eventType;
     switch (eventType) {
       case "INSERT":
@@ -56,7 +57,7 @@ export function useArticles($q: QVueGlobals) {
       case "DELETE":
         {
           const indexToDelete = rows.findIndex(
-            (article: Article) => article.Id === newArticle.Id
+            (article: Article) => article.Id === oldArticle.Id
           );
           if (indexToDelete !== -1) rows.splice(indexToDelete, 1);
         }
