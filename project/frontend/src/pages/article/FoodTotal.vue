@@ -98,7 +98,7 @@
                 :color="getCategoryColor(item.category)"
               />
             </q-item-section>
-            <q-item-section>
+            <q-item-section style="margin-left: 18px;">
               {{ item.category }}
             </q-item-section>
             <q-item-section side>

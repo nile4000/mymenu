@@ -13,7 +13,9 @@
         @update:selectedReceipts="handleSelectedReceipts"
       />
       <CategorizationRequest :selectedItems="selected" />
-      <!-- Button zum Wechseln der Ansicht -->
+    </div>
+    <!-- Button zum Wechseln der Ansicht -->
+    <div class="column items-center">
       <q-btn
         @click="toggleView"
         unelevated
