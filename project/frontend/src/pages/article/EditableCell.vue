@@ -73,17 +73,20 @@ export default defineComponent({
     },
     updateCategory: {
       type: Function as PropType<(article: Article) => void>,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       default: () => {},
     },
     updateUnit: {
       type: Function as PropType<(article: Article) => void>,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       default: () => {},
     },
   },
   setup(props) {
-    const currentValue = computed({
-      get() {
-        return props.props.row[props.fieldName];
+    const currentValue = computed<string>({
+      get(): string {
+        const val = props.props.row[props.fieldName];
+        return val === undefined ? "" : val;
       },
       set(newVal: string) {
         props.props.row[props.fieldName] = newVal;
