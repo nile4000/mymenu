@@ -13,11 +13,13 @@ import {
   upsertArticleCategory,
   upsertArticleUnit,
 } from "src/services/updateArticle";
+import { QVueGlobals } from "quasar";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
-export function useArticles($q: any) {
-  const rows = reactive<Article[]>([]);
+export function useArticles($q: QVueGlobals) {
+  const rows = reactive<any>([]);
   const receipts = reactive<Record<string, Receipt>>({});
-  let channel: any;
+  let channel: RealtimeChannel;
 
   async function loadArticles() {
     const data = await readAllArticles();
@@ -54,7 +56,7 @@ export function useArticles($q: any) {
       case "DELETE":
         {
           const indexToDelete = rows.findIndex(
-            (article) => article.Id === newArticle.Id
+            (article: Article) => article.Id === newArticle.Id
           );
           if (indexToDelete !== -1) rows.splice(indexToDelete, 1);
         }
@@ -62,7 +64,7 @@ export function useArticles($q: any) {
       case "UPDATE":
         {
           const updateIndex = rows.findIndex(
-            (article) => article.Id === newArticle.Id
+            (article: Article) => article.Id === newArticle.Id
           );
           if (updateIndex !== -1) {
             rows[updateIndex] = newArticle;
@@ -72,7 +74,6 @@ export function useArticles($q: any) {
         }
         break;
       default:
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         $q.notify({
           type: "warning",
           message: `Unknown event type: ${eventType}`,

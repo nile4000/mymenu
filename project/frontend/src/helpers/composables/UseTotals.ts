@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { computed } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { Receipt } from "../interfaces/receipt.interface";

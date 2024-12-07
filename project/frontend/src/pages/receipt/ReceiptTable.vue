@@ -88,16 +88,17 @@
 </template>
 
 <script lang="ts">
-import { Receipt } from "../../helpers/interfaces/receipt.interface";
-import { Column } from "../../helpers/interfaces/column.interface";
-import { defineComponent, ref, onMounted } from "vue";
-import { readAllReceipts } from "../../services/readAllReceipts";
-import { deleteReceiptById } from "../../services/deleteReceipt";
-import { formatDateShort, formatDate } from "../../helpers/dateHelpers";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { useQuasar } from "quasar";
-import ScannerPage from "../Scanner.vue";
+import { defineComponent, onMounted, ref } from "vue";
 import { handleError } from "../../helpers/composables/UseErrors";
+import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
+import { Column } from "../../helpers/interfaces/column.interface";
+import { Receipt } from "../../helpers/interfaces/receipt.interface";
+import { deleteReceiptById } from "../../services/deleteReceipt";
+import { readAllReceipts } from "../../services/readAllReceipts";
 import { subscribeToReceiptChanges } from "../../services/realtimeReceipts";
+import ScannerPage from "../Scanner.vue";
 
 // Defining the columns
 const columns: Column[] = [
@@ -125,7 +126,7 @@ export default defineComponent({
     const selected = ref<string[]>([]);
     const allRows: Receipt[] = [];
 
-    let channel: any;
+    let channel: RealtimeChannel;
 
     const initialPagination = ref({
       sortBy: "desc",

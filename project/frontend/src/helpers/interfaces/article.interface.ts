@@ -9,6 +9,6 @@ export interface Article {
   Quantity: number;
   Discount: number;
   Total: number;
-  Purchase_Date?: string;
+  Purchase_Date: string;
   Category?: string;
 }

@@ -10,7 +10,7 @@
             vom {{ formatMonth(totalExpenses.firstMonth) }}
             {{ totalExpenses.firstYear }}
             -
-            {{ formatMonth(totalExpenses.lastMonth) }}
+            {{ formatMonth(totalExpenses.lastMonth || 0) }}
             {{ totalExpenses.lastYear }}</template
           ></q-item-label
         >

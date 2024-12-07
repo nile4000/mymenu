@@ -89,6 +89,7 @@ export default defineComponent({
         return val === undefined ? "" : val;
       },
       set(newVal: string) {
+        // eslint-disable-next-line vue/no-mutating-props
         props.props.row[props.fieldName] = newVal;
       },
     });

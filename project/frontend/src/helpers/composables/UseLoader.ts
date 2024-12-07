@@ -1,4 +1,6 @@
-export const showLoading = (message: string, $q: any): boolean => {
+import { QVueGlobals } from "quasar";
+
+export const showLoading = (message: string, $q: QVueGlobals): boolean => {
   $q.loading.show({
     message: message,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -8,7 +10,7 @@ export const showLoading = (message: string, $q: any): boolean => {
   return true;
 };
 
-export const hideLoading = ($q: any): boolean => {
+export const hideLoading = ($q: QVueGlobals): boolean => {
   $q.loading.hide();
   return false;
 };

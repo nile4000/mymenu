@@ -28,32 +28,30 @@
 </template>
 
 <script lang="ts">
-import { Article } from "../helpers/interfaces/article.interface";
+import { useQuasar } from "quasar";
 import { defineComponent, PropType, ref } from "vue";
+import { handleError } from "../helpers/composables/UseErrors";
+import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
+import { Article } from "../helpers/interfaces/article.interface";
+import {
+  createBatches, prepareArticles, prepareArticlesPrices, processAllBatches
+} from "../services/aiRequest.service";
+import { deleteArticleById } from "../services/deleteArticle";
 import {
   upsertArticleCategories,
-  upsertArticleUnits,
+  upsertArticleUnits
 } from "../services/updateArticle";
-import { useQuasar } from "quasar";
-import {
-  prepareArticles,
-  createBatches,
-  processAllBatches,
-  prepareArticlesPrices,
-} from "../services/aiRequest.service";
-import { showLoading, hideLoading } from "../helpers/composables/UseLoader";
-import { deleteArticleById } from "../services/deleteArticle";
 import {
   categorizationPrompt,
   categorySystemPrompt,
-  validateExtractedCategories,
+  validateExtractedCategories
 } from "./prompts/categorization";
 import {
   detailExtractionPrompt,
   detailSystemPrompt,
-  validateExtractedDetails,
+  validateExtractedDetails
 } from "./prompts/detailExtraction";
-import { handleError } from "../helpers/composables/UseErrors";
+
 
 export default defineComponent({
   name: "CategorizationRequest",

@@ -9,16 +9,16 @@
       :class="selected ? ($q.dark.isActive ? '$positive' : 'bg-grey-2') : ''"
     >
       <q-card-section class="q-pa-xs row justify-between">
-        <q-checkbox
-          style="white-space: break-all; width: 80%"
-          v-model="selected"
-          checked-icon="radio_button_checked"
-          unchecked-icon="radio_button_unchecked"
-          :label="row.Name"
-        />
+        <!-- ToDo: selected @click.stop="$emit('update:selected', !selected)" -->
+        <div
+          style="margin: 5px; white-space: break-all; width: 80%"
+        >
+          {{ row.Name }}
+        </div>
+
         <q-icon
-          :name="getCategoryIcon(row.Category)"
-          :color="getCategoryColor(row.Category)"
+          :name="getCategoryIcon(row.Category || '')"
+          :color="getCategoryColor(row.Category || '')"
           size="md"
         >
           <q-tooltip anchor="center left" class="text-h6">

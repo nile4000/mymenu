@@ -74,23 +74,13 @@ import { handleError } from "../helpers/composables/UseErrors";
 const columns: Column[] = [
   {
     name: "Name",
-    required: true,
     label: "Name",
     align: "left",
     field: "Name",
     sortable: true,
   },
-  // {
-  //   name: "Preis",
-  //   align: "center",
-  //   label: "Preis",
-  //   field: "Price",
-  //   sortable: true,
-  // },
   { name: "Menge", label: "Menge", field: "Quantity", sortable: true },
-  // { name: "Rabatt", label: "Aktion", field: "Discount", sortable: true },
   { name: "Total", label: "Gesamt", field: "Total", sortable: true },
-  // { name: "Kategorie", label: "Kategorie", field: "Category", sortable: true },
 ];
 
 export default defineComponent({
@@ -132,7 +122,7 @@ export default defineComponent({
         if (performUnitExtraction.value) {
           await extractUnit(result.articles);
         }
-      } catch (error: any) {
+      } catch (error) {
         handleError("Speichern", error, $q);
       }
     };
@@ -164,7 +154,7 @@ export default defineComponent({
           "gpt-4o-mini-2024-07-18",
           categorySystemPrompt
         );
-      } catch (error: any) {
+      } catch (error) {
         handleError("Kategorisierung", error, $q);
       } finally {
         isLoading.value = hideLoading($q);
@@ -186,7 +176,7 @@ export default defineComponent({
         await processAllBatches(
           batches,
           detailExtractionPrompt,
-          async (extractedDetails: any[]) => {
+          async (extractedDetails) => {
             const validExtractedDetails =
               validateExtractedDetails(extractedDetails);
             if (validExtractedDetails.length > 0) {
@@ -202,7 +192,7 @@ export default defineComponent({
           "gpt-4o-mini-2024-07-18",
           detailSystemPrompt
         );
-      } catch (error: any) {
+      } catch (error) {
         handleError("Einheitsextraktion", error, $q);
       } finally {
         isLoading.value = hideLoading($q);

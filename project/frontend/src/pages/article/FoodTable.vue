@@ -47,7 +47,7 @@
         :columns="columns"
         row-key="Id"
         :pagination="initialPagination"
-        v-model:selected="selected"
+        v-model="selected"
         selection="multiple"
         class="table-custom"
         no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
@@ -73,7 +73,8 @@
           <FoodGrid
             :row="props.row"
             :cols="props.cols"
-            v-model:selected="props.selected"
+            :selected="props.selected"
+            @update:selected="(val) => onItemSelected(props.row, val)"
           />
         </template>
       </q-table>
@@ -143,27 +144,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import FoodControl from "./FoodControl.vue";
-import FoodTotal from "./FoodTotal.vue";
-import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { useQuasar } from "quasar";
-import { useTotals } from "../../helpers/composables/UseTotals";
-import FoodGrid from "./FoodGrid.vue";
-import {
-  articleColumns,
-  articleColumnsList,
-} from "../../helpers/columns/articleColumns";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import {
   categories,
-  categoryIcon,
+  categoryIcon
 } from "../../components/prompts/categorization";
-import { Article } from "../../helpers/interfaces/article.interface";
-import { handleError } from "../../helpers/composables/UseErrors";
+import {
+  articleColumns,
+  articleColumnsList
+} from "../../helpers/columns/articleColumns";
 import { useArticles } from "../../helpers/composables/UseArticles";
+import { handleError } from "../../helpers/composables/UseErrors";
 import { useFilters } from "../../helpers/composables/UseFilters";
+import { useTotals } from "../../helpers/composables/UseTotals";
 import { useViewMode } from "../../helpers/composables/UseViewMode";
+import { Article } from "../../helpers/interfaces/article.interface";
 import EditableCell from "./EditableCell.vue";
+import FoodControl from "./FoodControl.vue";
+import FoodGrid from "./FoodGrid.vue";
+import FoodTotal from "./FoodTotal.vue";
 
 export default defineComponent({
   name: "FoodTable",
@@ -231,6 +232,14 @@ export default defineComponent({
       return category ? category.color : "primary";
     }
 
+    function onItemSelected(row: Article, isSelected: boolean) {
+      if (isSelected && !selected.value.includes(row)) {
+        selected.value.push(row);
+      } else if (!isSelected) {
+        selected.value = selected.value.filter((item) => item.Id !== row.Id);
+      }
+    }
+
     onMounted(async () => {
       try {
         await loadArticles();
@@ -258,6 +267,7 @@ export default defineComponent({
       totalExpenses,
       calculatedTotalPerReceipt,
       categories,
+      onItemSelected,
       handleSelectedReceipts,
       updateCategory,
       updateUnit,
