@@ -5,7 +5,7 @@
         <q-item-label class="text-h6" style="font-size: 16px"
           >Gesamtausgaben</q-item-label
         >
-        <q-item-label class="text-h6" caption>
+        <q-item-label class="text-h6" caption style="min-height: 70px">
           <template v-if="totalExpenses.firstMonth">
             vom {{ formatMonth(totalExpenses.firstMonth) }}
             {{ totalExpenses.firstYear }}

@@ -39,6 +39,25 @@
             </q-list>
           </q-expansion-item>
         </q-card-section>
+        <q-card-section style="margin-top: 0px">
+          <q-expansion-item :dense="false" class="custom-card">
+            <template v-slot:header>
+              <q-item-section avatar>
+                <q-avatar icon="receipt_long" class="colored-icon2" />
+              </q-item-section>
+              <q-item-section style="font-weight: bold">
+                Belege
+              </q-item-section>
+            </template>
+            <q-list>
+              <q-item v-for="item in categories" :key="item">
+                <q-item-section>
+                  {{ item }}
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
+        </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Abbrechen" color="negative" v-close-popup />
           <q-btn
@@ -237,6 +256,14 @@ export default defineComponent({
   :deep(.q-avatar__content) {
     .q-icon {
       color: $secondary !important;
+    }
+  }
+}
+
+.colored-icon2 {
+  :deep(.q-avatar__content) {
+    .q-icon {
+      color: $negative !important;
     }
   }
 }
