@@ -37,7 +37,7 @@
       Artikel ({{ selected.length }} / {{ filteredRows.length }})
     </h5>
 
-    <div v-if="isGridView">
+    <div v-if="isGridView" style="padding-bottom: 70px">
       <!-- Grid Ansicht -->
       <q-table
         flat
@@ -79,7 +79,7 @@
       </q-table>
     </div>
 
-    <div v-else>
+    <div v-else style="padding-bottom: 70px">
       <!-- Tabellenansicht -->
       <q-table
         flat

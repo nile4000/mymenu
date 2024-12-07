@@ -3,8 +3,7 @@ import { Article } from "../helpers/interfaces/article.interface";
 import { Ref } from "vue";
 
 const OPEN_AI_URL = "https://api.openai.com/v1/chat/completions";
-// const OPEN_AI_MODEL = "gpt-4o-mini";
-const OPEN_AI_TEMP = "gpt-3.5-turbo-0125";
+const OPEN_AI_TEMP_MODEL = "gpt-3.5-turbo-0125";
 
 // preparation
 export function prepareArticles(items: Article[]) {
@@ -123,7 +122,7 @@ export async function processAllBatches(
 }
 
 // call
-async function callOpenAiApi(
+export async function callOpenAiApi(
   prompt: string,
   model: string,
   systemPrompt: string
@@ -131,7 +130,7 @@ async function callOpenAiApi(
   return axios.post(
     OPEN_AI_URL,
     {
-      model: model || OPEN_AI_TEMP,
+      model: model || OPEN_AI_TEMP_MODEL,
       messages: [
         {
           role: "system",

@@ -26,9 +26,9 @@
               <q-item-section avatar>
                 <q-avatar icon="category" class="colored-icon" />
               </q-item-section>
-              <q-item-section style="font-weight: bold">
-                Kategorie
-              </q-item-section>
+              <q-item-section style="font-weight: bold"
+                >Kategorie</q-item-section
+              >
             </template>
             <q-list>
               <q-item v-for="item in categories" :key="item">
@@ -45,9 +45,7 @@
               <q-item-section avatar>
                 <q-avatar icon="receipt_long" class="colored-icon2" />
               </q-item-section>
-              <q-item-section style="font-weight: bold">
-                Belege
-              </q-item-section>
+              <q-item-section style="font-weight: bold">Belege</q-item-section>
             </template>
             <q-list>
               <q-item v-for="item in categories" :key="item">
@@ -65,7 +63,7 @@
             label="Erstellen"
             color="primary"
             style="font-weight: bold"
-            v-close-popup
+            @click="handleSendRequest"
           />
         </q-card-actions>
       </q-card>
@@ -86,25 +84,12 @@
 </template>
 
 <script lang="ts">
-import { Article } from "../helpers/interfaces/article.interface";
 import { defineComponent, PropType, ref } from "vue";
-
 import { useQuasar } from "quasar";
-
-import { showLoading, hideLoading } from "../helpers/composables/UseLoader";
-import { deleteArticleById } from "../services/deleteArticle";
-import {
-  categorizationPrompt,
-  categorySystemPrompt,
-  validateExtractedCategories,
-} from "./prompts/categorization";
-import {
-  detailExtractionPrompt,
-  detailSystemPrompt,
-  validateExtractedDetails,
-} from "./prompts/detailExtraction";
 import { handleError } from "../helpers/composables/UseErrors";
 import { categories } from "./prompts/receipe";
+import { sendSingleRecipeRequest } from "./prompts/recipe.service";
+import { Article } from "../helpers/interfaces/article.interface";
 
 export default defineComponent({
   name: "RecipeRequest",
@@ -114,130 +99,53 @@ export default defineComponent({
       default: () => [],
     },
   },
-  setup(props) {
+  emits: ["addRecipe"],
+  setup(props, { emit }) {
     const $q = useQuasar();
     const isLoading = ref(false);
     const showDialogRecipe = ref(false);
+    const standard = ref(2);
 
-    // const validateSelectedItems = () => {
-    //   if (props.selectedItems.length === 0) {
-    //     $q.notify({
-    //       type: "warning",
-    //       message: "Bitte wählen Sie mindestens einen Artikel aus.",
-    //     });
-    //     throw new Error("Keine ausgewählten Artikel.");
-    //   }
-    // };
-
-    // const sendCategorizationRequest = async () => {
-    //   try {
-    //     validateSelectedItems();
-    //     const preparedArticles = prepareArticles(props.selectedItems);
-    //     const batches = createBatches(preparedArticles, 40);
-    //     isLoading.value = showLoading("Kategorisierung läuft...", $q);
-
-    //     await processAllBatches(
-    //       batches,
-    //       categorizationPrompt,
-    //       validateAndUpdateCategory,
-    //       "gpt-4o-mini-2024-07-18",
-    //       categorySystemPrompt
-    //     );
-    //   } catch (error) {
-    //     handleError("Kategorisierung", error, $q);
-    //   } finally {
-    //     isLoading.value = hideLoading($q);
-    //     $q.notify({
-    //       type: "positive",
-    //       message: "Kategorisierung erfolgreich!",
-    //     });
-    //     // no further detail extraction
-    //     await sendDetailExtractionRequest();
-    //   }
-    // };
-
-    // async function validateAndUpdateCategory(
-    //   categorizedArticles: any[]
-    // ): Promise<void> {
-    //   const validCategorizedArticles =
-    //     validateExtractedCategories(categorizedArticles);
-    //   if (validCategorizedArticles.length > 0) {
-    //     await upsertArticleCategories(validCategorizedArticles);
-    //   } else {
-    //     $q.notify({
-    //       type: "warning",
-    //       message: "Keine gültigen kategorisierten Artikel gefunden.",
-    //     });
-    //     throw new Error("Ungültige extrahierte Einheiten.");
-    //   }
-    // }
-
-    // const sendDetailExtractionRequest = async () => {
-    //   try {
-    //     validateSelectedItems();
-    //     const preparedArticles = prepareArticlesPrices(props.selectedItems);
-    //     const batches = createBatches(preparedArticles, 40);
-    //     console.log(batches);
-
-    //     isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
-
-    //     await processAllBatches(
-    //       batches,
-    //       detailExtractionPrompt,
-    //       validateAndUpdateUnitExtraction,
-    //       "gpt-4o-mini-2024-07-18",
-    //       detailSystemPrompt
-    //     );
-    //   } catch (error) {
-    //     handleError("Einheitsextraktion", error, $q);
-    //   } finally {
-    //     isLoading.value = hideLoading($q);
-    //     $q.notify({
-    //       type: "positive",
-    //       message: "Einheitsextraktion erfolgreich!",
-    //     });
-    //   }
-    // };
-
-    // async function validateAndUpdateUnitExtraction(
-    //   extractedDetails: any[]
-    // ): Promise<void> {
-    //   const validExtractedDetails = validateExtractedDetails(extractedDetails);
-    //   if (validExtractedDetails.length > 0) {
-    //     await upsertArticleUnits(validExtractedDetails);
-    //   } else {
-    //     $q.notify({
-    //       type: "warning",
-    //       message: "Keine gültigen extrahierten Einheiten gefunden.",
-    //     });
-    //     throw new Error("Ungültige extrahierte Einheiten.");
-    //   }
-    // }
-
-    const deleteArticle = async (id: string) => {
+    const handleSendRequest = async () => {
       try {
-        await deleteArticleById(id);
+        if (props.selectedItems.length === 0) {
+          $q.notify({ type: "warning", message: "Keine Artikel ausgewählt!" });
+          return;
+        }
+
+        isLoading.value = true;
+        $q.loading.show({ message: "Rezept wird erstellt..." });
+
+        const lastItems = props.selectedItems.slice(-30);
+        const recipe = await sendSingleRecipeRequest(lastItems, standard.value);
+
+        emit("addRecipe", recipe);
+
+        $q.notify({
+          type: "positive",
+          message: "Rezept erfolgreich erstellt!",
+        });
       } catch (error) {
-        handleError("Artikel löschen", error, $q);
+        handleError("Rezept erstellen", error, $q);
+      } finally {
+        isLoading.value = false;
+        $q.loading.hide();
+        showDialogRecipe.value = false;
       }
     };
 
     return {
-      deleteArticle,
       isLoading,
       showDialogRecipe,
-      standard: ref(2),
+      standard,
       categories,
+      handleSendRequest,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.card-example {
-  margin: 0 auto;
-}
-
 .custom-card {
   background-color: $bar-background;
   border-radius: 15px;
@@ -267,23 +175,13 @@ export default defineComponent({
     }
   }
 }
-.button-loading-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 20px;
-}
+
 .q-btn {
   height: 45px;
 }
 
 .q-icon {
   margin-right: 10px;
-}
-.q-btn {
-  .q-icon {
-    margin-right: 10px;
-  }
 }
 
 .text-h6 {
@@ -298,16 +196,5 @@ export default defineComponent({
   z-index: 1000;
   background-color: $bar-background;
   border: 1px solid $primary;
-}
-
-@media (max-width: 459px) {
-  .btn-categorize {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 0;
-  }
-  .btn-details {
-    margin-bottom: 10px;
-  }
 }
 </style>
