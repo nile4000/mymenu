@@ -1,7 +1,7 @@
 {
   "name": "mymenu",
   "version": "0.0.1",
-  "description": "MyMenu - AI Meal Planner",
+  "description": "Receipt Scanner and AI Meal Planner",
   "productName": "MyMenu",
   "author": "Nils Lüem",
   "private": true,
@@ -18,7 +18,7 @@
     "axios": "^1.6.7",
     "core-js": "^3.6.5",
     "dotenv": "^16.4.5",
-    "firebase": "^9.0.2",
+    "firebase": "^9.23.0",
     "mymenu": "file:",
     "openai": "^4.67.3",
     "quasar": "^2.8.0",
