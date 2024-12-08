@@ -8,9 +8,9 @@
 
 ## Funktionen
 
-1. Einkaufsbeleg-Scannen: Registrierte Benutzer können ihren Coop oder Migros Einkaufsbeleg über ihr Desktop, Tablet oder Mobilgerät einscannen. Die Applikation unterstützt die Einlesung von Einkaufsbelegen als PDF-Datei. Deine Belege kannst du von Supercard oder deinem Migros-Cumulus-Konto heruntergeladen werden.
+1. Einkaufsbeleg-Scannen: Registrierte Benutzer können ihren Coop oder Migros Einkaufsbeleg über ihr Desktop, Tablet oder Mobilgerät einscannen. Die Applikation unterstützt die Einlesung von Einkaufsbelegen als PDF-Datei. Deine Belege kannst du von Supercard oder deinem Migros-Cumulus-Konto herunterladen.
 
-2. Textextraktion: Nach dem Einlesen wird der Beleg an das Backend gesendet, die für die Textextraktion und -aufbereitung zuständig ist. Diese Konversionsschicht stellt sicher, dass die Daten sparsam und in einem für die weitere Verarbeitung geeigneten Format vorliegen.
+2. Textextraktion: Nach dem Einlesen wird der Beleg an das Backend gesendet, das für die Textextraktion und -aufbereitung zuständig ist. Diese Konversionsschicht stellt sicher, dass die Daten sparsam und in einem für die weitere Verarbeitung geeigneten Format vorliegen.
 
 3. Datenverarbeitung mit ChatGPT: Die aufbereiteten Daten werden an ChatGPT übermittelt, wo sie strukturiert und in ein JSON-Format umgewandelt werden. Dies ermöglicht eine präzise und nutzerfreundliche Darstellung der Einkaufsdaten.
 
