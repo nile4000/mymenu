@@ -1,6 +1,6 @@
 # 🛸 My Menü - AI Essensplaner
 
-![alt text](image-1.png)
+![alt text](image.png)
 
 ## Showcase App
 
