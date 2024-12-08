@@ -49,16 +49,16 @@ public class ExtractionService {
             if (pdfFile == null) {
                 LOGGER.warning("No PDF file found in the request.");
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .header(FILE_REASON_HEADER, "No PDF file found in the request")
+                        .header(FILE_REASON_HEADER, "No valid PDF file found in the request.")
                         .build();
             }
 
             // Extract text from pdf
             String documentContent = FileUtils.getTextFromFile(pdfFile);
             if (documentContent == null) {
-                LOGGER.warning("Failed to extract text from the file.");
+                LOGGER.warning("Failed to extract text from PDF.");
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .header(FILE_REASON_HEADER, "Failed to extract text from the file")
+                        .header(FILE_REASON_HEADER, "Failed to extract text from PDF")
                         .build();
             }
 
@@ -71,18 +71,18 @@ public class ExtractionService {
             // OpenAI request
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
             if (articlesJson == null || articlesJson.isEmpty()) {
+                LOGGER.severe("Failed to retrieve articles from OpenAI.");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Failed to retrieve articles from OpenAI.")
                         .build();
             }
 
-            // LOGGER.info("Raw Articles JSON: " + articlesJson.toString());
             JsonArray sanitizedArticlesJson = sanitizeArticlesJson(articlesJson);
-            // LOGGER.info("Sanitized Articles JSON: " + sanitizedArticlesJson.toString());
+            LOGGER.fine("Sanitized Articles JSON: " + sanitizedArticlesJson.toString());
 
             // Convert sanitized JSON to Article objects
             List<Article> articles = convertJsonArrayToArticles(sanitizedArticlesJson);
-            LOGGER.info("Number of Articles Extracted: " + articles.size());
+            LOGGER.fine("Number of Articles Extracted: " + articles.size());
 
             String corp = textUtils.extractCorp(cleanedContent);
             UUID uid = UUID.randomUUID();
@@ -133,7 +133,7 @@ public class ExtractionService {
             if (sanitizedArticlesJson == null || sanitizedArticlesJson.isEmpty()) {
                 LOGGER.warning("JSON Response is empty!");
             } else {
-                LOGGER.info("JSON Response Built Successfully.");
+                LOGGER.fine("JSON Response Built Successfully.");
             }
 
             return Response.ok(jsonResponse)
@@ -151,7 +151,6 @@ public class ExtractionService {
         try {
             JsonArray response = openAiClient.askQuestion(fullQuestion);
             if (response == null || response.isEmpty()) {
-                LOGGER.severe("OpenAI response is null or empty.");
                 return Json.createArrayBuilder().build();
             }
             return response;
@@ -183,7 +182,7 @@ public class ExtractionService {
 
             for (Map.Entry<String, Object> entry : fieldsWithDefaults.entrySet()) {
                 String field = entry.getKey();
-                Object defaultValue = entry.getValue(); // Corrected
+                Object defaultValue = entry.getValue();
 
                 if (jsonObject.containsKey(field) && !jsonObject.isNull(field)) {
                     try {
@@ -223,7 +222,7 @@ public class ExtractionService {
         List<Article> articles = new ArrayList<>();
         for (jakarta.json.JsonValue jsonValue : articlesJson) {
             if (jsonValue.getValueType() != jakarta.json.JsonValue.ValueType.OBJECT) {
-                LOGGER.warning(
+                LOGGER.log(Level.WARNING,
                         "Invalid JSON value type for article. Expected OBJECT, found: " + jsonValue.getValueType());
                 continue; // Skip invalid entries
             }
@@ -262,7 +261,7 @@ public class ExtractionService {
                         : BigDecimal.ZERO;
                 article.setTotal(total);
 
-                // Initialize empty 'Category' field, its filled later
+                // Initialize empty 'Category' field, its filled later in FE
                 article.setCategory("");
 
                 // Correct data inconsistencies
@@ -271,7 +270,6 @@ public class ExtractionService {
                 articles.add(article);
             } catch (NumberFormatException | ClassCastException e) {
                 LOGGER.log(Level.SEVERE, "Error parsing article fields: " + jsonObject.toString(), e);
-                // Optionally, skip adding this article or add it with default values
             }
         }
         return articles;

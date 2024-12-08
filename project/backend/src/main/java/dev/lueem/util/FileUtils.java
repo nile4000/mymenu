@@ -67,7 +67,6 @@ public class FileUtils {
             tempFile.deleteOnExit();
             try (InputStream inputStream = formValue.getFileItem().getInputStream()) {
                 Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                LOGGER.info("Saved uploaded PDF to temporary file: " + tempFile.getAbsolutePath());
                 return tempFile;
             }
         } catch (IOException e) {
@@ -86,7 +85,7 @@ public class FileUtils {
         try (PDDocument document = Loader.loadPDF(pdfFile)) {
             PDFLayoutTextStripper stripper = new PDFLayoutTextStripper();
             String text = stripper.getText(document);
-            LOGGER.info("Successfully extracted text from PDF.");
+            LOGGER.fine("Successfully extracted text from PDF.");
             return text;
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error extracting text from PDF: " + e.getMessage());

@@ -81,7 +81,7 @@ public class TextUtils {
     public String extractTotal(String receipt) {
         Matcher matcher = TOTAL_PATTERN.matcher(receipt);
         if (matcher.find()) {
-            // Extrahiere den Betrag aus der Zeile "Total CHF X.XX"
+            // Extract the amount from "Total CHF X.XX"
             String totalLine = matcher.group();
             Matcher amountMatcher = Pattern.compile("\\d+\\.\\d{2}").matcher(totalLine);
             if (amountMatcher.find()) {
@@ -119,9 +119,9 @@ public class TextUtils {
         if (terminatorMatcher.find()) {
             terminatorIndex = terminatorMatcher.start();
             String matchedLine = terminatorMatcher.group();
-            LOGGER.info("Terminierende Zeile gefunden: \"" + matchedLine + "\" bei Index: " + terminatorIndex);
+            LOGGER.fine("Terminating line found: \"" + matchedLine + "\" bei Index: " + terminatorIndex);
         } else {
-            LOGGER.info("Keine terminierenden Schlüsselwörter gefunden.");
+            LOGGER.fine("No terminating line found like bon, rabatt or total.");
         }
 
         // extracts substring until terminator
@@ -129,31 +129,34 @@ public class TextUtils {
             String extracted = receipt.substring(0, terminatorIndex).trim();
             return extracted;
         } else {
-            // Wenn keines der Schlüsselwörter gefunden wurde, gib den gesamten Beleg zurück
-            LOGGER.info("No Keyword found. Returning entire receipt.");
+            LOGGER.fine("No Keyword found. Returning entire receipt.");
             return receipt;
         }
     }
 
+    /**
+     * Finds the row number of the "Total CHF" row in the receipt.
+     * returns -1 if not found, else the row number
+     */
     public int findTotalRowNumber(String receipt) {
         String[] lines = receipt.split(System.lineSeparator());
 
         // Finde den Start der Artikelzeilen
         int firstArticleLine = findFirstArticleStart(receipt);
         if (firstArticleLine == -1) {
-            LOGGER.warning("Kopfzeile für Artikelzeilen nicht gefunden. 'Total' kann nicht bestimmt werden.");
+            LOGGER.warning("First row of articles not found. Could not find 'Total'.");
             return -1;
         }
 
         for (int i = firstArticleLine; i < lines.length; i++) {
             Matcher matcher = TOTAL_PATTERN.matcher(lines[i]);
             if (matcher.find()) {
-                LOGGER.info("\"Total CHF\" Zeile gefunden bei Zeile " + (i + 1));
+                LOGGER.fine("\"Total CHF\" column found at line: " + (i + 1));
                 return i + 1;
             }
         }
 
-        LOGGER.warning("\"Total CHF\" Zeile nicht gefunden.");
+        LOGGER.fine("\"Total CHF\" row not found.");
         return -1;
     }
 
@@ -163,12 +166,10 @@ public class TextUtils {
         for (int i = 0; i < lines.length; i++) {
             Matcher matcher = HEADER_PATTERN.matcher(lines[i]);
             if (matcher.find()) {
-                LOGGER.info("Kopfzeile gefunden bei Zeile: " + (i + 1));
+                LOGGER.fine("First row found at line: " + (i + 1));
                 return i + 1;
             }
         }
-
-        LOGGER.warning("Kopfzeile nicht gefunden.");
         return -1;
     }
 
