@@ -5,7 +5,7 @@
       style="display: flex; align-items: center; justify-content: center; "
     >
       <q-img
-        src="../assets/logo.png"
+        src="../assets/mymenu-logo.png"
         style="max-width: 200px"
       ></q-img>
     </q-header>

@@ -85,9 +85,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
-import { useQuasar } from "quasar";
+import { QVueGlobals, useQuasar } from "quasar";
 import { handleError } from "../helpers/composables/UseErrors";
-import { categories } from "./prompts/receipe";
+import { categories } from "./prompts/recipe";
 import { sendSingleRecipeRequest } from "./prompts/recipe.service";
 import { Article } from "../helpers/interfaces/article.interface";
 
@@ -101,7 +101,7 @@ export default defineComponent({
   },
   emits: ["addRecipe"],
   setup(props, { emit }) {
-    const $q = useQuasar();
+    const $q: QVueGlobals = useQuasar();
     const isLoading = ref(false);
     const showDialogRecipe = ref(false);
     const standard = ref(2);

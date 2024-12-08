@@ -3,10 +3,10 @@
     :props="props"
     style="text-decoration: underline; cursor: pointer; text-underline-offset: 4px;"
   >
-    <!-- Anzeige des aktuellen Werts -->
+    <!-- Current value -->
     {{ currentValue }}
 
-    <!-- Popup für die Bearbeitung -->
+    <!-- Popups for editing -->
     <q-popup-edit v-model="currentValue" v-slot="scope" auto-save>
       <div v-if="fieldName === 'Category'">
         <q-select

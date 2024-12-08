@@ -54,7 +54,6 @@ export const categories: string[] = [
   "Gewürze, Kräuter und Saucen",
 ];
 
-// src/components/prompts/categorization.ts
 export const categoryIcon: { name: string; icon: string; color: string }[] = [
   { name: "Obst und Gemüse", icon: "emoji_nature", color: "green-4" },
   { name: "Milchprodukte, Eier und Alternativen", icon: "local_dining", color: "blue-4" },

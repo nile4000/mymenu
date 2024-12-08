@@ -121,7 +121,7 @@ export async function processAllBatches(
   await executeBatches();
 }
 
-// call
+// get request for open ai
 export async function callOpenAiApi(
   prompt: string,
   model: string,
@@ -141,7 +141,7 @@ export async function callOpenAiApi(
           content: prompt,
         },
       ],
-      temperature: 0, // work deterministic
+      temperature: 0, // works deterministic with 0
     },
     {
       headers: {

@@ -3,12 +3,12 @@
     <div class="back-button">
       <q-btn flat round icon="close" color="primary" @click="$emit('close')" />
     </div>
-    <!-- Rezept-Titel -->
+    <!-- recipe title -->
     <div class="recipe-title-container">
-      <h3 class="recipe-title">{{ recipe.title }}</h3>
-      <p class="recipe-description">{{ recipe.description }}</p>
+      <h3 class="recipe-title">{{ recipe?.title }}</h3>
+      <p class="recipe-description">{{ recipe?.description }}</p>
     </div>
-    <!-- Rezept-Details -->
+    <!-- recipe details -->
     <div class="recipe-details">
       <div class="detail-item">
         <q-icon
@@ -17,7 +17,7 @@
           class="detail-icon"
           color="negative"
         />
-        <span>{{ recipe.cookingTime }}</span>
+        <span>{{ recipe?.cookingTime }}</span>
       </div>
       <div class="detail-item">
         <q-icon
@@ -26,7 +26,7 @@
           class="detail-icon"
           color="amber"
         />
-        <span>{{ recipe.stepsList.length }} Schritte</span>
+        <span>{{ recipe?.stepsList.length }} Schritte</span>
       </div>
       <div class="detail-item">
         <q-icon
@@ -35,10 +35,10 @@
           class="detail-icon"
           color="secondary"
         />
-        <span>{{ recipe.category }}</span>
+        <span>{{ recipe?.category }}</span>
       </div>
     </div>
-    <!-- Inhaltsabschnitt -->
+    <!-- recipe content -->
     <div class="ingredients-section">
       <q-tabs
         active-color="dark"
@@ -57,7 +57,7 @@
           <div class="ingredient-list">
             <div
               class="ingredient-item"
-              v-for="ingredient in recipe.ingredients"
+              v-for="ingredient in recipe?.ingredients"
               :key="ingredient"
             >
               <q-icon name="restaurant" class="ingredient-icon" />
@@ -67,7 +67,7 @@
         </q-tab-panel>
         <q-tab-panel name="steps">
           <div class="steps-list">
-            <p v-for="(step, index) in recipe.stepsList" :key="index">
+            <p v-for="(step, index) in recipe?.stepsList" :key="index">
               {{ index + 1 }}. {{ step }}
             </p>
           </div>

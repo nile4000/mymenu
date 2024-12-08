@@ -100,7 +100,7 @@ export default defineComponent({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
         });
-        // no further detail extraction
+        // further detail extraction
         await sendDetailExtractionRequest();
       }
     };

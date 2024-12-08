@@ -1,7 +1,7 @@
 {
   "name": "mymenu",
-  "version": "0.0.1",
-  "description": "Receipt Scanner and AI Meal Planner",
+  "version": "0.0.2",
+  "description": "AI Belegscanner und Menüplaner",
   "productName": "MyMenu",
   "author": "Nils Lüem",
   "private": true,

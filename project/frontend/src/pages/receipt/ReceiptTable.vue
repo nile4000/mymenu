@@ -54,7 +54,7 @@
               </div>
             </div>
           </q-card-section>
-          <!-- PDF Thumbnail -->
+          <!-- ToDo:  PDF Thumbnail -->
           <q-card-section>
             <q-img
               :src="props.row.Thumbnail"
@@ -70,7 +70,6 @@
               round
               disabled
               icon="visibility"
-              @click="viewReceipt(props.row)"
               ><q-tooltip anchor="center left" class="text-h5"
                 >PDF anzeigen</q-tooltip
               ></q-btn
@@ -179,9 +178,9 @@ export default defineComponent({
       channel = subscribeToReceiptChanges(handleReceiptChange);
     });
 
-    const viewReceipt = (receipt: any) => {
-      window.open(receipt.Id, "_blank");
-    };
+    // const viewReceipt = (receipt: any) => {
+    //   window.open(receipt.Id, "_blank");
+    // };
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(

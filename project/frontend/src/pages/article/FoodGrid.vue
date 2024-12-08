@@ -49,10 +49,10 @@
 </template>
 
 <script lang="ts">
+import { QVueGlobals, useQuasar } from "quasar";
 import { defineComponent, PropType } from "vue";
-import { Article } from "../../helpers/interfaces/article.interface";
-import { useQuasar } from "quasar";
 import { categoryIcon } from "../../components/prompts/categorization";
+import { Article } from "../../helpers/interfaces/article.interface";
 
 interface Column {
   name: string;
@@ -78,7 +78,7 @@ export default defineComponent({
   },
   emits: ["update:selected"],
   setup() {
-    const $q = useQuasar();
+    const $q: QVueGlobals = useQuasar();
 
     const getCategoryIcon = (categoryName: string): string => {
       const cat = categoryIcon.find((c) => c.name === categoryName);

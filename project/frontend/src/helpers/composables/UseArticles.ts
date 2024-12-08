@@ -1,6 +1,5 @@
-import { reactive } from "vue";
-import { Article } from "../interfaces/article.interface";
-import { Receipt } from "../interfaces/receipt.interface";
+import { RealtimeChannel } from "@supabase/supabase-js";
+import { QVueGlobals } from "quasar";
 import {
   readAllArticles,
   readReceiptsByIds,
@@ -13,8 +12,9 @@ import {
   upsertArticleCategory,
   upsertArticleUnit,
 } from "src/services/updateArticle";
-import { QVueGlobals } from "quasar";
-import { RealtimeChannel } from "@supabase/supabase-js";
+import { reactive } from "vue";
+import { Article } from "../interfaces/article.interface";
+import { Receipt } from "../interfaces/receipt.interface";
 
 export function useArticles($q: QVueGlobals) {
   const rows = reactive<Article[]>([]);

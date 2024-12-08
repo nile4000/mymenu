@@ -1,6 +1,6 @@
 <template>
   <q-list class="justify-center custom-list">
-    <!-- Total pro Beleg -->
+    <!-- Total per receipt -->
     <q-expansion-item
       :dense="false"
       class="my-card"
@@ -15,7 +15,7 @@
         </q-item-section>
       </template>
 
-      <!-- Sortieroption für Receipts -->
+      <!-- Sortoptions for receipts -->
       <div class="q-pa-sm">
         <q-select
           v-model="receiptSortCriteria"
@@ -62,7 +62,7 @@
       </q-scroll-area>
     </q-expansion-item>
 
-    <!-- Total pro Kategorie -->
+    <!-- Total per category -->
     <q-expansion-item
       default-opened
       color="primary"
@@ -78,7 +78,7 @@
         </q-item-section>
       </template>
 
-      <!-- Sortieroption für Kategorien -->
+      <!-- Sortoption per category -->
       <div class="q-pa-sm">
         <q-select
           v-model="categorySortCriteria"
@@ -124,9 +124,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch, computed, ref } from "vue";
-import { formatDate } from "../../helpers/dateHelpers";
+import { computed, defineComponent, PropType, reactive, ref, watch } from "vue";
 import { categoryIcon } from "../../components/prompts/categorization";
+import { formatDate } from "../../helpers/dateHelpers";
 
 export default defineComponent({
   name: "FoodTotal",
@@ -184,7 +184,7 @@ export default defineComponent({
     };
 
     const toggleCategorySelection = (category: string) => {
-      // Wenn erneut auf dieselbe Kategorie geklickt wird, Filter wieder entfernen
+      // Reclicking on category removes the selected category
       if (selectedCategory.value === category) {
         selectedCategory.value = null;
       } else {

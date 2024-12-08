@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import { Article } from "../interfaces/article.interface";
 
 export function useFilters(rows: Article[]) {

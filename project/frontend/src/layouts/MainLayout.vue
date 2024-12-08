@@ -5,7 +5,7 @@
         <q-item clickable @click="returnHome">
           <q-toolbar-title class="title-header">
             <q-avatar flat round class="q-mr-sm">
-              <img src="../assets/logo.png" alt="Logo" /> </q-avatar
+              <img src="../assets/mymenu-logo.png" alt="Logo" /> </q-avatar
             ><span class="menu-title">MY MENÜ</span>
           </q-toolbar-title>
         </q-item>
@@ -61,9 +61,9 @@
 </template>
 
 <script>
-import router from "../router";
 import { useQuasar } from "quasar";
-import { defineComponent, ref, computed } from "vue";
+import { computed, defineComponent, ref } from "vue";
+import router from "../router";
 // import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // const linksList = [
@@ -117,16 +117,17 @@ export default defineComponent({
     //   }
     // });
 
-    const logout = () => {
-      // getAuth().signOut();
-      router
-        .push("/auth/login")
-        .then(() => {
-          // sessionStorage.clear();
-          $q.notify({ message: "Sign Out Success." });
-        })
-        .catch((error) => console.log("error", error));
-    };
+    // ToDo: use for auth
+    // const logout = () => {
+    //   // getAuth().signOut();
+    //   router
+    //     .push("/auth/login")
+    //     .then(() => {
+    //       // sessionStorage.clear();
+    //       $q.notify({ message: "Sign Out Success." });
+    //     })
+    //     .catch((error) => console.log("error", error));
+    // };
     const openHistory = () => {
       void router.push("/receipt");
     };
@@ -141,7 +142,7 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
-      logout,
+      // logout,
       openHistory,
       returnHome,
       isReceipt,

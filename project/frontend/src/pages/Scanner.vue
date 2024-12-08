@@ -16,15 +16,14 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed } from "vue";
-import DialogComponent from "../components/DialogComponent.vue";
 import { useQuasar } from "quasar";
+import { computed, defineComponent } from "vue";
+import DialogComponent from "../components/DialogComponent.vue";
 import { handleError } from "../helpers/composables/UseErrors";
 
 export default defineComponent({
   name: "ScannerPage",
   components: {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     DialogComponent,
   },
 
@@ -33,6 +32,7 @@ export default defineComponent({
     // const auth = getAuth();
 
     const authHeaders = computed(() => {
+      // ToDo: used for auth
       // const userId = auth.currentUser ? auth.currentUser.uid : 0;
       // if (userId) {
       //   return [{ name: "FirebaseAuthId", value: userId }];

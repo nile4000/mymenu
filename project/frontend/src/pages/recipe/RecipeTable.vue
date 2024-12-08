@@ -61,8 +61,8 @@
 </template>
 
 <script lang="ts">
+import { QVueGlobals, useQuasar } from "quasar";
 import { defineComponent, ref } from "vue";
-import { useQuasar } from "quasar";
 import RecipeRequest from "../../components/RecipeRequest.vue";
 import RecipeDetail from "./RecipeDetail.vue";
 
@@ -73,7 +73,7 @@ export default defineComponent({
     RecipeDetail,
   },
   setup() {
-    const $q = useQuasar();
+    const $q: QVueGlobals = useQuasar();
     const selectedOption = ref(null);
     const showDialog = ref(false);
 

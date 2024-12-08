@@ -10,6 +10,7 @@ const firebaseConfig = {
 };
 
 export default boot(() => {
+  // ToDo: used for auth
   // initializeApp(firebaseConfig);
   // const auth = getAuth();
 

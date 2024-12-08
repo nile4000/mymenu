@@ -2,6 +2,7 @@ import { AxiosResponse } from "axios";
 import { Article } from "../../helpers/interfaces/article.interface";
 import { callOpenAiApi } from "../../services/aiRequest.service";
 
+// define structure
 const RECIPE_STRUCTURE = {
   title: "string",
   description: "string",
@@ -19,7 +20,7 @@ const systemPrompt = `You are a cooking-recipe assistant. You will receive a lis
 )} Use only the given ingredients. Make sure the JSON is valid and does not contain any additional text. If you cannot comply, return an empty JSON {}.`;
 
 function createExampleRecipeJson(servings: number): string {
-  // set placeholder values
+  // set placeholder values of structure
   const example = {
     title: "Titel des Rezepts",
     description: "Kurze Beschreibung des Gerichts",
@@ -51,13 +52,10 @@ export function createRecipePrompt(
   const exampleJson = createExampleRecipeJson(servings);
 
   return `Hier sind meine verfügbaren Zutaten:
-${ingredientsList}
-
-Erstelle ein Rezept für ca. ${servings} Personen, das diese Zutaten verwendet. Gib nur ein gültiges JSON im folgenden Format zurück, ohne weitere Erklärungen:
-
-${exampleJson}
-
-Bitte mache keine anderen Ausgaben, nur dieses JSON.`;
+        ${ingredientsList}
+        Erstelle ein Rezept für ca. ${servings} Personen, das diese Zutaten verwendet. Gib nur ein gültiges JSON im folgenden Format zurück, ohne weitere Erklärungen:
+        ${exampleJson}
+        Bitte mache keine anderen Ausgaben, nur dieses JSON.`;
 }
 
 function parseSingleRecipeResponse(response: AxiosResponse<any, any>): any {

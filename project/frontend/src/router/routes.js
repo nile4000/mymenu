@@ -45,6 +45,7 @@ const routes = [
       { path: "/auth/login", component: () => import("pages/Auth.vue") },
     ],
   },
+  // ToDo: used for auth
   // {
   //   path: '/login',
   //   component: () => import('pages/auth/login')

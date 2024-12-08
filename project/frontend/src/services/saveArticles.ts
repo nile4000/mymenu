@@ -28,7 +28,6 @@ export async function saveArticlesAndReceipt(
       throw receiptInsertError;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const receipt: Receipt = receiptInsertData[0];
 
     const preparedArticles = articles.map((article) => {
@@ -45,7 +44,7 @@ export async function saveArticlesAndReceipt(
       };
     });
 
-    // save article
+    // save and return safed article with Id,Name,Quantity and Price
     const { data: articlesInsertData, error: articlesInsertError } =
       await supabase
         .from("article")

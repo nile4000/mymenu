@@ -2,11 +2,6 @@
   <q-dialog transition-show="rotate">
     <q-card>
       <q-card-section>
-        <q-row>
-          <!-- Commented sections -->
-        </q-row>
-      </q-card-section>
-      <q-card-section>
         <q-table
           flat
           bordered
@@ -43,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { useQuasar } from "quasar";
+import { QVueGlobals, useQuasar } from "quasar";
 import { computed, defineComponent, PropType, ref, Ref } from "vue";
 import { handleError } from "../helpers/composables/UseErrors";
 import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
@@ -54,22 +49,22 @@ import {
   createBatches,
   prepareArticlesPrices,
   prepareDialogArticles,
-  processAllBatches
+  processAllBatches,
 } from "../services/aiRequest.service";
 import { saveArticlesAndReceipt } from "../services/saveArticles";
 import {
   upsertArticleCategories,
-  upsertArticleUnits
+  upsertArticleUnits,
 } from "../services/updateArticle";
 import {
   categorizationPrompt,
   categorySystemPrompt,
-  validateExtractedCategories
+  validateExtractedCategories,
 } from "./prompts/categorization";
 import {
   detailExtractionPrompt,
   detailSystemPrompt,
-  validateExtractedDetails
+  validateExtractedDetails,
 } from "./prompts/detailExtraction";
 
 const columns: Column[] = [
@@ -98,7 +93,7 @@ export default defineComponent({
     const performCategorization = ref(true);
     const performUnitExtraction = ref(false);
 
-    const $q = useQuasar();
+    const $q: QVueGlobals = useQuasar();
 
     const receiptData: Ref<Receipt> = computed(() => ({
       Uuid: props.response[0].UID,
