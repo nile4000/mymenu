@@ -1,17 +1,13 @@
 # Quarkus-PDF-Extract Projekt
 
-## Middleware Übersicht
-
-- Auslesen von Text aus PDFs
-- Extrahieren von bestimmten Textstellen und Metadaten
 - [PDFBox](https://pdfbox.apache.org/)
-
-- API Anfragen senden und empfangen
 - [ChatGPT](https://chat.openai.com/)
 
-- Speichern von Daten in einer Datenbank
-- Coming soon...
+## Middleware Übersicht
 
+- Auslesen von Text aus mehreren PDFs
+- Extrahieren von Textstellen und Metadaten
+- API Anfragen an ChatGPT senden und empfangen
 
 ### Start development
 
@@ -23,19 +19,19 @@ quarkus dev
 ./mvnw compile quarkus:dev
 ```
 
-### Testen
+### Endpoint testing
 
 <http://localhost:8080/q/swagger-ui/#>
 
-## Deployment auf fly.io
+## Deployment production to fly.io
 
-### Testing the container locally for fly
+### Testing the container locally for fly.io
 
 ```shell
 docker-compose up -d
 ```
 
-### Build package first
+### Build package first for production
 
 ```shell
 ./mvnw package
@@ -49,7 +45,7 @@ flyctl deploy
 
 ## Creating a native executable
 
-You can create a native executable using:
+You can create a native executable (.exe) using:
 
 ```shell script
 ./mvnw package -Dnative
