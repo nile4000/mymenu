@@ -42,11 +42,10 @@ public class OpenAiClient {
             }
             String contentString = message.getString("content");
 
-            LOGGER.info("Content received from OpenAI: " + contentString);
+            // LOGGER.info("Content received from OpenAI: " + contentString);
 
             try (JsonReader contentReader = Json.createReader(new StringReader(contentString))) {
                 JsonObject contentJson = contentReader.readObject();
-                System.out.println(contentJson.toString());
                 return contentJson.getJsonArray("ArticleList");
             }
         } catch (Exception e) {
@@ -58,7 +57,7 @@ public class OpenAiClient {
     public JsonArray askQuestion(String question) {
         try {
             String payload = payloadBuilder.constructPayload(question);
-            LOGGER.info("Payload sent to OpenAI: " + payload);
+            // LOGGER.info("Payload sent to OpenAI: " + payload);
 
             if (openaiKey == null || openaiKey.trim().isEmpty()) {
                 throw new IllegalArgumentException("API KEY is not set");
@@ -72,7 +71,7 @@ public class OpenAiClient {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            LOGGER.info("Response from OpenAI: " + response.body());
+            // LOGGER.info("Response from OpenAI: " + response.body());
 
             return processResponse(response.body());
         } catch (Exception e) {

@@ -65,12 +65,8 @@ public class ExtractionService {
             String cleanedContent = textUtils.cleanUpContent(documentContent);
             String extractTotal = textUtils.extractTotal(cleanedContent);
             String extractDate = textUtils.extractDate(cleanedContent);
+            int totalRowNumber = textUtils.findTotalRowNumber(cleanedContent);
             String cuttedEnd = textUtils.extractArticlesUntilTotal(cleanedContent);
-            int totalRowNumber = textUtils.findTotalRowNumber(cuttedEnd);
-
-            LOGGER.info("Extracted Total: " + extractTotal);
-            LOGGER.info("Extracted Date: " + extractDate);
-            LOGGER.info("Cutted End Content: " + cuttedEnd);
 
             // OpenAI request
             JsonArray articlesJson = getAnswerOpenAI(cuttedEnd);
@@ -80,9 +76,9 @@ public class ExtractionService {
                         .build();
             }
 
-            LOGGER.info("Raw Articles JSON: " + articlesJson.toString());
+            // LOGGER.info("Raw Articles JSON: " + articlesJson.toString());
             JsonArray sanitizedArticlesJson = sanitizeArticlesJson(articlesJson);
-            LOGGER.info("Sanitized Articles JSON: " + sanitizedArticlesJson.toString());
+            // LOGGER.info("Sanitized Articles JSON: " + sanitizedArticlesJson.toString());
 
             // Convert sanitized JSON to Article objects
             List<Article> articles = convertJsonArrayToArticles(sanitizedArticlesJson);
@@ -134,7 +130,11 @@ public class ExtractionService {
 
             JsonObject jsonResponse = jsonResponseBuilder.build();
 
-            LOGGER.info("JSON Response Built Successfully.");
+            if (sanitizedArticlesJson == null || sanitizedArticlesJson.isEmpty()) {
+                LOGGER.warning("JSON Response is empty!");
+            } else {
+                LOGGER.info("JSON Response Built Successfully.");
+            }
 
             return Response.ok(jsonResponse)
                     .header("Content-Type", "application/json;charset=UTF-8")
@@ -287,7 +287,7 @@ public class ExtractionService {
         BigDecimal calculatedTotal = article.getPrice()
                 .multiply(article.getQuantity())
                 .subtract(article.getDiscount());
-        article.setTotal(calculatedTotal.max(BigDecimal.ZERO)); 
+        article.setTotal(calculatedTotal.max(BigDecimal.ZERO));
     }
 
 }

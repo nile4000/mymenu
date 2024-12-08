@@ -23,7 +23,8 @@ public class FileUtils {
     private static final String PDF_TEMP_SUFFIX = ".pdf";
 
     /**
-     * Extracts a PDF file from multipart form data input and saves it as a temporary file.
+     * Extracts a PDF file from multipart form data input and saves it as a
+     * temporary file.
      *
      * @param input Multipart form data input containing the uploaded files.
      * @return The temporary PDF file if found, otherwise null.
@@ -42,7 +43,8 @@ public class FileUtils {
      * Extracts text from the given file based on its type.
      *
      * @param file The file from which to extract text.
-     * @return The extracted text, or null if extraction failed or file type is unsupported.
+     * @return The extracted text, or null if extraction failed or file type is
+     *         unsupported.
      */
     public static String getTextFromFile(File file) {
         if (file.getName().endsWith(PDF_TEMP_SUFFIX)) {
@@ -84,10 +86,10 @@ public class FileUtils {
         try (PDDocument document = Loader.loadPDF(pdfFile)) {
             PDFLayoutTextStripper stripper = new PDFLayoutTextStripper();
             String text = stripper.getText(document);
-            LOGGER.info("Successfully extracted text from PDF: " + pdfFile.getName());
+            LOGGER.info("Successfully extracted text from PDF.");
             return text;
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error extracting text from PDF: " + pdfFile.getName(), e);
+            LOGGER.log(Level.SEVERE, "Error extracting text from PDF: " + e.getMessage());
             return null;
         }
     }

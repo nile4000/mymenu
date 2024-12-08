@@ -112,7 +112,6 @@ public class TextUtils {
      * @return the substring of the receipt containing the articles
      */
     public String extractArticlesUntilTotal(String receipt) {
-        System.out.println(receipt);
         Matcher terminatorMatcher = TERMINATOR_PATTERN.matcher(receipt);
 
         int terminatorIndex = -1;
@@ -125,14 +124,13 @@ public class TextUtils {
             LOGGER.info("Keine terminierenden Schlüsselwörter gefunden.");
         }
 
-        // Extrahiere den Substring bis zum terminierenden Schlüsselwort
+        // extracts substring until terminator
         if (terminatorIndex != -1) {
             String extracted = receipt.substring(0, terminatorIndex).trim();
-            LOGGER.info("Extrahierter Artikelabschnitt: " + extracted);
             return extracted;
         } else {
             // Wenn keines der Schlüsselwörter gefunden wurde, gib den gesamten Beleg zurück
-            LOGGER.info("Keine Schlüsselwörter gefunden. Gesamter Beleg wird zurückgegeben.");
+            LOGGER.info("No Keyword found. Returning entire receipt.");
             return receipt;
         }
     }
@@ -165,7 +163,7 @@ public class TextUtils {
         for (int i = 0; i < lines.length; i++) {
             Matcher matcher = HEADER_PATTERN.matcher(lines[i]);
             if (matcher.find()) {
-                LOGGER.info("Kopfzeile gefunden bei Zeile " + (i + 1));
+                LOGGER.info("Kopfzeile gefunden bei Zeile: " + (i + 1));
                 return i + 1;
             }
         }
