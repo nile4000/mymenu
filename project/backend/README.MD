@@ -1,15 +1,15 @@
-# Quarkus-PDF-Extract Projekt
+# Quarkus-PDF-Extract for my-menu
 
 - [PDFBox](https://pdfbox.apache.org/)
-- [ChatGPT](https://chat.openai.com/)
+- [ChatGPT-API](https://chat.openai.com/)
 
-## Middleware Übersicht
+## Middleware Overview
 
 - Auslesen von Text aus mehreren PDFs
 - Extrahieren von Textstellen und Metadaten
 - API Anfragen an ChatGPT senden und empfangen
 
-### Start development
+### Local development
 
 ```shell
 quarkus dev
