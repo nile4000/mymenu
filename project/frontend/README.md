@@ -6,12 +6,12 @@
     npm run start
     ```
 
-## deploy to firebase
+## build
 
     ```shell
     npm run build
     ```
 
-    ```shell
-    firebase deploy
-    ```
+## deploy
+
+- this project is deployed on github pages, via main branch
