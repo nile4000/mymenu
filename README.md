@@ -4,7 +4,7 @@
 
 ## Showcase App
 
-<https://mymenu-bdf37.firebaseapp.com/>
+<https://nile4000.github.io/mymenu/#/>
 
 ## Funktionen
 
