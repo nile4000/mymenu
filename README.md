@@ -16,4 +16,4 @@
 
 4. UI: In der Applikation können Nutzer die eingelesenen Daten einsehen und bei Bedarf bearbeiten. Dieser Schritt ist wichtig, um die Relevanz der Menüvorschläge zu gewährleisten.
 
-5. Analyse: Die App bietet Analyse- und Filterfunktionen deiner Essensartikel. Alle Artikel können kategorisiert und ihre Einheiten extrahiert werden. Damit hast du deine Ausgaben über Monate hinweg im Überblick und kannst deine Einkäufe nach ihrer Kategorie auswerten.
+5. Analyse: Die App bietet Analyse- und Filterfunktionen deiner Essensartikel. Alle Artikel können kategorisiert und ihre Einheiten extrahiert werden. Damit hast du deine Ausgaben über Monate hinweg im Überblick und kannst deine Einkäufe nach diversen Kriterien auswerten.
