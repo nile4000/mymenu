@@ -79,8 +79,14 @@ class TextLine {
         }
     }
 
+    /**
+     * Checks if the character at the given index in the line is a space.
+     *
+     * @param index position within the line
+     * @return {@code true} if the character is a space, otherwise {@code false}
+     */
     private boolean isSpaceCharacterAtIndex(int index) {
-        return this.line.charAt(index) != SPACE_CHARACTER;
+        return this.line.charAt(index) == SPACE_CHARACTER;
     }
 
     private boolean isNewIndexGreaterThanLastIndex(int index) {
