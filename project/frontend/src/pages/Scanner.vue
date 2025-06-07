@@ -32,7 +32,6 @@ export default defineComponent({
     // const auth = getAuth();
 
     const authHeaders = computed(() => {
-      // ToDo: used for auth
       // const userId = auth.currentUser ? auth.currentUser.uid : 0;
       // if (userId) {
       //   return [{ name: "FirebaseAuthId", value: userId }];

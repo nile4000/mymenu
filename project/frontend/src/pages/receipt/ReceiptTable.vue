@@ -54,7 +54,6 @@
               </div>
             </div>
           </q-card-section>
-          <!-- ToDo:  PDF Thumbnail -->
           <q-card-section>
             <q-img
               :src="props.row.Thumbnail"
@@ -164,12 +163,6 @@ export default defineComponent({
         const data = await readAllReceipts();
         if (data) {
           allRows.splice(0, allRows.length, ...data);
-          // Füge Thumbnails für PDFs hinzu (falls API-Response diese liefert)
-          // allRows.forEach((row) => {
-          //   row.Id = row.Id
-          //     ? `${row.Id}_thumbnail.jpg` // Beispiel: Thumbnail-URL generieren
-          //     : undefined;
-          // });
         }
       } catch (error) {
         handleError("Belege laden", error, $q);
@@ -178,9 +171,6 @@ export default defineComponent({
       channel = subscribeToReceiptChanges(handleReceiptChange);
     });
 
-    // const viewReceipt = (receipt: any) => {
-    //   window.open(receipt.Id, "_blank");
-    // };
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(

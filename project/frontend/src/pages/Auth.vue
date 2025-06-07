@@ -1,4 +1,3 @@
-<!-- ToDo: used for auth -->
 <template>
   <q-page class="flex q-pa-md justify-center items-center">
     <q-card style="width: 100%; max-width: 500px">
@@ -30,12 +29,10 @@
 </template>
 
 <script lang="ts">
-// import AuthComponent from "components/AuthComponent";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "AuthComp",
-  // components: { AuthComponent },
   setup() {
     const tab = ref("login");
     return {

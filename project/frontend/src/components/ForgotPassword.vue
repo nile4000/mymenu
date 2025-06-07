@@ -36,24 +36,13 @@
 
 <script>
 import { defineComponent, reactive } from "vue";
-// import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-// import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "ForgotPassword",
   setup() {
-    // const $q = useQuasar();
     const form = reactive({ email: "" });
     const resetPassword = () => {
-      // const auth = getAuth();
-      // sendPasswordResetEmail(auth, form.email)
-      //   .then(() => {
-      //     form.email = "";
-      //     $q.notify({
-      //       message: "Überprüfe deine E-Mails und setz dort dein Passwort zurück. ",
-      //     });
-      //   })
-      //   .catch((error) => console.log(error));
+      // password reset is currently disabled
     };
     return {
       form,
