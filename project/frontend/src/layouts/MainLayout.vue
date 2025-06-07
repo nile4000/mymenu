@@ -117,17 +117,6 @@ export default defineComponent({
     //   }
     // });
 
-    // ToDo: use for auth
-    // const logout = () => {
-    //   // getAuth().signOut();
-    //   router
-    //     .push("/auth/login")
-    //     .then(() => {
-    //       // sessionStorage.clear();
-    //       $q.notify({ message: "Sign Out Success." });
-    //     })
-    //     .catch((error) => console.log("error", error));
-    // };
     const openHistory = () => {
       void router.push("/receipt");
     };
@@ -142,7 +131,6 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
-      // logout,
       openHistory,
       returnHome,
       isReceipt,

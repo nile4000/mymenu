@@ -126,7 +126,6 @@ export default defineComponent({
         validateSelectedItems();
         const preparedArticles = prepareArticlesPrices(props.selectedItems);
         const batches = createBatches(preparedArticles, 40);
-        console.log(batches);
 
         isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
 

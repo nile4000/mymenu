@@ -1,29 +1,17 @@
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 
 /**
  * Returns a promise that resolves with an ID token, if available, that can be verified on a server.
  * @return {!Promise<?string>} The promise that resolves with an ID token if
  *     available. Otherwise, the promise resolves with null.
  */
-export const getIdToken = () => {
-  return new Promise((resolve, reject) => {
+export const getIdToken = async () => {
+  try {
     const auth = getAuth();
-    // const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //   unsubscribe(); // unsubscribe the observer that we've just created
-    //   if (user) {
-    //     user.getIdToken().then(
-    //       (idToken) => {
-    //         resolve(idToken);
-    //       },
-    //       () => {
-    //         resolve(null);
-    //       }
-    //     );
-    //   } else {
-    //     resolve(null);
-    //   }
-    // });
-  }).catch((error) => {
-    console.log(error);
-  });
+    const user = auth.currentUser;
+    return user ? await user.getIdToken() : null;
+  } catch (error) {
+    console.error("Failed to retrieve ID token", error);
+    return null;
+  }
 };
