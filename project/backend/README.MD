@@ -6,7 +6,7 @@
 ## Middleware Overview
 
 - Auslesen von Text aus mehreren PDFs
-- Extrahieren von Textstellen und Metadaten
+- Extrahieren von Textstellen und Metadaten mit Regex
 - API Anfragen an ChatGPT senden und empfangen
 
 ### Local development
