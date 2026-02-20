@@ -8,9 +8,10 @@
     >
       <q-card class="custom-card">
         <q-card-section class="column items-center">
-          <h5 style="margin-block-end: 20px">Einstellungen</h5>
-          <q-badge color="secondary" class="q-mb-md">
-            Anzahl Personen: {{ standard }} (0-10)
+          <h5 style="margin-block-end: 16px">Einstellungen</h5>
+
+          <q-badge color="secondary" class="q-mb-sm">
+            Anzahl Personen: {{ standard }} (1-10)
           </q-badge>
           <q-slider
             v-model="standard"
@@ -19,45 +20,44 @@
             style="max-width: 300px"
             color="secondary"
           />
+
+          <q-badge color="primary" class="q-mt-sm">
+            Auswahl: {{ filteredItems.length }} von {{ selectedItemsCount }} Artikeln
+          </q-badge>
         </q-card-section>
+
         <q-card-section style="margin-top: 0px">
-          <q-expansion-item :dense="false" class="custom-card">
-            <template v-slot:header>
-              <q-item-section avatar>
-                <q-avatar icon="category" class="colored-icon" />
-              </q-item-section>
-              <q-item-section style="font-weight: bold"
-                >Kategorie</q-item-section
-              >
-            </template>
-            <q-list>
-              <q-item v-for="item in categories" :key="item">
-                <q-item-section>
-                  {{ item }}
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-expansion-item>
+          <FilterPanel
+            panel-class="custom-card"
+            icon-class="colored-icon"
+            icon="category"
+            default-opened
+            title="Filter: Kategorie"
+          >
+            <CategoryFilterList
+              v-model="categoryModel"
+              :options="categoryFilterItems"
+              show-all-option
+            />
+          </FilterPanel>
         </q-card-section>
+
         <q-card-section style="margin-top: 0px">
-          <q-expansion-item :dense="false" class="custom-card">
-            <template v-slot:header>
-              <q-item-section avatar>
-                <q-avatar icon="receipt_long" class="colored-icon2" />
-              </q-item-section>
-              <q-item-section style="font-weight: bold"
-                >Kassenzettel</q-item-section
-              >
-            </template>
-            <q-list>
-              <q-item v-for="item in categories" :key="item">
-                <q-item-section>
-                  {{ item }}
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-expansion-item>
+          <FilterPanel
+            panel-class="custom-card"
+            icon-class="colored-icon2"
+            icon="receipt_long"
+            default-opened
+            title="Filter: Kassenzettel"
+          >
+            <ReceiptFilterList
+              v-model="safeGlobalSelectedReceiptIds"
+              :options="availableReceipts"
+              show-bulk-actions
+            />
+          </FilterPanel>
         </q-card-section>
+
         <q-card-actions align="right">
           <q-btn flat label="Abbrechen" color="negative" v-close-popup />
           <q-btn
@@ -65,11 +65,13 @@
             label="Erstellen"
             color="primary"
             style="font-weight: bold"
+            :disable="isLoading"
             @click="handleSendRequest"
           />
         </q-card-actions>
       </q-card>
     </q-dialog>
+
     <q-btn-group rounded>
       <q-btn
         unelevated
@@ -86,15 +88,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { computed, defineComponent, PropType, ref } from "vue";
 import { QVueGlobals, useQuasar } from "quasar";
+import { storeToRefs } from "pinia";
+import FilterPanel from "./filters/FilterPanel.vue";
+import CategoryFilterList from "./filters/CategoryFilterList.vue";
+import ReceiptFilterList from "./filters/ReceiptFilterList.vue";
 import { handleError } from "../helpers/composables/useErrors";
-import { categories } from "./prompts/recipe";
 import { sendSingleRecipeRequest } from "../services/recipeRequest";
 import { Article } from "../helpers/interfaces/article.interface";
+import { Recipe } from "../helpers/interfaces/recipe.interface";
+import { useFilterStore } from "../stores/filterStore";
+
+type ReceiptOption = {
+  id: string;
+  label: string;
+};
 
 export default defineComponent({
   name: "RecipeRequest",
+  components: {
+    FilterPanel,
+    CategoryFilterList,
+    ReceiptFilterList,
+  },
   props: {
     selectedItems: {
       type: Array as PropType<Article[]>,
@@ -104,29 +121,112 @@ export default defineComponent({
   emits: ["addRecipe"],
   setup(props, { emit }) {
     const $q: QVueGlobals = useQuasar();
+    const filterStore = useFilterStore();
+    const {
+      selectedCategory: globalSelectedCategory,
+      selectedReceiptIds: globalSelectedReceiptIds,
+    } = storeToRefs(filterStore);
+
     const isLoading = ref(false);
     const showDialogRecipe = ref(false);
     const standard = ref(2);
 
+    const categoryModel = computed<string | null>({
+      get: () => globalSelectedCategory.value,
+      set: (value) => {
+        globalSelectedCategory.value = value;
+      },
+    });
+
+    const safeGlobalSelectedReceiptIds = computed<string[]>({
+      get: () =>
+        Array.isArray(globalSelectedReceiptIds.value)
+          ? globalSelectedReceiptIds.value.map((id) => String(id))
+          : [],
+      set: (value) => {
+        globalSelectedReceiptIds.value = Array.isArray(value)
+          ? value.map((id) => String(id))
+          : [];
+      },
+    });
+
+    const categoryFilterItems = computed(() =>
+      Array.from(
+        new Set(
+          props.selectedItems
+            .map((item) => item.Category)
+            .filter((category): category is string => Boolean(category))
+        )
+      )
+        .sort((a, b) => a.localeCompare(b))
+        .map((item) => ({
+          value: item,
+          label: item,
+        }))
+    );
+
+    const availableReceipts = computed<ReceiptOption[]>(() => {
+      const map = new Map<string, string>();
+
+      props.selectedItems.forEach((item) => {
+        if (!item.Receipt_Id) {
+          return;
+        }
+
+        const receiptId = String(item.Receipt_Id);
+        const fallbackDate = item.Purchase_Date || "Unbekanntes Datum";
+        const label = `${fallbackDate} (${receiptId.slice(0, 8)})`;
+        if (!map.has(receiptId)) {
+          map.set(receiptId, label);
+        }
+      });
+
+      return Array.from(map.entries())
+        .map(([id, label]) => ({ id, label }))
+        .sort((a, b) => b.label.localeCompare(a.label));
+    });
+
+    const filteredItems = computed<Article[]>(() => {
+      const activeReceiptIds = safeGlobalSelectedReceiptIds.value;
+
+      return props.selectedItems.filter((item) => {
+        const matchesCategory =
+          !categoryModel.value || item.Category === categoryModel.value;
+
+        const matchesReceipt =
+          activeReceiptIds.length === 0 ||
+          (item.Receipt_Id
+            ? activeReceiptIds.includes(String(item.Receipt_Id))
+            : false);
+
+        return matchesCategory && matchesReceipt;
+      });
+    });
+
+    const selectedItemsCount = computed(() =>
+      Array.isArray(props.selectedItems) ? props.selectedItems.length : 0
+    );
+
     const handleSendRequest = async () => {
       try {
-        if (props.selectedItems.length === 0) {
-          $q.notify({ type: "warning", message: "Keine Artikel ausgewählt!" });
+        if (filteredItems.value.length === 0) {
+          $q.notify({
+            type: "warning",
+            message: "Keine passenden Artikel ausgewaehlt!",
+          });
           return;
         }
 
         isLoading.value = true;
         $q.loading.show({ message: "Rezept wird erstellt..." });
 
-        const lastItems = props.selectedItems.slice(-30);
-        const recipe = await sendSingleRecipeRequest(lastItems, standard.value);
+        const recipe = await sendSingleRecipeRequest(
+          filteredItems.value.slice(-30),
+          standard.value
+        );
 
-        emit("addRecipe", recipe);
-
-        $q.notify({
-          type: "positive",
-          message: "Rezept erfolgreich erstellt!",
-        });
+        emit("addRecipe", recipe as Recipe);
+        $q.notify({ type: "positive", message: "Rezept erfolgreich erstellt!" });
       } catch (error) {
         handleError("Rezept erstellen", error, $q);
       } finally {
@@ -140,7 +240,12 @@ export default defineComponent({
       isLoading,
       showDialogRecipe,
       standard,
-      categories,
+      categoryModel,
+      safeGlobalSelectedReceiptIds,
+      categoryFilterItems,
+      availableReceipts,
+      filteredItems,
+      selectedItemsCount,
       handleSendRequest,
     };
   },

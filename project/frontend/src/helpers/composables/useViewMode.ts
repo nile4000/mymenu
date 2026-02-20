@@ -1,7 +1,7 @@
 import { ref } from "vue";
 
 export function useViewMode() {
-  const isGridView = ref(true);
+  const isGridView = ref(false);
   function toggleView() {
     isGridView.value = !isGridView.value;
   }

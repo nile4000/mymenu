@@ -22,15 +22,14 @@
           <q-route-tab round icon="receipt_long" :to="ROUTE_PATHS.home" class="custom-icon2">
             <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
           </q-route-tab>
-          <!-- ToDo: reactivate when available -->
-          <!-- <q-route-tab
+          <q-route-tab
             round
             icon="restaurant"
-            :to="'/recipe'"
+            :to="ROUTE_PATHS.recipe"
             class="custom-icon3"
           >
             <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
-          </q-route-tab> -->
+          </q-route-tab>
 
           <!-- <q-tab round icon="account_circle" class="custom-icon4">
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>

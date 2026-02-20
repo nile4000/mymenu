@@ -1,175 +1,103 @@
 <template>
   <q-list class="justify-center custom-list">
-    <!-- Total per receipt -->
-    <q-expansion-item
-      :dense="false"
-      class="my-card filter-panel"
+    <FilterPanel
+      panel-class="my-card filter-panel"
+      title="Filter: Kassenzettel"
       caption="Klickbar: blendet Artikel pro Kassenzettel ein/aus."
+      icon="receipt_long"
+      icon-class="colored-icon2"
+      :badge-text="`${activeReceiptCount} aktiv`"
     >
-      <template v-slot:header>
-        <q-item-section avatar>
-          <q-avatar icon="receipt_long" class="colored-icon2" />
-        </q-item-section>
-        <q-item-section style="font-weight: bold">
-          Filter: Kassenzettel
-        </q-item-section>
-        <q-item-section side>
-          <q-badge color="primary" text-color="white">
-            {{ activeReceiptCount }} aktiv
-          </q-badge>
-        </q-item-section>
+      <template #controls>
+        <div class="q-pa-sm">
+          <q-select
+            v-model="receiptSortCriteria"
+            :options="[
+              { label: 'Datum', value: 'Datum' },
+              { label: 'Total', value: 'Total' },
+            ]"
+            label="Sortieren nach"
+            dense
+            outlined
+            rounded
+          />
+        </div>
       </template>
 
-      <!-- Sortoptions for receipts -->
-      <div class="q-pa-sm">
-        <q-select
-          v-model="receiptSortCriteria"
-          :options="[
-            { label: 'Datum', value: 'Datum' },
-            { label: 'Total', value: 'Total' },
-          ]"
-          label="Sortieren nach"
-          dense
-          outlined
-          rounded
-        />
-      </div>
+      <ReceiptFilterList
+        v-model="selectedReceiptIds"
+        :options="receiptFilterItems"
+        show-visibility-icon
+        tooltip-text="Artikel pro Kassenzettel ein-/ausblenden"
+      />
+    </FilterPanel>
 
-      <q-scroll-area class="filter-scroll">
-        <q-list>
-          <q-item
-            v-for="receipt in sortedTotalsPerReceipt"
-            :key="receipt.id"
-            clickable
-            :class="{ 'active-filter-item': selectedReceipts[receipt.id] }"
-            @click="
-              toggleReceiptSelection(receipt.id, !selectedReceipts[receipt.id])
-            "
-          >
-            <q-item-section>
-              {{ formatDate(receipt.date) }}
-            </q-item-section>
-            <q-item-section>
-              <div class="text-body1">{{ receipt.total.toFixed(2) }} CHF</div>
-            </q-item-section>
-            <q-item-section side>
-              <q-icon
-                :name="
-                  selectedReceipts[receipt.id] ? 'visibility' : 'visibility_off'
-                "
-                @click.stop="
-                  toggleReceiptSelection(
-                    receipt.id,
-                    !selectedReceipts[receipt.id]
-                  )
-                "
-                class="cursor-pointer"
-              >
-                <q-tooltip anchor="center left" class="text-h6">
-                  Artikel pro Kassenzettel ein-/ausblenden
-                </q-tooltip>
-              </q-icon>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-scroll-area>
-    </q-expansion-item>
-
-    <!-- Total per category -->
-    <q-expansion-item
-      default-opened
-      color="primary"
-      :dense="false"
-      class="my-card filter-panel"
+    <FilterPanel
+      panel-class="my-card filter-panel"
+      title="Filter: Kategorien"
       caption="Klickbar: filtert die Artikelliste nach Kategorie."
+      icon="hub"
+      icon-class="colored-icon"
+      color="primary"
+      :badge-text="categoryFilterStatus"
     >
-      <template v-slot:header>
-        <q-item-section avatar>
-          <q-avatar icon="hub" class="colored-icon" />
-        </q-item-section>
-        <q-item-section style="font-weight: bold">
-          Filter: Kategorien
-        </q-item-section>
-        <q-item-section side>
-          <q-badge color="primary" text-color="white">
-            {{ categoryFilterStatus }}
-          </q-badge>
-        </q-item-section>
+      <template #controls>
+        <div class="q-pa-sm">
+          <q-select
+            v-model="categorySortCriteria"
+            :options="[
+              { label: 'Name', value: 'Name' },
+              { label: 'Total', value: 'Total' },
+            ]"
+            label="Sortieren nach"
+            dense
+            outlined
+            rounded
+          />
+        </div>
       </template>
 
-      <!-- Sortoption per category -->
-      <div class="q-pa-sm">
-        <q-select
-          v-model="categorySortCriteria"
-          :options="[
-            { label: 'Name', value: 'Name' },
-            { label: 'Total', value: 'Total' },
-          ]"
-          label="Sortieren nach"
-          dense
-          outlined
-          rounded
-        />
-      </div>
-
-      <q-scroll-area class="filter-scroll">
-        <q-list>
-          <q-item
-            v-for="item in sortedTotalsPerCategory"
-            :key="item.category"
-            clickable
-            :class="{
-              'active-filter-item': selectedCategory === item.category,
-            }"
-            @click="toggleCategorySelection(item.category)"
-          >
-            <q-item-section>
-              <q-icon
-                size="sm"
-                :name="getCategoryIcon(item.category)"
-                :color="getCategoryColor(item.category)"
-              />
-            </q-item-section>
-            <q-item-section style="margin-left: 18px">
-              <div :style="{ 'font-weight': selectedCategory === item.category ? 'bold' : 'normal' }">
-                {{ item.category }}
-              </div>
-            </q-item-section>
-            <q-item-section side>
-              <div class="text-body1">{{ item.total.toFixed(2) }} CHF</div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-scroll-area>
-    </q-expansion-item>
+      <CategoryFilterList
+        v-model="selectedCategory"
+        :options="categoryFilterItems"
+        show-all-option
+      />
+    </FilterPanel>
   </q-list>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, ref, watch } from "vue";
+import { computed, defineComponent, PropType, ref, watch } from "vue";
 import { categoryIcon } from "../../components/prompts/categorization";
 import { formatDate } from "../../helpers/dateHelpers";
+import FilterPanel from "../../components/filters/FilterPanel.vue";
+import CategoryFilterList from "../../components/filters/CategoryFilterList.vue";
+import ReceiptFilterList from "../../components/filters/ReceiptFilterList.vue";
 
 export default defineComponent({
   name: "ArticleTotal",
+  components: {
+    FilterPanel,
+    CategoryFilterList,
+    ReceiptFilterList,
+  },
   props: {
     totalsPerCategory: {
       type: Object as () => Record<string, number>,
       required: true,
     },
     totalsPerReceipt: {
-      type: Array as PropType<
-        Array<{ id: string; date: string; total: number }>
-      >,
+      type: Array as PropType<Array<{ id: string; date: string; total: number }>>,
       required: true,
     },
   },
   emits: ["update:selectedReceipts", "update:selectedCategory"],
   setup(props, { emit }) {
-    const selectedReceipts = reactive<Record<string, boolean>>({});
+    const selectedReceiptIds = ref<string[]>([]);
+    const selectedCategory = ref<string | null>(null);
     const receiptSortCriteria = ref<"Datum" | "Total">("Datum");
     const categorySortCriteria = ref<"Name" | "Total">("Name");
-    const selectedCategory = ref<string | null>(null);
+
     const categoryMetaByName = computed<Record<string, { icon: string; color: string }>>(
       () =>
         categoryIcon.reduce<Record<string, { icon: string; color: string }>>(
@@ -181,103 +109,88 @@ export default defineComponent({
         )
     );
 
-    const sortedTotalsPerReceipt = computed(() => {
-      return [...props.totalsPerReceipt].sort((a, b) => {
-        if (receiptSortCriteria.value === "Datum") {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        } else {
-          return b.total - a.total;
-        }
-      });
-    });
-
-    const sortedTotalsPerCategory = computed(() => {
-      const categoriesArray = Object.entries(props.totalsPerCategory).map(
-        ([category, total]) => ({
-          category,
-          total,
-        })
-      );
-      return categoriesArray.sort((a, b) => {
-        if (categorySortCriteria.value === "Name") {
-          return a.category.localeCompare(b.category);
-        } else {
-          return b.total - a.total;
-        }
-      });
-    });
-
-    const activeReceiptCount = computed(() =>
-      sortedTotalsPerReceipt.value.filter(
-        (receipt) => selectedReceipts[receipt.id]
-      ).length
+    const sortedTotalsPerReceipt = computed(() =>
+      [...props.totalsPerReceipt].sort((a, b) =>
+        receiptSortCriteria.value === "Datum"
+          ? new Date(b.date).getTime() - new Date(a.date).getTime()
+          : b.total - a.total
+      )
     );
+
+    const sortedTotalsPerCategory = computed(() =>
+      Object.entries(props.totalsPerCategory)
+        .map(([category, total]) => ({ category, total }))
+        .sort((a, b) =>
+          categorySortCriteria.value === "Name"
+            ? a.category.localeCompare(b.category)
+            : b.total - a.total
+        )
+    );
+
+    const receiptFilterItems = computed(() =>
+      sortedTotalsPerReceipt.value.map((receipt) => ({
+        id: String(receipt.id),
+        label: formatDate(receipt.date),
+        amount: receipt.total,
+      }))
+    );
+
+    const categoryFilterItems = computed(() =>
+      sortedTotalsPerCategory.value.map((item) => ({
+        value: item.category,
+        label: item.category,
+        icon: categoryMetaByName.value[item.category]?.icon ?? "help_outline",
+        iconColor: categoryMetaByName.value[item.category]?.color ?? "primary",
+        amount: item.total,
+      }))
+    );
+
+    const activeReceiptCount = computed(() => selectedReceiptIds.value.length);
     const categoryFilterStatus = computed(() =>
       selectedCategory.value ? "aktiv" : "inaktiv"
     );
 
-    const toggleReceiptSelection = (id: string, value: boolean) => {
-      selectedReceipts[id] = value;
-    };
-
-    const toggleCategorySelection = (category: string) => {
-      // Reclicking on category removes the selected category
-      if (selectedCategory.value === category) {
-        selectedCategory.value = null;
-      } else {
-        selectedCategory.value = category;
-      }
-    };
-
-    const getCategoryIcon = (categoryName: string): string => {
-      return categoryMetaByName.value[categoryName]?.icon ?? "help_outline";
-    };
-
-    const getCategoryColor = (categoryName: string): string => {
-      return categoryMetaByName.value[categoryName]?.color ?? "primary";
-    };
-
     watch(
       () => props.totalsPerReceipt,
       (newReceipts) => {
-        if (newReceipts && newReceipts.length > 0) {
-          newReceipts.forEach((receipt) => {
-            if (selectedReceipts[receipt.id] === undefined) {
-              selectedReceipts[receipt.id] = true;
-            }
-          });
+        const currentSet = new Set(selectedReceiptIds.value);
+        const availableIds = newReceipts.map((receipt) => String(receipt.id));
+
+        if (availableIds.length === 0) {
+          selectedReceiptIds.value = [];
+          return;
+        }
+
+        if (currentSet.size === 0) {
+          selectedReceiptIds.value = availableIds;
+          return;
+        }
+
+        selectedReceiptIds.value = availableIds.filter((id) => currentSet.has(id));
+        if (selectedReceiptIds.value.length === 0) {
+          selectedReceiptIds.value = availableIds;
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true }
     );
 
-    watch(
-      () => ({ ...selectedReceipts }),
-      (newVal) => {
-        const selectedIds = Object.keys(newVal).filter((id) => newVal[id]);
-        emit("update:selectedReceipts", selectedIds);
-      },
-      { immediate: true, deep: true }
-    );
+    watch(selectedReceiptIds, (newVal) => {
+      emit("update:selectedReceipts", newVal.map((id) => String(id)));
+    });
 
     watch(selectedCategory, (newVal) => {
       emit("update:selectedCategory", newVal);
     });
 
     return {
-      selectedReceipts,
-      toggleReceiptSelection,
-      toggleCategorySelection,
-      formatDate,
-      sortedTotalsPerReceipt,
-      sortedTotalsPerCategory,
-      activeReceiptCount,
-      categoryFilterStatus,
+      selectedReceiptIds,
+      selectedCategory,
       receiptSortCriteria,
       categorySortCriteria,
-      getCategoryIcon,
-      getCategoryColor,
-      selectedCategory,
+      receiptFilterItems,
+      categoryFilterItems,
+      activeReceiptCount,
+      categoryFilterStatus,
     };
   },
 });
@@ -296,14 +209,6 @@ export default defineComponent({
   width: 360px;
 }
 
-.filter-scroll {
-  height: 240px;
-}
-
-.q-item__section--main {
-  flex: auto 1 !important;
-}
-
 .custom-list {
   display: flex;
   flex-direction: row;
@@ -311,14 +216,10 @@ export default defineComponent({
   margin-top: 10px;
   gap: 8px;
 }
+
 .q-item:focus {
   background-color: none;
   border-radius: 15px;
-}
-
-.active-filter-item {
-  background-color: rgba(34, 46, 87, 0.08);
-  border-left: 3px solid $primary;
 }
 
 :deep(.q-expansion-item) {

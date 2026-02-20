@@ -26,12 +26,13 @@
         no-caps
         unelevated
         rounded
-        toggle-color="primary"
-        color="white"
-        text-color="primary"
+        dense
+        toggle-color="grey-4"
+        color="grey-2"
+        text-color="grey-8"
         :options="[
-          { label: 'Grid', value: 'grid' },
           { label: 'Tabelle', value: 'table' },
+          { label: 'Grid', value: 'grid' },
         ]"
       />
     </div>
@@ -292,14 +293,15 @@ h5 {
 }
 
 .view-mode-toggle {
-  border: 1px solid $primary;
+  border: 1px solid rgba(34, 46, 87, 0.2);
   border-radius: 999px;
-  background-color: $bar-background;
+  background-color: rgba(255, 255, 255, 0.6);
   padding: 2px;
 }
 
 .view-mode-toggle :deep(.q-btn) {
-  min-width: 90px;
-  font-weight: 600;
+  min-width: 76px;
+  font-weight: 500;
+  height: 34px;
 }
 </style>

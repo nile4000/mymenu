@@ -1,34 +1,37 @@
 import { AxiosResponse } from "axios";
 import { Article } from "../helpers/interfaces/article.interface";
+import {
+  Recipe,
+  RecipeIngredient,
+} from "../helpers/interfaces/recipe.interface";
 import { callOpenAiApi } from "./aiRequest";
 
-// define structure
-const RECIPE_STRUCTURE = {
-  title: "string",
-  description: "string",
-  cookingTime: "string",
-  category: "string",
-  servings: "number",
-  color: "string",
-  ingredients: ["string"],
-  stepsList: ["string"],
-  image: "string",
-};
+const RECIPE_SCHEMA_DESCRIPTION =
+  "{ title: string, description: string, cookingTime: string, category: string, servings: number, color: string, ingredients: [{ name: string, amount: number, unit: string }], stepsList: string[], image: string }";
 
-const systemPrompt = `You are a cooking-recipe assistant. You will receive a list of ingredients and should return a single JSON without explanation, in this exact structure: ${JSON.stringify(
-  RECIPE_STRUCTURE
-)} Use only the given ingredients. Make sure the JSON is valid and does not contain any additional text. If you cannot comply, return an empty JSON {}.`;
+const systemPrompt = `You are a cooking-recipe assistant. You will receive a list of ingredients and should return a single JSON without explanation, in this exact structure: ${RECIPE_SCHEMA_DESCRIPTION}
+Return ONLY one valid JSON object.
+No markdown, no code fences, no comments, no extra text.
+Use only edible ingredients from the user list and ignore non-food items.
+"servings" must be a number and must match the requested servings exactly.
+Each ingredient must include name (string), amount (number), and unit (string, non-empty).
+Use realistic ingredient amounts and units for the requested servings.
+"stepsList" must be a non-empty string array.
+If you cannot comply exactly, return {}.`;
 
 function createExampleRecipeJson(servings: number): string {
-  // set placeholder values of structure
   const example = {
     title: "Titel des Rezepts",
     description: "Kurze Beschreibung des Gerichts",
     cookingTime: "45 Min",
     category: "Kategorie des Gerichts",
-    servings: servings,
+    servings,
     color: "card-background1",
-    ingredients: ["Zutat 1", "Zutat 2"],
+    ingredients: [
+      { name: "Brokkoli", amount: 400, unit: "g" },
+      { name: "Reis", amount: 250, unit: "g" },
+      { name: "Olivenoel", amount: 2, unit: "EL" },
+    ],
     stepsList: ["Schritt 1", "Schritt 2"],
     image: "https://example.com/image.jpg",
   };
@@ -51,14 +54,34 @@ export function createRecipePrompt(
 
   const exampleJson = createExampleRecipeJson(servings);
 
-  return `Hier sind meine verfügbaren Zutaten:
-        ${ingredientsList}
-        Erstelle ein Rezept für ca. ${servings} Personen, das diese Zutaten verwendet. Gib nur ein gültiges JSON im folgenden Format zurück, ohne weitere Erklärungen:
-        ${exampleJson}
-        Bitte mache keine anderen Ausgaben, nur dieses JSON.`;
+  return `Hier sind meine verfuegbaren Zutaten:\n${ingredientsList}\nErstelle ein gutes Rezept fuer ca. ${servings} Personen, das diese Zutaten verwendet. Verwende nur Zutaten aus dieser Liste und fuege keine weiteren hinzu. Setze "servings" exakt auf ${servings} und skaliere die Mengen passend fuer ${servings} Personen. Gib nur ein gueltiges JSON im folgenden Format zurueck, ohne weitere Erklaerungen:\n${exampleJson}\nBitte mache keine anderen Ausgaben, nur dieses JSON.`;
 }
 
-function parseSingleRecipeResponse(response: AxiosResponse<any, any>): any {
+function normalizeIngredient(value: unknown): RecipeIngredient | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const ingredient = value as Partial<RecipeIngredient>;
+  if (
+    !ingredient.name ||
+    typeof ingredient.name !== "string" ||
+    typeof ingredient.amount !== "number" ||
+    !Number.isFinite(ingredient.amount) ||
+    typeof ingredient.unit !== "string" ||
+    ingredient.unit.trim().length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    name: ingredient.name,
+    amount: ingredient.amount,
+    unit: ingredient.unit.trim(),
+  };
+}
+
+function parseSingleRecipeResponse(response: AxiosResponse<any, any>): Recipe {
   if (
     !response.data ||
     !response.data.choices ||
@@ -67,32 +90,56 @@ function parseSingleRecipeResponse(response: AxiosResponse<any, any>): any {
     !response.data.choices[0].message ||
     !response.data.choices[0].message.content
   ) {
-    throw new Error("Ungültige API-Antwortstruktur.");
+    throw new Error("Ungueltige API-Antwortstruktur.");
   }
 
-  const resultText = response.data.choices[0].message.content.trim();
+  const resultText = response.data.choices[0].message.content
+    .replace(/```json|```/g, "")
+    .trim();
+
   if (!resultText) {
     throw new Error("Keine Antwort vom Modell erhalten.");
   }
 
-  let recipe;
+  let recipe: Partial<Recipe>;
   try {
     recipe = JSON.parse(resultText);
-  } catch (err) {
+  } catch {
     throw new Error("Die Antwort ist kein valides JSON.");
   }
 
-  if (!recipe || !recipe.title) {
-    throw new Error("Kein gültiges Rezept gefunden.");
+  const normalizedIngredients = Array.isArray(recipe.ingredients)
+    ? recipe.ingredients
+        .map((value) => normalizeIngredient(value))
+        .filter((value): value is RecipeIngredient => Boolean(value))
+    : [];
+
+  if (
+    !recipe ||
+    !recipe.title ||
+    !Array.isArray(recipe.stepsList) ||
+    normalizedIngredients.length === 0
+  ) {
+    throw new Error("Kein gueltiges Rezept gefunden.");
   }
 
-  return recipe;
+  return {
+    title: recipe.title,
+    description: recipe.description || "",
+    cookingTime: recipe.cookingTime || "",
+    category: recipe.category || "",
+    servings: Number(recipe.servings) || 2,
+    color: recipe.color || "card-background1",
+    ingredients: normalizedIngredients,
+    stepsList: recipe.stepsList,
+    image: recipe.image || "",
+  };
 }
 
 export async function sendSingleRecipeRequest(
   articles: Article[],
   servings: number
-): Promise<any> {
+): Promise<Recipe> {
   const prompt = createRecipePrompt(articles, servings);
 
   const response = await callOpenAiApi(
@@ -101,5 +148,9 @@ export async function sendSingleRecipeRequest(
     systemPrompt
   );
 
-  return parseSingleRecipeResponse(response);
+  const recipe = parseSingleRecipeResponse(response);
+  return {
+    ...recipe,
+    servings,
+  };
 }

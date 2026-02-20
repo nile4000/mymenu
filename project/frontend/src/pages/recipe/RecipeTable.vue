@@ -1,15 +1,20 @@
 <template>
   <div>
     <div class="q-pa-md row justify-center">
-      <RecipeRequest />
+      <RecipeRequest :selectedItems="recipeInputArticles" @addRecipe="handleAddRecipe" />
       <h5>Rezepte</h5>
+    </div>
+    <div class="row justify-center q-mb-sm">
+      <q-badge color="primary" text-color="white">
+        Zutatenbasis: {{ recipeInputArticles.length }} Artikel
+      </q-badge>
     </div>
     <div class="row justify-center">
       <q-card
+        v-for="recipe in recipes"
+        :key="recipe.id"
         flat
         bordered
-        v-for="recipe in yourRecipes"
-        :key="recipe.id"
         class="q-ma-sm cards"
         :class="recipe.color"
       >
@@ -28,7 +33,7 @@
         </q-card-section>
         <q-card-actions align="center" class="q-px-md">
           <q-btn disabled flat round icon="hub" class="btn-background">
-            <q-tooltip anchor="center left" class="text-h6">Ändern</q-tooltip>
+            <q-tooltip anchor="center left" class="text-h6">Aendern</q-tooltip>
           </q-btn>
           <q-btn
             flat
@@ -37,34 +42,116 @@
             icon="north_east"
             class="btn-background"
             @click="goToRecipe(recipe)"
-            ><q-tooltip anchor="center left" class="text-h6">Details</q-tooltip>
+          >
+            <q-tooltip anchor="center left" class="text-h6">Details</q-tooltip>
           </q-btn>
         </q-card-actions>
       </q-card>
-      <template v-if="selectedRecipe">
-        <!-- Overlay für Rezeptdetails -->
-        <q-dialog
-          v-model="showDialog"
-          persistent
-          transition-show="slide-up"
-          transition-hide="slide-down"
-        >
-          <RecipeDetail
-            v-if="selectedRecipe"
-            :recipe="selectedRecipe"
-            @close="closeOverlay"
-          />
-        </q-dialog>
-      </template>
+      <q-banner
+        v-if="recipes.length === 0"
+        class="q-mt-md empty-state"
+        rounded
+      >
+        Noch keine Rezepte vorhanden. Erstelle dein erstes Rezept mit dem Button.
+      </q-banner>
+      <q-dialog
+        v-model="showDialog"
+        persistent
+        transition-show="slide-up"
+        transition-hide="slide-down"
+        @hide="closeOverlay"
+      >
+        <RecipeDetail
+          v-if="selectedRecipe"
+          :recipe="selectedRecipe"
+          @close="closeOverlay"
+        />
+      </q-dialog>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { QVueGlobals, useQuasar } from "quasar";
-import { defineComponent, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, defineComponent, onMounted, ref, watch } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 import RecipeRequest from "../../components/RecipeRequest.vue";
+import { handleError } from "../../helpers/composables/useErrors";
+import { Recipe, RecipeIngredient } from "../../helpers/interfaces/recipe.interface";
+import { useDataStore } from "../../stores/dataStore";
 import RecipeDetail from "./RecipeDetail.vue";
+
+const STORAGE_KEY = "mymenu_generated_recipes";
+const CARD_COLORS = ["card-background1", "card-background2", "card-background3"] as const;
+
+function selectCardColor(index: number): string {
+  return CARD_COLORS[index % CARD_COLORS.length];
+}
+
+function normalizeIngredient(value: unknown): RecipeIngredient | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const ingredient = value as Partial<RecipeIngredient>;
+  if (
+    !ingredient.name ||
+    typeof ingredient.name !== "string" ||
+    typeof ingredient.amount !== "number" ||
+    !Number.isFinite(ingredient.amount) ||
+    typeof ingredient.unit !== "string" ||
+    ingredient.unit.trim().length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    name: ingredient.name,
+    amount: ingredient.amount,
+    unit: ingredient.unit.trim(),
+  };
+}
+
+function normalizeRecipe(input: Partial<Recipe>, index: number): Recipe {
+  const normalizedIngredients = Array.isArray(input.ingredients)
+    ? input.ingredients
+        .map((value) => normalizeIngredient(value))
+        .filter((value): value is RecipeIngredient => Boolean(value))
+    : [];
+
+  return {
+    id: input.id || `generated-${Date.now()}-${index}`,
+    title: input.title || "Neues Rezept",
+    description: input.description || "KI-generiertes Rezept",
+    cookingTime: input.cookingTime || "Unbekannt",
+    category: input.category || "Allgemein",
+    servings: Number(input.servings) || 2,
+    color: input.color || selectCardColor(index),
+    ingredients: normalizedIngredients,
+    stepsList: Array.isArray(input.stepsList) ? input.stepsList : [],
+    image: input.image || "",
+  };
+}
+
+function loadStoredRecipes(): Recipe[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw) as Partial<Recipe>[];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.map((item, index) => normalizeRecipe(item, index));
+  } catch (error) {
+    console.warn("Could not load stored recipes", error);
+    return [];
+  }
+}
 
 export default defineComponent({
   name: "RecipeTable",
@@ -74,99 +161,20 @@ export default defineComponent({
   },
   setup() {
     const $q: QVueGlobals = useQuasar();
-    const selectedOption = ref(null);
+    const dataStore = useDataStore();
+    const { articles } = storeToRefs(dataStore);
     const showDialog = ref(false);
+    const recipes = ref<Recipe[]>(loadStoredRecipes());
+    const selectedRecipe = ref<Recipe | null>(null);
 
-    const yourRecipes = ref([
-      {
-        id: 4,
-        title: "Vegetarische Lasagne",
-        description: "Eine köstliche Lasagne mit viel Gemüse und Käse.",
-        cookingTime: "75 Min",
-        category: "Vegetarisch",
-        servings: 6,
-        color: "card-background1",
-        ingredients: [
-          "12 Lasagne-Blätter",
-          "500g gemischtes Gemüse (z.B. Zucchini, Paprika, Karotten)",
-          "300g geriebener Käse",
-          "1 Zwiebel",
-          "2 Knoblauchzehen",
-          "400ml Tomatensoße",
-          "2 EL Olivenöl",
-          "Salz und Pfeffer nach Geschmack",
-        ],
-        stepsList: [
-          "Gemüse schneiden.",
-          "Zwiebel und Knoblauch anbraten.",
-          "Soße mit Gemüse zubereiten.",
-          "Lasagne schichten und mit Käse bestreuen.",
-          "Im Ofen bei 180°C ca. 45 Minuten backen.",
-        ],
-        image: "https://via.placeholder.com/300",
-      },
-      {
-        id: 5,
-        title: "Kürbiscremesuppe",
-        description: "Eine cremige Suppe aus Hokkaido-Kürbis und Kokosmilch.",
-        cookingTime: "40 Min",
-        category: "Vegan",
-        servings: 4,
-        color: "card-background2",
-        ingredients: [
-          "1 großer Hokkaido-Kürbis (ca. 1kg)",
-          "400ml Kokosmilch",
-          "1 Zwiebel",
-          "2 Knoblauchzehen",
-          "1 Liter Gemüsebrühe",
-          "2 EL Olivenöl",
-          "Salz und Pfeffer nach Geschmack",
-          "Gewürze nach Wahl (z.B. Muskat, Ingwer)",
-        ],
-        stepsList: [
-          "Kürbis vorbereiten und würfeln.",
-          "Zwiebel und Knoblauch anbraten.",
-          "Kürbis hinzufügen und kurz mitbraten.",
-          "Mit Gemüsebrühe aufgießen und köcheln lassen.",
-          "Kokosmilch hinzufügen und pürieren.",
-          "Abschmecken und servieren.",
-        ],
-        image: "https://via.placeholder.com/300",
-      },
-      {
-        id: 6,
-        title: "Quinoa-Salat mit Avocado",
-        description:
-          "Ein leichter Salat mit Quinoa, Avocado und frischem Gemüse.",
-        cookingTime: "25 Min",
-        category: "Gesund",
-        servings: 2,
-        color: "card-background3",
-        ingredients: [
-          "200g Quinoa",
-          "1 reife Avocado",
-          "300g gemischtes Gemüse (z.B. Gurken, Tomaten, Paprika)",
-          "50g frischer Spinat",
-          "2 EL Olivenöl",
-          "1 Zitrone (Saft)",
-          "Salz und Pfeffer nach Geschmack",
-          "Frische Kräuter (z.B. Petersilie, Koriander)",
-        ],
-        stepsList: [
-          "Quinoa nach Packungsanleitung kochen und abkühlen lassen.",
-          "Gemüse schneiden.",
-          "Avocado würfeln.",
-          "Alles in einer Schüssel mischen.",
-          "Mit Olivenöl, Zitronensaft, Salz und Pfeffer würzen.",
-          "Mit frischen Kräutern garnieren und servieren.",
-        ],
-        image: "https://via.placeholder.com/300",
-      },
-    ]);
+    const recipeInputArticles = computed(() =>
+      [...articles.value].sort(
+        (a, b) =>
+          new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime()
+      )
+    );
 
-    const selectedRecipe = ref(null);
-
-    const goToRecipe = (recipe: any) => {
+    const goToRecipe = (recipe: Recipe) => {
       selectedRecipe.value = recipe;
       showDialog.value = true;
     };
@@ -176,15 +184,40 @@ export default defineComponent({
       selectedRecipe.value = null;
     };
 
+    onBeforeRouteLeave(() => {
+      closeOverlay();
+    });
+
+    const handleAddRecipe = (recipe: Recipe) => {
+      const normalized = normalizeRecipe(recipe, recipes.value.length);
+      recipes.value = [normalized, ...recipes.value];
+    };
+
+    watch(
+      recipes,
+      (newRecipes) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRecipes));
+      },
+      { deep: true }
+    );
+
+    onMounted(async () => {
+      try {
+        await dataStore.ensureInitialized();
+      } catch (error) {
+        handleError("Daten laden", error, $q);
+      }
+      dataStore.startRealtime();
+    });
+
     return {
-      $q,
-      selectedOption,
-      yourRecipes,
+      recipes,
+      recipeInputArticles,
       goToRecipe,
       selectedRecipe,
       showDialog,
       closeOverlay,
-      standard: ref(2),
+      handleAddRecipe,
     };
   },
 });
@@ -195,6 +228,10 @@ export default defineComponent({
   border-radius: 25px;
   height: auto;
   max-width: 320px;
+}
+
+.empty-state {
+  max-width: 420px;
 }
 
 h5 {
@@ -221,12 +258,15 @@ h5 {
 .btn {
   background-color: white !important;
 }
+
 .card-background1 {
   background-color: #e6f7e8;
 }
+
 .card-background2 {
   background-color: #f0f7ff;
 }
+
 .card-background3 {
   background-color: #fdf3e6;
 }

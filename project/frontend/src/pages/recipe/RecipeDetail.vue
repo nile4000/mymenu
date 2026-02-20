@@ -37,6 +37,10 @@
         />
         <span>{{ recipe?.category }}</span>
       </div>
+      <div class="detail-item">
+        <q-icon size="xs" name="groups" class="detail-icon" color="primary" />
+        <span>{{ recipe?.servings }} Personen</span>
+      </div>
     </div>
     <!-- recipe content -->
     <div class="ingredients-section">
@@ -57,11 +61,11 @@
           <div class="ingredient-list">
             <div
               class="ingredient-item"
-              v-for="ingredient in recipe?.ingredients"
-              :key="ingredient"
+              v-for="(ingredient, index) in recipe?.ingredients"
+              :key="`${ingredient.name}-${index}`"
             >
               <q-icon name="restaurant" class="ingredient-icon" />
-              <span>{{ ingredient }}</span>
+              <span>{{ formatIngredient(ingredient) }}</span>
             </div>
           </div>
         </q-tab-panel>
@@ -77,21 +81,28 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, PropType, ref } from "vue";
+import { Recipe, RecipeIngredient } from "../../helpers/interfaces/recipe.interface";
 
 export default defineComponent({
   name: "RecipeDetail",
   props: {
     recipe: {
-      type: Object,
+      type: Object as PropType<Recipe | null>,
       required: false,
+      default: null,
     },
   },
   setup() {
     const activeTab = ref("ingredients");
 
+    function formatIngredient(ingredient: RecipeIngredient): string {
+      return `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`;
+    }
+
     return {
       activeTab,
+      formatIngredient,
     };
   },
 });
@@ -140,7 +151,7 @@ export default defineComponent({
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
   height: 60px;
   border-radius: 15px;
   background-color: white;

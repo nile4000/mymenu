@@ -1,14 +1,18 @@
-import { computed, Ref, ref, unref } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, Ref, unref } from "vue";
 import { Article } from "../interfaces/article.interface";
+import { useFilterStore } from "src/stores/filterStore";
 
 export function useFilters(rows: Article[] | Ref<Article[]>) {
-  const search = ref("");
-  const selectedCategory = ref<string | null>(null);
-  const selectedReceiptIds = ref<string[]>([]);
+  const filterStore = useFilterStore();
+  const { search, selectedCategory, selectedReceiptIds } = storeToRefs(filterStore);
   const filterFields = ["Name", "Purchase_Date", "Category"] as const;
 
   const filteredRows = computed(() => {
     const cleanedSearch = search.value.trim().toLowerCase();
+    const normalizedSelectedReceiptIds = (selectedReceiptIds.value || []).map((id) =>
+      String(id)
+    );
 
     return unref(rows).filter((row) => {
       const matchesSearch =
@@ -20,8 +24,9 @@ export function useFilters(rows: Article[] | Ref<Article[]>) {
         );
 
       const matchesReceipt =
-        selectedReceiptIds.value.length === 0 ||
-        (row.Receipt_Id && selectedReceiptIds.value.includes(String(row.Receipt_Id)));
+        normalizedSelectedReceiptIds.length === 0 ||
+        (row.Receipt_Id &&
+          normalizedSelectedReceiptIds.includes(String(row.Receipt_Id)));
 
       const matchesCategory =
         !selectedCategory.value || row.Category === selectedCategory.value;
