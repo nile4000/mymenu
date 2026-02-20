@@ -30,15 +30,15 @@
 <script lang="ts">
 import { useQuasar } from "quasar";
 import { defineComponent, PropType, ref } from "vue";
-import { handleError } from "../helpers/composables/UseErrors";
-import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
+import { handleError } from "../helpers/composables/useErrors";
+import { hideLoading, showLoading } from "../helpers/composables/useLoader";
 import { Article } from "../helpers/interfaces/article.interface";
 import {
   createBatches,
   prepareArticles,
   prepareArticlesPrices,
   processAllBatches,
-} from "../services/aiRequest.service";
+} from "../services/aiRequest";
 import { deleteArticleById } from "../services/deleteArticle";
 import {
   upsertArticleCategories,
@@ -186,16 +186,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.card-example {
-  max-width: 400px;
-  margin: 0 auto;
-}
-.button-loading-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 20px;
-}
 .q-btn {
   height: 45px;
 }
@@ -218,16 +208,5 @@ export default defineComponent({
   z-index: 1000;
   background-color: $bar-background;
   border: 1px solid $primary;
-}
-
-@media (max-width: 459px) {
-  .btn-categorize {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 0;
-  }
-  .btn-details {
-    margin-bottom: 10px;
-  }
 }
 </style>

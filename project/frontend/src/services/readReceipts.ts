@@ -11,3 +11,13 @@ export async function readAllReceipts(): Promise<Receipt[] | null> {
 
   return data;
 }
+
+
+export const readReceiptsByIds = async (ids: string[]): Promise<Receipt[]> => {
+  const { data, error } = await supabase
+    .from("receipt")
+    .select("*")
+    .in("Id", ids);
+  if (error) throw error;
+  return data;
+};

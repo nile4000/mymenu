@@ -32,7 +32,7 @@
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  name: "AuthComp",
+  name: "AuthPage",
   setup() {
     const tab = ref("login");
     return {

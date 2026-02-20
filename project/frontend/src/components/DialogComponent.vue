@@ -16,11 +16,11 @@
       <q-card-section class="q-pt-none" side>
         <q-toggle
           v-model="performCategorization"
-          label="Kategorisierung"
+          label="Kategorisieren"
         ></q-toggle>
         <q-toggle
           v-model="performUnitExtraction"
-          label="Einheit extrahieren"
+          label="Einheiten extrahieren"
         ></q-toggle>
       </q-card-section>
       <q-card-actions align="right">
@@ -40,8 +40,8 @@
 <script lang="ts">
 import { QVueGlobals, useQuasar } from "quasar";
 import { computed, defineComponent, PropType, ref } from "vue";
-import { handleError } from "../helpers/composables/UseErrors";
-import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
+import { handleError } from "../helpers/composables/useErrors";
+import { hideLoading, showLoading } from "../helpers/composables/useLoader";
 import { Column } from "../helpers/interfaces/column.interface";
 import { Article } from "../helpers/interfaces/article.interface";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
@@ -51,8 +51,8 @@ import {
   prepareArticlesPrices,
   prepareDialogArticles,
   processAllBatches,
-} from "../services/aiRequest.service";
-import { normalizeExtractResponse } from "../services/extractResponse.mapper";
+} from "../services/aiRequest";
+import { normalizeExtractResponse } from "../services/extractResponseMapper";
 import { saveArticlesAndReceipt } from "../services/saveArticles";
 import {
   upsertArticleCategories,
@@ -160,7 +160,7 @@ export default defineComponent({
               await upsertArticleCategories(validCategorizedArticles);
             } else {
               handleError(
-                "Kategorisierung",
+                "Kategorisieren",
                 "Keine gültigen kategorisierten Artikel gefunden.",
                 $q
               );
@@ -170,7 +170,7 @@ export default defineComponent({
           categorySystemPrompt
         );
       } catch (error) {
-        handleError("Kategorisierung", error, $q);
+        handleError("Kategorisieren", error, $q);
       } finally {
         isLoading.value = hideLoading($q);
         $q.notify({

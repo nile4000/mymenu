@@ -68,6 +68,7 @@ export const articleColumns: Column[] = [
     name: "Total",
     label: "Total CHF",
     field: "Total",
+    format: (val: number) => Number(val ?? 0).toFixed(2),
     sortable: true,
   },
 ];
@@ -139,6 +140,7 @@ export const articleColumnsList: Column[] = [
     name: "Total",
     label: "Total CHF",
     field: "Total",
+    format: (val: number) => Number(val ?? 0).toFixed(2),
     sortable: true,
   },
 ];

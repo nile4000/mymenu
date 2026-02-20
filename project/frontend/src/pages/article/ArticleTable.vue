@@ -1,12 +1,13 @@
 <template>
   <div>
+    <section class="overview-block">
     <div class="column items-center">
       <h5>Übersicht</h5>
     </div>
 
-    <div class="row q-pa-md justify-evenly">
-      <FoodControl :totalExpenses="totalExpenses" :rows="filteredRows" />
-      <FoodTotal
+    <div class="row q-pa-md justify-evenly overview-section">
+      <ArticleControl :totalExpenses="totalExpenses" :rows="filteredRows" />
+      <ArticleTotal
         :totalsPerCategory="totalsPerCategory"
         :totalsPerReceipt="totalsPerReceipt"
         :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
@@ -20,26 +21,27 @@
     </div>
 
     <div class="column items-center">
-      <q-btn
-        @click="toggleView"
+      <q-btn-toggle
+        v-model="viewMode"
+        class="view-mode-toggle"
+        no-caps
         unelevated
         rounded
-        :label="
-          isGridView
-            ? 'Zur Tabellenansicht wechseln'
-            : 'Zur Grid-Ansicht wechseln'
-        "
-        color="primary"
+        toggle-color="primary"
+        color="white"
+        text-color="primary"
+        :options="[
+          { label: 'Grid', value: 'grid' },
+          { label: 'Tabelle', value: 'table' },
+        ]"
       />
     </div>
 
-    <h5
-      class="column items-center"
-      style="margin-block-start: 10px; margin-bottom: 20px"
-    >
-      Artikel ({{ selected.length }} / {{ filteredRows.length }})
+    <h5 class="column items-center article-counter">
+      Ausgewählt: {{ selected.length }} von {{ filteredRows.length }} Artikeln
     </h5>
 
+    </section>
     <div v-if="isGridView" style="padding-bottom: 70px">
       <!-- Grid Ansicht -->
       <q-table
@@ -54,14 +56,14 @@
         @update:selected="handleSelectionUpdate"
         selection="multiple"
         class="table-custom"
-        no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+        no-data-label="Keine Daten gefunden / keine Kassenzettel eingeblendet"
       >
         <template v-slot:top>
           <TableSearchInput v-model="search" />
         </template>
 
         <template v-slot:item="props">
-          <FoodGrid
+          <ArticleGrid
             :row="props.row"
             :cols="props.cols"
             :selected="props.selected"
@@ -84,7 +86,7 @@
         @update:selected="handleSelectionUpdate"
         selection="multiple"
         class="table-custom"
-        no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
+        no-data-label="Keine Daten gefunden / keine Kassenzettel eingeblendet"
       >
         <template v-slot:top>
           <TableSearchInput v-model="search" />
@@ -124,55 +126,54 @@
 
 <script lang="ts">
 import { useQuasar } from "quasar";
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, defineComponent, onMounted, ref } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { categories } from "../../components/prompts/categorization";
 import {
   articleColumns,
   articleColumnsList,
 } from "../../helpers/columns/articleColumns";
-import { useArticles } from "../../helpers/composables/UseArticles";
-import { handleError } from "../../helpers/composables/UseErrors";
-import { useFilters } from "../../helpers/composables/UseFilters";
-import { useTotals } from "../../helpers/composables/UseTotals";
-import { useViewMode } from "../../helpers/composables/UseViewMode";
+import { handleError } from "../../helpers/composables/useErrors";
+import { useFilters } from "../../helpers/composables/useFilters";
+import { useTotals } from "../../helpers/composables/useTotals";
+import { useViewMode } from "../../helpers/composables/useViewMode";
 import { Article } from "../../helpers/interfaces/article.interface";
+import { useDataStore } from "../../stores/dataStore";
+import { upsertArticleCategory, upsertArticleUnit } from "../../services/updateArticle";
 import EditableCell from "./EditableCell.vue";
-import FoodControl from "./FoodControl.vue";
-import FoodGrid from "./FoodGrid.vue";
-import FoodTotal from "./FoodTotal.vue";
+import ArticleControl from "./ArticleControl.vue";
+import ArticleGrid from "./ArticleGrid.vue";
+import ArticleTotal from "./ArticleTotal.vue";
 import TableSearchInput from "src/components/TableSearchInput.vue";
 
 export default defineComponent({
-  name: "FoodTable",
+  name: "ArticleTable",
   components: {
-    FoodControl,
-    FoodTotal,
+    ArticleControl,
+    ArticleTotal,
     CategorizationRequest,
-    FoodGrid,
+    ArticleGrid,
     EditableCell,
     TableSearchInput,
   },
   setup() {
     const $q = useQuasar();
-
-    // Artikel laden & verwalten
-    const {
-      rows,
-      receipts,
-      loadArticles,
-      subscribeToArticles,
-      unsubscribeArticles,
-      updateCategory,
-      updateUnit,
-    } = useArticles($q);
+    const dataStore = useDataStore();
+    const { articles: rows, receiptById } = storeToRefs(dataStore);
 
     // Filter-Logik
     const { search, selectedCategory, selectedReceiptIds, filteredRows } =
       useFilters(rows);
 
     // View-Modus (Grid/Tabelle)
-    const { isGridView, toggleView } = useViewMode();
+    const { isGridView } = useViewMode();
+    const viewMode = computed<"grid" | "table">({
+      get: () => (isGridView.value ? "grid" : "table"),
+      set: (value) => {
+        isGridView.value = value === "grid";
+      },
+    });
 
     const selected = ref<Article[]>([]);
 
@@ -188,7 +189,7 @@ export default defineComponent({
       totalsPerReceipt,
       totalExpenses,
       calculatedTotalPerReceipt,
-    } = useTotals(rows, receipts);
+    } = useTotals(rows, receiptById);
 
     function onArticleDeleted(id: string) {
       selected.value = selected.value.filter((item) => item.Id !== id);
@@ -213,17 +214,29 @@ export default defineComponent({
       selected.value = updated;
     }
 
+    async function updateCategory(article: Article) {
+      try {
+        await upsertArticleCategory(article);
+      } catch (error) {
+        handleError("Kategorie aktualisieren", error, $q);
+      }
+    }
+
+    async function updateUnit(article: Article) {
+      try {
+        await upsertArticleUnit(article.Id, article.Unit);
+      } catch (error) {
+        handleError("Einheit aktualisieren", error, $q);
+      }
+    }
+
     onMounted(async () => {
       try {
-        await loadArticles();
+        await dataStore.ensureInitialized();
       } catch (error) {
-        handleError("Belege laden", error, $q);
+        handleError("Daten laden", error, $q);
       }
-      subscribeToArticles();
-    });
-
-    onUnmounted(() => {
-      unsubscribeArticles();
+      dataStore.startRealtime();
     });
 
     return {
@@ -244,7 +257,7 @@ export default defineComponent({
       updateCategory,
       updateUnit,
       isGridView,
-      toggleView,
+      viewMode,
       handleSelectedCategory,
       handleSelectionUpdate,
     };
@@ -275,6 +288,15 @@ h5 {
   margin-block-end: 5px;
 }
 
+.overview-section {
+  margin-bottom: 8px;
+}
+
+.article-counter {
+  margin-block-start: 8px;
+  margin-bottom: 4px;
+}
+
 .q-input {
   border-radius: 15px;
   background-color: $bar-background;
@@ -294,5 +316,17 @@ h5 {
 
 .q-btn {
   height: 45px;
+}
+
+.view-mode-toggle {
+  border: 1px solid $primary;
+  border-radius: 999px;
+  background-color: $bar-background;
+  padding: 2px;
+}
+
+.view-mode-toggle :deep(.q-btn) {
+  min-width: 90px;
+  font-weight: 600;
 }
 </style>

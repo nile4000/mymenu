@@ -24,6 +24,6 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "ErrorDefault",
+  name: "NotFoundPage",
 });
 </script>

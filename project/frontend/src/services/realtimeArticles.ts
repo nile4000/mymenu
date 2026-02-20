@@ -1,28 +1,22 @@
-import { supabase } from "src/boot/supabase";
+import { RealtimeChannel } from "@supabase/supabase-js";
+import {
+  RealtimeChangeCallback,
+  subscribeToTableChanges,
+  unsubscribeFromChanges,
+} from "./realtime";
 
-type ArticleChangeCallback = (payload: any) => void;
+type ArticleChangeCallback = RealtimeChangeCallback<any>;
 
 /**
  * Setup of the realtime channel for article changes
  */
 export function subscribeToArticleChanges(callback: ArticleChangeCallback) {
-  const channel = supabase
-    .channel("article-changes")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "article" },
-      (payload) => {
-        callback(payload);
-      }
-    )
-    .subscribe();
-
-  return channel;
+  return subscribeToTableChanges("article-changes", "article", callback);
 }
 
 /**
  * Closes the realtime channel
  */
-export function unsubscribeFromArticleChanges(channel: any) {
-  void supabase.removeChannel(channel);
+export function unsubscribeFromArticleChanges(channel: RealtimeChannel) {
+  unsubscribeFromChanges(channel);
 }

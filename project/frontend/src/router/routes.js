@@ -1,6 +1,8 @@
+import ROUTE_PATHS from "./paths";
+
 const routes = [
   {
-    path: "/",
+    path: ROUTE_PATHS.home,
     component: () => import("layouts/MainLayout.vue"),
     meta: { requiresAuth: false },
     children: [
@@ -10,17 +12,17 @@ const routes = [
         meta: { requiresAuth: false },
       },
       {
-        path: "scanner",
-        component: () => import("pages/Scanner.vue"),
+        path: ROUTE_PATHS.scanner.slice(1),
+        redirect: ROUTE_PATHS.receipt,
         meta: { requiresAuth: false },
       },
       {
-        path: "receipt",
+        path: ROUTE_PATHS.receipt.slice(1),
         component: () => import("pages/receipt/ReceiptTable.vue"),
         meta: { requiresAuth: false },
       },
       {
-        path: "recipe",
+        path: ROUTE_PATHS.recipe.slice(1),
         component: () => import("pages/recipe/RecipeTable.vue"),
         meta: { requiresAuth: false },
         children: [
@@ -32,24 +34,29 @@ const routes = [
         ],
       },
       {
-        path: "food",
-        component: () => import("pages/article/FoodTable.vue"),
+        path: ROUTE_PATHS.article.slice(1),
+        component: () => import("pages/article/ArticleTable.vue"),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: ROUTE_PATHS.foodAlias.slice(1),
+        redirect: ROUTE_PATHS.article,
         meta: { requiresAuth: false },
       },
     ],
   },
   {
-    path: "/auth",
+    path: ROUTE_PATHS.auth,
     component: () => import("layouts/AuthLayout.vue"),
     children: [
-      { path: "/auth/login", component: () => import("pages/Auth.vue") },
+      { path: "login", component: () => import("pages/Auth.vue") },
     ],
   },
   // Always leave this as last one,
   // but you can also remove it
   {
     path: "/:catchAll(.*)*",
-    component: () => import("pages/ErrorDefault.vue"),
+    component: () => import("pages/common/NotFoundPage.vue"),
   },
 ];
 

@@ -3,15 +3,20 @@
     <!-- Total per receipt -->
     <q-expansion-item
       :dense="false"
-      class="my-card"
-      caption="Total CHF (eingescannt)."
+      class="my-card filter-panel"
+      caption="Klickbar: blendet Artikel pro Kassenzettel ein/aus."
     >
       <template v-slot:header>
         <q-item-section avatar>
           <q-avatar icon="receipt_long" class="colored-icon2" />
         </q-item-section>
         <q-item-section style="font-weight: bold">
-          Total pro Beleg
+          Filter: Kassenzettel
+        </q-item-section>
+        <q-item-section side>
+          <q-badge color="primary" text-color="white">
+            {{ activeReceiptCount }} aktiv
+          </q-badge>
         </q-item-section>
       </template>
 
@@ -30,21 +35,29 @@
         />
       </div>
 
-      <q-scroll-area style="height: 200px">
+      <q-scroll-area class="filter-scroll">
         <q-list>
-          <q-item v-for="receipt in sortedTotalsPerReceipt" :key="receipt.id">
+          <q-item
+            v-for="receipt in sortedTotalsPerReceipt"
+            :key="receipt.id"
+            clickable
+            :class="{ 'active-filter-item': selectedReceipts[receipt.id] }"
+            @click="
+              toggleReceiptSelection(receipt.id, !selectedReceipts[receipt.id])
+            "
+          >
             <q-item-section>
               {{ formatDate(receipt.date) }}
             </q-item-section>
             <q-item-section>
-              <div class="text-body1">{{ receipt.total.toFixed(2) }}.-</div>
+              <div class="text-body1">{{ receipt.total.toFixed(2) }} CHF</div>
             </q-item-section>
             <q-item-section side>
               <q-icon
                 :name="
                   selectedReceipts[receipt.id] ? 'visibility' : 'visibility_off'
                 "
-                @click="
+                @click.stop="
                   toggleReceiptSelection(
                     receipt.id,
                     !selectedReceipts[receipt.id]
@@ -53,7 +66,7 @@
                 class="cursor-pointer"
               >
                 <q-tooltip anchor="center left" class="text-h6">
-                  Artikel Ein-/Ausblenden
+                  Artikel pro Kassenzettel ein-/ausblenden
                 </q-tooltip>
               </q-icon>
             </q-item-section>
@@ -67,14 +80,20 @@
       default-opened
       color="primary"
       :dense="false"
-      class="my-card"
+      class="my-card filter-panel"
+      caption="Klickbar: filtert die Artikelliste nach Kategorie."
     >
       <template v-slot:header>
         <q-item-section avatar>
           <q-avatar icon="hub" class="colored-icon" />
         </q-item-section>
         <q-item-section style="font-weight: bold">
-          Total pro Kategorie
+          Filter: Kategorien
+        </q-item-section>
+        <q-item-section side>
+          <q-badge color="primary" text-color="white">
+            {{ categoryFilterStatus }}
+          </q-badge>
         </q-item-section>
       </template>
 
@@ -93,12 +112,15 @@
         />
       </div>
 
-      <q-scroll-area style="height: 300px">
+      <q-scroll-area class="filter-scroll">
         <q-list>
           <q-item
             v-for="item in sortedTotalsPerCategory"
             :key="item.category"
             clickable
+            :class="{
+              'active-filter-item': selectedCategory === item.category,
+            }"
             @click="toggleCategorySelection(item.category)"
           >
             <q-item-section>
@@ -114,7 +136,7 @@
               </div>
             </q-item-section>
             <q-item-section side>
-              <div class="text-body1">{{ item.total.toFixed(2) }}.-</div>
+              <div class="text-body1">{{ item.total.toFixed(2) }} CHF</div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -129,7 +151,7 @@ import { categoryIcon } from "../../components/prompts/categorization";
 import { formatDate } from "../../helpers/dateHelpers";
 
 export default defineComponent({
-  name: "FoodTotal",
+  name: "ArticleTotal",
   props: {
     totalsPerCategory: {
       type: Object as () => Record<string, number>,
@@ -178,6 +200,15 @@ export default defineComponent({
         }
       });
     });
+
+    const activeReceiptCount = computed(() =>
+      sortedTotalsPerReceipt.value.filter(
+        (receipt) => selectedReceipts[receipt.id]
+      ).length
+    );
+    const categoryFilterStatus = computed(() =>
+      selectedCategory.value ? "aktiv" : "inaktiv"
+    );
 
     const toggleReceiptSelection = (id: string, value: boolean) => {
       selectedReceipts[id] = value;
@@ -236,6 +267,8 @@ export default defineComponent({
       formatDate,
       sortedTotalsPerReceipt,
       sortedTotalsPerCategory,
+      activeReceiptCount,
+      categoryFilterStatus,
       receiptSortCriteria,
       categorySortCriteria,
       getCategoryIcon,
@@ -252,8 +285,15 @@ export default defineComponent({
   border-radius: 15px;
   border: 1px solid $primary;
   margin-bottom: 12px;
-  max-width: fit-content;
   height: fit-content;
+}
+
+.filter-panel {
+  width: 360px;
+}
+
+.filter-scroll {
+  height: 240px;
 }
 
 .q-item__section--main {
@@ -270,6 +310,11 @@ export default defineComponent({
 .q-item:focus {
   background-color: none;
   border-radius: 15px;
+}
+
+.active-filter-item {
+  background-color: rgba(34, 46, 87, 0.08);
+  border-left: 3px solid $primary;
 }
 
 :deep(.q-expansion-item) {

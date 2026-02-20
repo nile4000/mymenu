@@ -1,6 +1,5 @@
 <template>
   <div class="custom">
-    <DialogComponent></DialogComponent>
     <q-uploader
       :url="apiUrl"
       label="PDFs hochladen"
@@ -18,15 +17,11 @@
 <script lang="ts">
 import { useQuasar } from "quasar";
 import { computed, defineComponent } from "vue";
-import DialogComponent from "../components/DialogComponent.vue";
-import { handleError } from "../helpers/composables/UseErrors";
+import DialogComponent from "../../components/DialogComponent.vue";
+import { handleError } from "../../helpers/composables/useErrors";
 
 export default defineComponent({
   name: "ScannerPage",
-  components: {
-    DialogComponent,
-  },
-
   setup() {
     const $q = useQuasar();
     // const auth = getAuth();

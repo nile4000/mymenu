@@ -1,7 +1,7 @@
-import { computed, ref } from "vue";
+import { computed, Ref, ref, unref } from "vue";
 import { Article } from "../interfaces/article.interface";
 
-export function useFilters(rows: Article[]) {
+export function useFilters(rows: Article[] | Ref<Article[]>) {
   const search = ref("");
   const selectedCategory = ref<string | null>(null);
   const selectedReceiptIds = ref<string[]>([]);
@@ -10,7 +10,7 @@ export function useFilters(rows: Article[]) {
   const filteredRows = computed(() => {
     const cleanedSearch = search.value.trim().toLowerCase();
 
-    return rows.filter((row) => {
+    return unref(rows).filter((row) => {
       const matchesSearch =
         !cleanedSearch ||
         filterFields.some((field) =>

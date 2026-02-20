@@ -83,7 +83,7 @@ import { TotalExpenses } from "../../helpers/interfaces/totalExpenses.interface"
 import { formatMonth, formatDate } from "../../helpers/dateHelpers";
 
 export default defineComponent({
-  name: "FoodControl",
+  name: "ArticleControl",
 
   props: {
     totalExpenses: {

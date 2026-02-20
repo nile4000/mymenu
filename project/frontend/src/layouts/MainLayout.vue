@@ -14,22 +14,23 @@
           <q-route-tab
             round
             icon="document_scanner"
-            :to="'/receipt'"
+            :to="ROUTE_PATHS.receipt"
             class="custom-icon"
           >
             <q-tooltip anchor="center left" class="text-h5">Scanner</q-tooltip>
           </q-route-tab>
-          <q-route-tab round icon="receipt_long" :to="'/'" class="custom-icon2">
+          <q-route-tab round icon="receipt_long" :to="ROUTE_PATHS.home" class="custom-icon2">
             <q-tooltip anchor="center left" class="text-h5">Artikel</q-tooltip>
           </q-route-tab>
-          <q-route-tab
+          <!-- ToDo: reactivate when available -->
+          <!-- <q-route-tab
             round
             icon="restaurant"
             :to="'/recipe'"
             class="custom-icon3"
           >
             <q-tooltip anchor="center left" class="text-h5">Rezepte</q-tooltip>
-          </q-route-tab>
+          </q-route-tab> -->
 
           <!-- <q-tab round icon="account_circle" class="custom-icon4">
             <q-tooltip anchor="center left" class="text-h6">Profil</q-tooltip>
@@ -61,79 +62,21 @@
 </template>
 
 <script>
-import { useQuasar } from "quasar";
-import { computed, defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import router from "../router";
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
-
-// const linksList = [
-//   {
-//     title: "Home",
-//     caption: "Willkommen",
-//     icon: "home",
-//     link: "/",
-//   },
-//   {
-//     title: "Erfassung",
-//     caption: "Dokumente Erfassung",
-//     icon: "scanner",
-//     link: "/scanner",
-//   },
-//   // {
-//   //   title: "Deine Belege",
-//   //   caption: "Gescannte Belege",
-//   //   icon: "receipt",
-//   //   link: "/receipt",
-//   // },
-//   {
-//     title: "Esswaren",
-//     caption: "Deine Esswaren",
-//     icon: "restaurant",
-//     link: "/food",
-//   },
-// ];
+import ROUTE_PATHS from "../router/paths";
 
 export default defineComponent({
   name: "MainLayout",
 
-  // components: {
-  //   // EssentialLink,
-  // },
-
   setup() {
-    const leftDrawerOpen = ref(false);
-    const email = ref("");
-    const name = ref("");
-    const $q = useQuasar();
-    const isReceipt = computed(
-      () => router.currentRoute.value.path === "/receipt"
-    );
-    // const auth = getAuth();
-    // if we want to get the user details, this is how its done
-    // onAuthStateChanged(auth, (user) => {
-    //   if (user) {
-    //     email.value = user.email;
-    //     name.value = user.displayName;
-    //   }
-    // });
-
-    const openHistory = () => {
-      void router.push("/receipt");
-    };
-
     const returnHome = () => {
-      void router.push("/recipe");
+      void router.push(ROUTE_PATHS.home);
     };
+
     return {
-      email,
-      name,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
-      openHistory,
+      ROUTE_PATHS,
       returnHome,
-      isReceipt,
     };
   },
 });

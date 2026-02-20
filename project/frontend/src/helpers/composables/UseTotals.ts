@@ -1,11 +1,14 @@
-import { computed } from "vue";
+import { computed, Ref, unref } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { Receipt } from "../interfaces/receipt.interface";
 import { TotalExpenses } from "../interfaces/totalExpenses.interface";
 
-export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
+export function useTotals(
+  rows: Article[] | Ref<Article[]>,
+  receipts: Record<string, Receipt> | Ref<Record<string, Receipt>>
+) {
   const totalsPerReceipt = computed(() =>
-    Object.values(receipts).map(({ Id, Purchase_Date, Total_Receipt }) => ({
+    Object.values(unref(receipts)).map(({ Id, Purchase_Date, Total_Receipt }) => ({
       id: Id || "",
       date: Purchase_Date,
       total: Number(Total_Receipt),
@@ -13,7 +16,7 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
   );
 
   const totalExpenses = computed<TotalExpenses>(() => {
-    const receiptValues = Object.values(receipts);
+    const receiptValues = Object.values(unref(receipts));
     const sum = receiptValues.reduce((acc, { Total_Receipt }) => acc + Number(Total_Receipt), 0);
 
     if (receiptValues.length === 0) {
@@ -42,7 +45,7 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
   });
 
   const totalsPerCategory = computed(() =>
-    rows.reduce((acc, { Category, Total }) => {
+    unref(rows).reduce((acc, { Category, Total }) => {
       if (Category) {
         acc[Category] = (acc[Category] ?? 0) + (Total ?? 0);
       }
@@ -51,10 +54,11 @@ export function useTotals(rows: Article[], receipts: Record<string, Receipt>) {
   );
 
   const calculatedTotalPerReceipt = computed(() =>
-    rows.reduce((acc, { Receipt_Id, Total }) => {
+    unref(rows).reduce((acc, { Receipt_Id, Total }) => {
       if (Receipt_Id) {
+        const resolvedReceipts = unref(receipts);
         if (!acc[Receipt_Id]) {
-          const r = receipts[Receipt_Id];
+          const r = resolvedReceipts[Receipt_Id];
           acc[Receipt_Id] = {
             total: 0,
             date: r ? r.Purchase_Date : "Unbekannt",

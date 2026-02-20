@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
-import { Article } from "../../helpers/interfaces/article.interface";
-import { callOpenAiApi } from "../../services/aiRequest.service";
+import { Article } from "../helpers/interfaces/article.interface";
+import { callOpenAiApi } from "./aiRequest";
 
 // define structure
 const RECIPE_STRUCTURE = {

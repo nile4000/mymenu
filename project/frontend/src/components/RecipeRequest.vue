@@ -45,7 +45,9 @@
               <q-item-section avatar>
                 <q-avatar icon="receipt_long" class="colored-icon2" />
               </q-item-section>
-              <q-item-section style="font-weight: bold">Belege</q-item-section>
+              <q-item-section style="font-weight: bold"
+                >Kassenzettel</q-item-section
+              >
             </template>
             <q-list>
               <q-item v-for="item in categories" :key="item">
@@ -86,9 +88,9 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import { QVueGlobals, useQuasar } from "quasar";
-import { handleError } from "../helpers/composables/UseErrors";
+import { handleError } from "../helpers/composables/useErrors";
 import { categories } from "./prompts/recipe";
-import { sendSingleRecipeRequest } from "./prompts/recipe.service";
+import { sendSingleRecipeRequest } from "../services/recipeRequest";
 import { Article } from "../helpers/interfaces/article.interface";
 
 export default defineComponent({

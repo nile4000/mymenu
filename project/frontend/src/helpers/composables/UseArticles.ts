@@ -2,8 +2,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 import { QVueGlobals } from "quasar";
 import {
   readAllArticles,
-  readReceiptsByIds,
-} from "src/services/readAllArticles";
+} from "src/services/readArticles";
 import {
   subscribeToArticleChanges,
   unsubscribeFromArticleChanges,
@@ -15,6 +14,7 @@ import {
 import { reactive } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { Receipt } from "../interfaces/receipt.interface";
+import { readReceiptsByIds } from "src/services/readReceipts";
 
 export function useArticles($q: QVueGlobals) {
   const rows = reactive<Article[]>([]);

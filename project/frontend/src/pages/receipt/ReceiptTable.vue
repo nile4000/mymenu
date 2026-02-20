@@ -1,5 +1,5 @@
 <template>
-  <div class="column items-center">
+  <q-page class="column items-center">
     <h5>Scanner</h5>
     <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
@@ -82,24 +82,20 @@
         </q-card>
       </template>
     </q-table>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
-import { RealtimeChannel } from "@supabase/supabase-js";
+import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { handleError } from "../../helpers/composables/UseErrors";
+import { defineComponent, onMounted, ref } from "vue";
 import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
 import { Column } from "../../helpers/interfaces/column.interface";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
 import { deleteReceiptById } from "../../services/deleteReceipt";
-import { readAllReceipts } from "../../services/readAllReceipts";
-import {
-  subscribeToReceiptChanges,
-  unsubscribeFromReceiptChanges,
-} from "../../services/realtimeReceipts";
-import ScannerPage from "../Scanner.vue";
+import { useDataStore } from "../../stores/dataStore";
+import ScannerPage from "../scanner/ScannerPage.vue";
+import { handleError } from "src/helpers/composables/useErrors";
 
 // Defining the columns
 const columns: Column[] = [
@@ -122,12 +118,10 @@ export default defineComponent({
 
   setup() {
     const $q = useQuasar();
-    const rows = ref<Receipt[]>([]);
+    const dataStore = useDataStore();
+    const { receipts: rows } = storeToRefs(dataStore);
     const filter = ref<string>("");
     const selected = ref<string[]>([]);
-    const allRows: Receipt[] = [];
-
-    let channel: RealtimeChannel;
 
     const initialPagination = ref({
       sortBy: "desc",
@@ -136,65 +130,30 @@ export default defineComponent({
       rowsPerPage: 500,
     });
 
-    const handleReceiptChange = (payload: any) => {
-      const newReceipt = payload.new as Receipt;
-      const eventType = payload.eventType;
-
-      switch (eventType) {
-        case "INSERT":
-          rows.value.push(newReceipt);
-          break;
-        case "DELETE":
-          // eslint-disable-next-line no-case-declarations
-          const indexToDelete = rows.value.findIndex(
-            (receipt: Receipt) => receipt.Id === newReceipt.Id
-          );
-          if (indexToDelete !== -1) {
-            rows.value.splice(indexToDelete, 1);
-          }
-          break;
-        default:
-          $q.notify({
-            type: "warning",
-            message: `Unknown event type: ${eventType}`,
-          });
-      }
-    };
-
     onMounted(async () => {
       try {
-        const data = await readAllReceipts();
-        if (data) {
-          allRows.splice(0, allRows.length, ...data);
-        }
+        await dataStore.ensureInitialized();
       } catch (error) {
-        handleError("Belege laden", error, $q);
+        handleError("Kassenzettel laden", error, $q);
       }
-      rows.value = allRows;
-      channel = subscribeToReceiptChanges(handleReceiptChange);
-    });
-
-    onUnmounted(() => {
-      if (channel) {
-        unsubscribeFromReceiptChanges(channel);
-      }
+      dataStore.startRealtime();
     });
 
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
-        `Sind sich sicher, dass Sie den Einkauf vom ${receipt.Purchase_Date} löschen wollen?`
+        `Sind Sie sicher, dass Sie den Kassenzettel vom ${receipt.Purchase_Date} loeschen wollen?`
       );
       if (confirmed && receipt.Id) {
         try {
           await deleteReceiptById(receipt.Id);
-          rows.value = rows.value.filter((row) => row.Id !== receipt.Id);
+          dataStore.removeReceiptById(receipt.Id);
           $q.notify({
             type: "positive",
-            message: "Beleg gelöscht.",
+            message: "Kassenzettel geloescht.",
           });
         } catch (error) {
-          handleError("Beleg löschen", error, $q);
+          handleError("Kassenzettel loeschen", error, $q);
         }
       }
     };
@@ -330,3 +289,4 @@ h5 {
   }
 }
 </style>
+

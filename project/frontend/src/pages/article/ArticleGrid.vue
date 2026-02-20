@@ -6,17 +6,13 @@
       bordered
       flat
       dense
-      :class="selected ? ($q.dark.isActive ? '$positive' : 'bg-grey-2') : ''"
+      class="clickable-card"
+      :class="selected ? (q.dark.isActive ? '$positive' : 'bg-grey-2') : ''"
+      @click="$emit('update:selected', !selected)"
     >
-      <q-card-section class="q-pa-xs row justify-between">
-        <div
-          style="margin: 5px; white-space: break-all; width: 80%"
-          @click.stop="$emit('update:selected', !selected)"
-        >
-          {{ row.Name }}
-        </div>
-
+      <q-card-section class="q-pa-xs card-header">
         <q-icon
+          class="category-icon"
           :name="getCategoryIcon(row.Category || '')"
           :color="getCategoryColor(row.Category || '')"
           size="md"
@@ -25,6 +21,9 @@
             {{ row.Category }}
           </q-tooltip>
         </q-icon>
+        <div class="article-name">
+          {{ row.Name }}
+        </div>
       </q-card-section>
 
       <q-separator />
@@ -61,7 +60,7 @@ interface Column {
 }
 
 export default defineComponent({
-  name: "FoodGrid",
+  name: "ArticleGrid",
   props: {
     row: {
       type: Object as PropType<Article>,
@@ -78,7 +77,7 @@ export default defineComponent({
   },
   emits: ["update:selected"],
   setup() {
-    const $q: QVueGlobals = useQuasar();
+    const q: QVueGlobals = useQuasar();
 
     const getCategoryIcon = (categoryName: string): string => {
       const cat = categoryIcon.find((c) => c.name === categoryName);
@@ -91,7 +90,7 @@ export default defineComponent({
     };
 
     return {
-      $q,
+      q,
       getCategoryIcon,
       getCategoryColor,
     };
@@ -102,5 +101,25 @@ export default defineComponent({
 <style scoped>
 .grid-style-transition {
   transition: all 0.3s ease;
+}
+
+.clickable-card {
+  cursor: pointer;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-icon {
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.article-name {
+  margin: 5px 5px 5px 0;
+  white-space: break-all;
 }
 </style>
