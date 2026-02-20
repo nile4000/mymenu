@@ -50,26 +50,14 @@
         :columns="columns"
         row-key="Id"
         :pagination="initialPagination"
-        v-model:selected="selected"
+        :selected="selected"
+        @update:selected="handleSelectionUpdate"
         selection="multiple"
         class="table-custom"
         no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
       >
         <template v-slot:top>
-          <div style="width: 100%">
-            <q-input
-              rounded
-              dense
-              debounce="400"
-              v-model="search"
-              outlined
-              label="Kaufdatum, Name oder Kategorie"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
+          <TableSearchInput v-model="search" />
         </template>
 
         <template v-slot:item="props">
@@ -92,26 +80,14 @@
         :columns="columnsList"
         row-key="Id"
         :pagination="initialPagination"
-        v-model:selected="selected"
+        :selected="selected"
+        @update:selected="handleSelectionUpdate"
         selection="multiple"
         class="table-custom"
         no-data-label="Keine Daten gefunden / keine Belege eingeblendet"
       >
         <template v-slot:top>
-          <div style="width: 100%">
-            <q-input
-              rounded
-              dense
-              debounce="400"
-              v-model="search"
-              outlined
-              label="Kaufdatum, Name oder Kategorie"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
+          <TableSearchInput v-model="search" />
         </template>
 
         <!-- Toggles styled -->
@@ -150,10 +126,7 @@
 import { useQuasar } from "quasar";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
-import {
-  categories,
-  categoryIcon,
-} from "../../components/prompts/categorization";
+import { categories } from "../../components/prompts/categorization";
 import {
   articleColumns,
   articleColumnsList,
@@ -168,6 +141,7 @@ import EditableCell from "./EditableCell.vue";
 import FoodControl from "./FoodControl.vue";
 import FoodGrid from "./FoodGrid.vue";
 import FoodTotal from "./FoodTotal.vue";
+import TableSearchInput from "src/components/TableSearchInput.vue";
 
 export default defineComponent({
   name: "FoodTable",
@@ -177,6 +151,7 @@ export default defineComponent({
     CategorizationRequest,
     FoodGrid,
     EditableCell,
+    TableSearchInput,
   },
   setup() {
     const $q = useQuasar();
@@ -200,8 +175,6 @@ export default defineComponent({
     const { isGridView, toggleView } = useViewMode();
 
     const selected = ref<Article[]>([]);
-    const message = ref("");
-    const messageType = ref("positive");
 
     const initialPagination = ref({
       sortBy: "desc",
@@ -229,22 +202,15 @@ export default defineComponent({
       selectedCategory.value = cat;
     }
 
-    function getCategoryIcon(categoryName: string): string {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.icon : "help_outline";
-    }
-
-    function getCategoryColor(categoryName: string): string {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.color : "primary";
-    }
-
     function onItemSelected(row: Article, isSelected: boolean) {
       if (isSelected && !selected.value.includes(row)) {
         selected.value.push(row);
       } else if (!isSelected) {
         selected.value = selected.value.filter((item) => item.Id !== row.Id);
       }
+    }
+    function handleSelectionUpdate(updated: Article[]) {
+      selected.value = updated;
     }
 
     onMounted(async () => {
@@ -266,8 +232,6 @@ export default defineComponent({
       filteredRows,
       search,
       selected,
-      message,
-      messageType,
       initialPagination,
       totalsPerCategory,
       totalsPerReceipt,
@@ -279,11 +243,10 @@ export default defineComponent({
       handleSelectedReceipts,
       updateCategory,
       updateUnit,
-      getCategoryIcon,
-      getCategoryColor,
       isGridView,
       toggleView,
       handleSelectedCategory,
+      handleSelectionUpdate,
     };
   },
 });

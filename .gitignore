@@ -8,3 +8,5 @@ project/.vscode
 .quarkus
 .vscode
 .DS_Store
+project/backend/db/local_dev_*.sql
+project/backend/db/local_dev_*.dump

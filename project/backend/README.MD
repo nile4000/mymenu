@@ -25,25 +25,20 @@ quarkus dev
 
 Prerequisite: Docker Desktop must be running.
 
-```shell
+```powershell
 cd C:\dev\mymenu\project\backend\db
 
-# 1) Restart local Supabase stack cleanly
-npx supabase stop --no-backup
-npx supabase start
+# Restore local DB snapshot
+.\restore-local-db.ps1 -DumpFile local_dev_public.sql
 
-# 2) Load dummy data from SQL dump into local DB
-Get-Content .\db_cluster.backup -Raw | docker exec -i supabase_db_db psql -U postgres -d postgres
-
-# 3) Optional check
-npx supabase status
-docker exec supabase_db_db psql -U postgres -d postgres -c "select count(*) as article_count from public.article; select count(*) as receipt_count from public.receipt;"
+# Save current local DB snapshot
+.\save-local-db.ps1 -OutputFile local_dev_public.sql
 ```
 
 Note:
 
-- `db_cluster.backup` is a SQL text dump (not `pg_restore` format).
-- For a full reset, run `npx supabase stop --no-backup` and then the steps above again.
+- `local_dev_*.sql` files are ignored by git (local-only snapshots).
+- Scripts restore/export the `public` schema only, for local development speed.
 
 ### Endpoint testing
 

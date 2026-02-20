@@ -1,12 +1,4 @@
-import { Article } from "./article.interface";
+import { ExtractResponseRaw } from "./extract-response.interface";
 
-export interface ResponseItem {
-  UID: string;
-  Articles: Article[];
-  Purchase_Date: string;
-  Created_At: string;
-  Corp: string;
-  Total: string;
-  Total_R_Extract: number;
-  Total_R_Open_Ai: number;
-}
+// Alias used by DialogComponent imports.
+export type ResponseItem = ExtractResponseRaw;

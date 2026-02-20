@@ -4,7 +4,7 @@
     <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
     </div>
-    <h5 style="margin-block-start: 15px">Belege</h5>
+    <h5 style="margin-block-start: 15px">Meine Kassenzettel</h5>
     <q-table
       flat
       bordered
@@ -88,14 +88,17 @@
 <script lang="ts">
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { useQuasar } from "quasar";
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { handleError } from "../../helpers/composables/UseErrors";
 import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
 import { Column } from "../../helpers/interfaces/column.interface";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
 import { deleteReceiptById } from "../../services/deleteReceipt";
 import { readAllReceipts } from "../../services/readAllReceipts";
-import { subscribeToReceiptChanges } from "../../services/realtimeReceipts";
+import {
+  subscribeToReceiptChanges,
+  unsubscribeFromReceiptChanges,
+} from "../../services/realtimeReceipts";
 import ScannerPage from "../Scanner.vue";
 
 // Defining the columns
@@ -169,6 +172,12 @@ export default defineComponent({
       }
       rows.value = allRows;
       channel = subscribeToReceiptChanges(handleReceiptChange);
+    });
+
+    onUnmounted(() => {
+      if (channel) {
+        unsubscribeFromReceiptChanges(channel);
+      }
     });
 
 

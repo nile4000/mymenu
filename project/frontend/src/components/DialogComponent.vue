@@ -39,10 +39,11 @@
 
 <script lang="ts">
 import { QVueGlobals, useQuasar } from "quasar";
-import { computed, defineComponent, PropType, ref, Ref } from "vue";
+import { computed, defineComponent, PropType, ref } from "vue";
 import { handleError } from "../helpers/composables/UseErrors";
 import { hideLoading, showLoading } from "../helpers/composables/UseLoader";
 import { Column } from "../helpers/interfaces/column.interface";
+import { Article } from "../helpers/interfaces/article.interface";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { ResponseItem } from "../helpers/interfaces/response-item.interface";
 import {
@@ -51,6 +52,7 @@ import {
   prepareDialogArticles,
   processAllBatches,
 } from "../services/aiRequest.service";
+import { normalizeExtractResponse } from "../services/extractResponse.mapper";
 import { saveArticlesAndReceipt } from "../services/saveArticles";
 import {
   upsertArticleCategories,
@@ -89,75 +91,28 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const isLoading = ref(false);
-    const responseItem = computed(() => props.response?.[0] ?? {});
-
-    const articles = computed(() => {
-      const rawArticles =
-        (responseItem.value as any).Articles ??
-        (responseItem.value as any).articles ??
-        [];
-
-      if (!Array.isArray(rawArticles)) return [];
-
-      return rawArticles.map((article: any) => ({
-        Id: article.Id ?? article.id ?? undefined,
-        Name: article.Name ?? article.name ?? "",
-        Quantity: article.Quantity ?? article.quantity ?? 0,
-        Price: article.Price ?? article.price ?? 0,
-        Total:
-          article.Total ??
-          article.total ??
-          article.Price ??
-          article.price ??
-          0,
-        Discount: article.Discount ?? article.discount ?? 0,
-        Category: article.Category ?? article.category ?? "",
-        Unit: article.Unit ?? article.unit ?? undefined,
-        Purchase_Date:
-          article.Purchase_Date ??
-          article.purchaseDate ??
-          article.purchase_date ??
-          undefined,
-      }));
+    const responseItem = computed<ResponseItem | null>(
+      () => props.response?.[0] ?? null
+    );
+    const emptyReceipt: Receipt = {
+      Purchase_Date: "",
+      Corp: "Unknown",
+      Total_Receipt: 0,
+    };
+    const normalizedResponse = computed(() => {
+      if (!responseItem.value) {
+        return { articles: [] as Article[], receipt: emptyReceipt };
+      }
+      return normalizeExtractResponse(responseItem.value);
     });
+
+    const articles = computed(() => normalizedResponse.value.articles);
     const performCategorization = ref(true);
     const performUnitExtraction = ref(false);
 
     const $q: QVueGlobals = useQuasar();
 
-    const receiptData: Ref<Receipt> = computed(() => ({
-      Uuid: (responseItem.value as any).UID ?? (responseItem.value as any).uid,
-      Purchase_Date:
-        (responseItem.value as any).Purchase_Date ??
-        (responseItem.value as any).purchaseDate ??
-        (responseItem.value as any).purchase_date ??
-        "",
-      Created_At:
-        (responseItem.value as any).Created_At ??
-        (responseItem.value as any).createdAt ??
-        (responseItem.value as any).created_at,
-      Corp:
-        (responseItem.value as any).Corp ??
-        (responseItem.value as any).corp ??
-        "Unknown",
-      Total_R_Extract:
-        (responseItem.value as any).Total_R_Extract ??
-        (responseItem.value as any).totalRExtract ??
-        (responseItem.value as any).total_r_extract ??
-        0,
-      Total_R_Open_Ai:
-        (responseItem.value as any).Total_R_Open_Ai ??
-        (responseItem.value as any).totalROpenAi ??
-        (responseItem.value as any).total_r_open_ai ??
-        0,
-      Total_Receipt: parseFloat(
-        String(
-          (responseItem.value as any).Total ??
-            (responseItem.value as any).total ??
-            0
-        )
-      ),
-    }));
+    const receiptData = computed(() => normalizedResponse.value.receipt);
 
     const saveAll = async () => {
       try {
@@ -196,9 +151,11 @@ export default defineComponent({
         await processAllBatches(
           batches,
           categorizationPrompt,
-          async (categorizedArticles: any[]) => {
+          async (categorizedArticles) => {
             const validCategorizedArticles =
-              validateExtractedCategories(categorizedArticles);
+              validateExtractedCategories(
+                categorizedArticles as { id: string; category: string }[]
+              );
             if (validCategorizedArticles.length > 0) {
               await upsertArticleCategories(validCategorizedArticles);
             } else {
@@ -236,7 +193,9 @@ export default defineComponent({
           detailExtractionPrompt,
           async (extractedDetails) => {
             const validExtractedDetails =
-              validateExtractedDetails(extractedDetails);
+              validateExtractedDetails(
+                extractedDetails as { id: string; unit: string }[]
+              );
             if (validExtractedDetails.length > 0) {
               await upsertArticleUnits(validExtractedDetails);
             } else {

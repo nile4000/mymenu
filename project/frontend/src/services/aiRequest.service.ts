@@ -1,37 +1,64 @@
 import axios, { AxiosResponse } from "axios";
-import { Article } from "../helpers/interfaces/article.interface";
 import { Ref } from "vue";
 
 const OPEN_AI_URL = "https://api.openai.com/v1/chat/completions";
 const OPEN_AI_TEMP_MODEL = "gpt-3.5-turbo-0125";
 
+type PreparedPromptItem = {
+  id: string;
+  name: string;
+  quantity?: number;
+  price?: number;
+};
+
+type ArticleNameRef = {
+  Id: string;
+  Name: string;
+};
+
+type ArticleDetailRef = {
+  Id: string;
+  Name: string;
+  Quantity: number;
+  Total?: number;
+  Price?: number;
+};
+
+type OpenAiChatResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+};
+
 // preparation
-export function prepareArticles(items: Article[]) {
-  return items.map((item: Article) => ({
+export function prepareArticles(items: ArticleNameRef[]) {
+  return items.map((item: ArticleNameRef) => ({
     id: item.Id,
     name: item.Name,
   }));
 }
 
-export function prepareArticlesPrices(items: any) {
-  return items.map((item: any) => ({
+export function prepareArticlesPrices(items: ArticleDetailRef[]) {
+  return items.map((item: ArticleDetailRef) => ({
     id: item.Id,
     name: item.Name,
     quantity: item.Quantity,
-    price: item.Total,
+    price: item.Total ?? item.Price ?? 0,
   }));
 }
 
-export function prepareDialogArticles(items: any) {
-  return items.map((item: any) => ({
+export function prepareDialogArticles(items: ArticleNameRef[]) {
+  return items.map((item: ArticleNameRef) => ({
     id: item.Id,
     name: item.Name,
   }));
 }
 
 // batching
-export function createBatches(preparedArticles: any[], batchSize: number) {
-  const batches = [];
+export function createBatches<T>(preparedArticles: T[], batchSize: number) {
+  const batches: T[][] = [];
   for (let i = 0; i < preparedArticles.length; i += batchSize) {
     batches.push(preparedArticles.slice(i, i + batchSize));
   }
@@ -42,20 +69,20 @@ export function createBatches(preparedArticles: any[], batchSize: number) {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function processBatch(
-  batch: any[],
-  promptGenerator: (batch: any[]) => string,
+  batch: PreparedPromptItem[],
+  promptGenerator: (batch: PreparedPromptItem[]) => string,
   callApi: (
     prompt: string,
     model: string,
     systemPrompt: string
-  ) => Promise<AxiosResponse<any, any>>,
-  handleApiResponse: (response: AxiosResponse<any, any>) => any[],
+  ) => Promise<AxiosResponse<OpenAiChatResponse>>,
+  handleApiResponse: (response: AxiosResponse<OpenAiChatResponse>) => unknown[],
   model: string,
   systemPrompt: Ref<string>,
   maxRetries = 2,
   retryDelay = 2000,
   attempt = 1
-): Promise<any[]> {
+): Promise<unknown[]> {
   const prompt = promptGenerator(batch);
   try {
     const response = await callApi(prompt, model, systemPrompt.value);
@@ -87,9 +114,9 @@ export async function processBatch(
 }
 
 export async function processAllBatches(
-  batches: any[],
-  promptGenerator: (batch: any[]) => string,
-  handleBatchResponse: (data: any[]) => Promise<void>,
+  batches: PreparedPromptItem[][],
+  promptGenerator: (batch: PreparedPromptItem[]) => string,
+  handleBatchResponse: (data: unknown[]) => Promise<void>,
   model: string,
   systemPrompt: Ref<string>
 ) {
@@ -154,7 +181,7 @@ export async function callOpenAiApi(
 }
 
 // receiving / parsing
-function handleResponse(response: AxiosResponse<any, any>) {
+function handleResponse(response: AxiosResponse<OpenAiChatResponse>) {
   if (
     !response.data ||
     !response.data.choices ||
@@ -169,7 +196,7 @@ function handleResponse(response: AxiosResponse<any, any>) {
   let data = response.data.choices[0].message.content;
   data = data.replace(/```json|```/g, "").trim();
 
-  let parsedData: any[];
+  let parsedData: unknown[];
   try {
     parsedData = JSON.parse(data);
   } catch (parseError) {

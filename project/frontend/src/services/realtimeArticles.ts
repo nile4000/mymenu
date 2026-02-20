@@ -7,7 +7,7 @@ type ArticleChangeCallback = (payload: any) => void;
  */
 export function subscribeToArticleChanges(callback: ArticleChangeCallback) {
   const channel = supabase
-    .channel("custom-all-channel")
+    .channel("article-changes")
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "article" },
