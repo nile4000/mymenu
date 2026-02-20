@@ -53,10 +53,28 @@ export function formatMonth(monthNumber: number): string {
 // (DD.MM.YY -> YYYY-MM-DD)
 export function convertToISODate(dateString: string): string {
   try {
-    const [day, month, year] = dateString.split(".");
-    const fullYear = year.length === 2 ? `20${year}` : year;
-    return `${fullYear}-${month}-${day}`;
+    const value = (dateString || "").trim();
+    if (!value) throw new Error("empty date");
+
+    if (value.includes(".")) {
+      const [day, month, year] = value.split(".");
+      if (!day || !month || !year) throw new Error("invalid dotted date");
+      const fullYear = year.length === 2 ? `20${year}` : year;
+      return `${fullYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) throw new Error("invalid date");
+
+    const yyyy = parsed.getFullYear();
+    const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+    const dd = String(parsed.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
   } catch (error) {
-    return "2024-11-23";
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
   }
 }

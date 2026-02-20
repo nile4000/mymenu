@@ -8,7 +8,14 @@ export async function saveArticlesAndReceipt(
   receiptData: Receipt
 ): Promise<any> {
   try {
-    const formattedDate = convertToISODate(receiptData.Purchase_Date);
+    const fallbackDate = new Intl.DateTimeFormat("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date());
+    const rawDate =
+      receiptData?.Purchase_Date || receiptData?.Created_At || fallbackDate;
+    const formattedDate = convertToISODate(rawDate);
     // save receipt
     const { data: receiptInsertData, error: receiptInsertError } =
       await supabase
@@ -31,14 +38,24 @@ export async function saveArticlesAndReceipt(
     const receipt: Receipt = receiptInsertData[0];
 
     const preparedArticles = articles.map((article) => {
+      const price = Number(article.Price ?? 0);
+      const quantity = Number(article.Quantity ?? 0);
+      const discount = Number(article.Discount ?? 0);
       const total =
         article.Total !== undefined && article.Total !== null
-          ? article.Total
-          : article.Price;
+          ? Number(article.Total)
+          : price;
 
+      // Use an explicit payload to avoid sending unsupported columns (e.g. Id)
+      // and to keep object keys stable for PostgREST bulk inserts.
       return {
-        ...article,
-        Total: total,
+        Name: article.Name ?? "",
+        Price: Number.isFinite(price) ? price : 0,
+        Quantity: Number.isFinite(quantity) ? quantity : 0,
+        Discount: Number.isFinite(discount) ? discount : 0,
+        Total: Number.isFinite(total) ? total : 0,
+        Category: article.Category ?? "",
+        Unit: article.Unit ?? null,
         Purchase_Date: formattedDate,
         Receipt_Id: receipt.Id,
       };

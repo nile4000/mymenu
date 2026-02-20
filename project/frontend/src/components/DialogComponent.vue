@@ -89,24 +89,86 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const isLoading = ref(false);
-    const articles = computed(() => props.response[0].Articles);
+    const responseItem = computed(() => props.response?.[0] ?? {});
+
+    const articles = computed(() => {
+      const rawArticles =
+        (responseItem.value as any).Articles ??
+        (responseItem.value as any).articles ??
+        [];
+
+      if (!Array.isArray(rawArticles)) return [];
+
+      return rawArticles.map((article: any) => ({
+        Id: article.Id ?? article.id ?? undefined,
+        Name: article.Name ?? article.name ?? "",
+        Quantity: article.Quantity ?? article.quantity ?? 0,
+        Price: article.Price ?? article.price ?? 0,
+        Total:
+          article.Total ??
+          article.total ??
+          article.Price ??
+          article.price ??
+          0,
+        Discount: article.Discount ?? article.discount ?? 0,
+        Category: article.Category ?? article.category ?? "",
+        Unit: article.Unit ?? article.unit ?? undefined,
+        Purchase_Date:
+          article.Purchase_Date ??
+          article.purchaseDate ??
+          article.purchase_date ??
+          undefined,
+      }));
+    });
     const performCategorization = ref(true);
     const performUnitExtraction = ref(false);
 
     const $q: QVueGlobals = useQuasar();
 
     const receiptData: Ref<Receipt> = computed(() => ({
-      Uuid: props.response[0].UID,
-      Purchase_Date: props.response[0].Purchase_Date,
-      Created_At: props.response[0].Created_At,
-      Corp: props.response[0].Corp,
-      Total_R_Extract: props.response[0].Total_R_Extract,
-      Total_R_Open_Ai: props.response[0].Total_R_Open_Ai,
-      Total_Receipt: parseFloat(props.response[0].Total),
+      Uuid: (responseItem.value as any).UID ?? (responseItem.value as any).uid,
+      Purchase_Date:
+        (responseItem.value as any).Purchase_Date ??
+        (responseItem.value as any).purchaseDate ??
+        (responseItem.value as any).purchase_date ??
+        "",
+      Created_At:
+        (responseItem.value as any).Created_At ??
+        (responseItem.value as any).createdAt ??
+        (responseItem.value as any).created_at,
+      Corp:
+        (responseItem.value as any).Corp ??
+        (responseItem.value as any).corp ??
+        "Unknown",
+      Total_R_Extract:
+        (responseItem.value as any).Total_R_Extract ??
+        (responseItem.value as any).totalRExtract ??
+        (responseItem.value as any).total_r_extract ??
+        0,
+      Total_R_Open_Ai:
+        (responseItem.value as any).Total_R_Open_Ai ??
+        (responseItem.value as any).totalROpenAi ??
+        (responseItem.value as any).total_r_open_ai ??
+        0,
+      Total_Receipt: parseFloat(
+        String(
+          (responseItem.value as any).Total ??
+            (responseItem.value as any).total ??
+            0
+        )
+      ),
     }));
 
     const saveAll = async () => {
       try {
+        if (!articles.value.length) {
+          handleError(
+            "Speichern",
+            "Keine Artikel in der Antwort gefunden.",
+            $q
+          );
+          return;
+        }
         emit("save-selection");
         const result = await saveArticlesAndReceipt(
           articles.value,
