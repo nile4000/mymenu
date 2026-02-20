@@ -12,6 +12,8 @@
 ### Local development
 
 ```shell
+cd C:\dev\mymenu\project\backend
+
 quarkus dev
 ```
 
@@ -23,7 +25,7 @@ quarkus dev
 
 Prerequisite: Docker Desktop must be running.
 
-```powershell
+```shell
 cd C:\dev\mymenu\project\backend\db
 
 # 1) Restart local Supabase stack cleanly
