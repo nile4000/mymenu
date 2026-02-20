@@ -10,7 +10,6 @@
       <ArticleTotal
         :totalsPerCategory="totalsPerCategory"
         :totalsPerReceipt="totalsPerReceipt"
-        :totalCalculatedPerReceipt="calculatedTotalPerReceipt"
         @update:selectedReceipts="handleSelectedReceipts"
         @update:selectedCategory="handleSelectedCategory"
       />
@@ -42,14 +41,13 @@
     </h5>
 
     </section>
-    <div v-if="isGridView" style="padding-bottom: 70px">
-      <!-- Grid Ansicht -->
+    <div style="padding-bottom: 70px">
       <q-table
         flat
         bordered
-        grid
+        :grid="isGridView"
         :rows="filteredRows"
-        :columns="columns"
+        :columns="isGridView ? columns : columnsList"
         row-key="Id"
         :pagination="initialPagination"
         :selected="selected"
@@ -62,7 +60,7 @@
           <TableSearchInput v-model="search" />
         </template>
 
-        <template v-slot:item="props">
+        <template v-if="isGridView" v-slot:item="props">
           <ArticleGrid
             :row="props.row"
             :cols="props.cols"
@@ -70,38 +68,15 @@
             @update:selected="(val) => onItemSelected(props.row, val)"
           />
         </template>
-      </q-table>
-    </div>
 
-    <div v-else style="padding-bottom: 70px">
-      <!-- Tabellenansicht -->
-      <q-table
-        flat
-        bordered
-        :rows="filteredRows"
-        :columns="columnsList"
-        row-key="Id"
-        :pagination="initialPagination"
-        :selected="selected"
-        @update:selected="handleSelectionUpdate"
-        selection="multiple"
-        class="table-custom"
-        no-data-label="Keine Daten gefunden / keine Kassenzettel eingeblendet"
-      >
-        <template v-slot:top>
-          <TableSearchInput v-model="search" />
-        </template>
-
-        <!-- Toggles styled -->
-        <template v-slot:header-selection="scope">
+        <template v-if="!isGridView" v-slot:header-selection="scope">
           <q-toggle v-model="scope.selected" />
         </template>
-        <template v-slot:body-selection="scope">
+        <template v-if="!isGridView" v-slot:body-selection="scope">
           <q-toggle v-model="scope.selected" />
         </template>
 
-        <!-- Editable columns -->
-        <template v-slot:body-cell-Category="props">
+        <template v-if="!isGridView" v-slot:body-cell-Category="props">
           <EditableCell
             :props="props"
             fieldName="Category"
@@ -111,7 +86,7 @@
           />
         </template>
 
-        <template v-slot:body-cell-Unit="props">
+        <template v-if="!isGridView" v-slot:body-cell-Unit="props">
           <EditableCell
             :props="props"
             fieldName="Unit"
@@ -188,7 +163,6 @@ export default defineComponent({
       totalsPerCategory,
       totalsPerReceipt,
       totalExpenses,
-      calculatedTotalPerReceipt,
     } = useTotals(rows, receiptById);
 
     function onArticleDeleted(id: string) {
@@ -249,7 +223,6 @@ export default defineComponent({
       totalsPerCategory,
       totalsPerReceipt,
       totalExpenses,
-      calculatedTotalPerReceipt,
       categories,
       onItemSelected,
       onArticleDeleted,

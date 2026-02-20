@@ -53,27 +53,9 @@ export function useTotals(
     }, {} as Record<string, number>)
   );
 
-  const calculatedTotalPerReceipt = computed(() =>
-    unref(rows).reduce((acc, { Receipt_Id, Total }) => {
-      if (Receipt_Id) {
-        const resolvedReceipts = unref(receipts);
-        if (!acc[Receipt_Id]) {
-          const r = resolvedReceipts[Receipt_Id];
-          acc[Receipt_Id] = {
-            total: 0,
-            date: r ? r.Purchase_Date : "Unbekannt",
-          };
-        }
-        acc[Receipt_Id].total += (Total ?? 0);
-      }
-      return acc;
-    }, {} as Record<string, { total: number; date: string }>)
-  );
-
   return {
     totalsPerCategory,
     totalsPerReceipt,
     totalExpenses,
-    calculatedTotalPerReceipt,
   };
 }

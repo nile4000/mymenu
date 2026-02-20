@@ -163,10 +163,6 @@ export default defineComponent({
       >,
       required: true,
     },
-    totalCalculatedPerReceipt: {
-      type: Object as PropType<Record<string, { total: number; date: string }>>,
-      required: true,
-    },
   },
   emits: ["update:selectedReceipts", "update:selectedCategory"],
   setup(props, { emit }) {
@@ -174,6 +170,16 @@ export default defineComponent({
     const receiptSortCriteria = ref<"Datum" | "Total">("Datum");
     const categorySortCriteria = ref<"Name" | "Total">("Name");
     const selectedCategory = ref<string | null>(null);
+    const categoryMetaByName = computed<Record<string, { icon: string; color: string }>>(
+      () =>
+        categoryIcon.reduce<Record<string, { icon: string; color: string }>>(
+          (acc, { name, icon, color }) => {
+            acc[name] = { icon, color };
+            return acc;
+          },
+          {}
+        )
+    );
 
     const sortedTotalsPerReceipt = computed(() => {
       return [...props.totalsPerReceipt].sort((a, b) => {
@@ -224,13 +230,11 @@ export default defineComponent({
     };
 
     const getCategoryIcon = (categoryName: string): string => {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.icon : "help_outline";
+      return categoryMetaByName.value[categoryName]?.icon ?? "help_outline";
     };
 
     const getCategoryColor = (categoryName: string): string => {
-      const category = categoryIcon.find((c) => c.name === categoryName);
-      return category ? category.color : "primary";
+      return categoryMetaByName.value[categoryName]?.color ?? "primary";
     };
 
     watch(
