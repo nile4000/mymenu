@@ -37,7 +37,7 @@
         </q-tabs>
       </q-toolbar>
     </q-header>
-    <!-- <q-footer reveal>
+    <q-footer reveal>
       <q-toolbar>
         <q-toolbar-title class="title-footer"
           >AI Essensplaner
@@ -45,14 +45,14 @@
             by
             <a
               style="font-family: 'Playfair Display'"
-              href="https://lueem.dev"
+              href="https://lueemdev-website.web.app/"
               target="_blank"
               >lueem.dev</a
             ></span
           ></q-toolbar-title
         >
       </q-toolbar>
-    </q-footer> -->
+    </q-footer>
 
     <q-page-container>
       <router-view />
