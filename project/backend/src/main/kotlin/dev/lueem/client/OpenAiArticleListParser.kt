@@ -1,6 +1,7 @@
 package dev.lueem.client
 
 import dev.lueem.model.openai.OpenAiResponse
+import dev.lueem.client.OpenAiJsonSanitizer
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.json.Json
 import jakarta.json.JsonArray

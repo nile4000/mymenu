@@ -50,8 +50,13 @@ module.exports = configure(function (ctx) {
       vueRouterMode: "hash", // available values: 'hash', 'history'
       env: {
         API_URL: ctx.dev ? "http://localhost:8080" : "https://mymenu.fly.dev",
-        VITE_SUPABASE_URL: "https://rthxcvylxvzgweeppgec.supabase.co",
-        VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY,
+        VITE_SUPABASE_URL: ctx.dev
+          ? process.env.VITE_SUPABASE_URL_LOCAL || "http://127.0.0.1:54321"
+          : "https://rthxcvylxvzgweeppgec.supabase.co",
+        VITE_SUPABASE_ANON_KEY: ctx.dev
+          ? process.env.VITE_SUPABASE_ANON_KEY_LOCAL ||
+            process.env.VITE_SUPABASE_ANON_KEY
+          : process.env.VITE_SUPABASE_ANON_KEY,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
         FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
       },
