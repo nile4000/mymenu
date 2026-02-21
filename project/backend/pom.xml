@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.lueem</groupId>
   <artifactId>pdfreader</artifactId>
-  <version>0.0.2</version>
+  <version>0.1.0</version>
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <java.version>17.0.8</java.version>
