@@ -67,12 +67,14 @@
 </template>
 
 <script lang="ts">
+import { storeToRefs } from "pinia";
 import { computed, defineComponent, PropType, ref, watch } from "vue";
 import { categoryIcon } from "../../components/prompts/categorization";
 import { formatDate } from "../../helpers/dateHelpers";
 import FilterPanel from "../../components/filters/FilterPanel.vue";
 import CategoryFilterList from "../../components/filters/CategoryFilterList.vue";
 import ReceiptFilterList from "../../components/filters/ReceiptFilterList.vue";
+import { useFilterStore } from "../../stores/filterStore";
 
 export default defineComponent({
   name: "ArticleTotal",
@@ -91,10 +93,9 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["update:selectedReceipts", "update:selectedCategory"],
-  setup(props, { emit }) {
-    const selectedReceiptIds = ref<string[]>([]);
-    const selectedCategory = ref<string | null>(null);
+  setup(props) {
+    const filterStore = useFilterStore();
+    const { selectedReceiptIds, selectedCategory } = storeToRefs(filterStore);
     const receiptSortCriteria = ref<"Datum" | "Total">("Datum");
     const categorySortCriteria = ref<"Name" | "Total">("Name");
 
@@ -174,13 +175,19 @@ export default defineComponent({
       { immediate: true }
     );
 
-    watch(selectedReceiptIds, (newVal) => {
-      emit("update:selectedReceipts", newVal.map((id) => String(id)));
-    });
-
-    watch(selectedCategory, (newVal) => {
-      emit("update:selectedCategory", newVal);
-    });
+    watch(
+      () => props.totalsPerCategory,
+      (newTotals) => {
+        if (!selectedCategory.value) {
+          return;
+        }
+        const hasCategory = Object.prototype.hasOwnProperty.call(newTotals, selectedCategory.value);
+        if (!hasCategory) {
+          selectedCategory.value = null;
+        }
+      },
+      { immediate: true }
+    );
 
     return {
       selectedReceiptIds,

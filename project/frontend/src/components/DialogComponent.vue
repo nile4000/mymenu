@@ -46,28 +46,15 @@ import { Column } from "../helpers/interfaces/column.interface";
 import { Article } from "../helpers/interfaces/article.interface";
 import { Receipt } from "../helpers/interfaces/receipt.interface";
 import { ResponseItem } from "../helpers/interfaces/response-item.interface";
+import { CategorizeResultItem, ExtractUnitResultItem } from "../services/ai/api/aiContracts";
 import {
-  createBatches,
-  prepareArticlesPrices,
-  prepareDialogArticles,
-  processAllBatches,
-} from "../services/aiRequest";
-import { normalizeExtractResponse } from "../services/extractResponseMapper";
-import { saveArticlesAndReceipt } from "../services/saveArticles";
-import {
-  upsertArticleCategories,
-  upsertArticleUnits,
-} from "../services/updateArticle";
-import {
-  categorizationPrompt,
-  categorySystemPrompt,
-  validateExtractedCategories,
-} from "./prompts/categorization";
-import {
-  detailExtractionPrompt,
-  detailSystemPrompt,
-  validateExtractedDetails,
-} from "./prompts/detailExtraction";
+  categorizeArticles,
+  extractArticleUnits,
+  parseExtractResponse,
+  saveReceiptWithArticles,
+  updateArticleCategories,
+  updateArticleUnits,
+} from "../services";
 
 const columns: Column[] = [
   {
@@ -103,7 +90,7 @@ export default defineComponent({
       if (!responseItem.value) {
         return { articles: [] as Article[], receipt: emptyReceipt };
       }
-      return normalizeExtractResponse(responseItem.value);
+      return parseExtractResponse(responseItem.value);
     });
 
     const articles = computed(() => normalizedResponse.value.articles);
@@ -117,58 +104,51 @@ export default defineComponent({
     const saveAll = async () => {
       try {
         if (!articles.value.length) {
-          handleError(
-            "Speichern",
-            "Keine Artikel in der Antwort gefunden.",
-            $q
-          );
+          handleError("Speichern", "Keine Artikel in der Antwort gefunden.", $q);
           return;
         }
         emit("save-selection");
-        const result = await saveArticlesAndReceipt(
-          articles.value,
-          receiptData.value
-        );
+        const result = await saveReceiptWithArticles(articles.value, receiptData.value);
+        if (!result.ok) {
+          handleError("Speichern", result.error.message, $q);
+          return;
+        }
+
         if (performCategorization.value) {
-          await categorizeArticles(result.articles);
+          await categorizeSavedArticles(result.data.articles as any[]);
         }
         if (performUnitExtraction.value) {
-          await extractUnit(result.articles);
+          await extractUnit(result.data.articles as any[]);
         }
       } catch (error) {
         handleError("Speichern", error, $q);
       }
     };
 
-    const categorizeArticles = async (
-      articles: { Id: string; Name: string; Quantity: number; Price: number }[]
+    const categorizeSavedArticles = async (
+      savedArticles: { Id: string; Name: string; Quantity: number; Price: number }[]
     ) => {
       try {
-        const preparedArticles = prepareDialogArticles(articles);
-        const batches = createBatches(preparedArticles, 40);
         isLoading.value = showLoading("Kategorisierung läuft...", $q);
 
-        await processAllBatches(
-          batches,
-          categorizationPrompt,
-          async (categorizedArticles) => {
-            const validCategorizedArticles =
-              validateExtractedCategories(
-                categorizedArticles as { id: string; category: string }[]
-              );
-            if (validCategorizedArticles.length > 0) {
-              await upsertArticleCategories(validCategorizedArticles);
-            } else {
-              handleError(
-                "Kategorisieren",
-                "Keine gültigen kategorisierten Artikel gefunden.",
-                $q
-              );
+        const result = await categorizeArticles(savedArticles, async (categorizedArticles: CategorizeResultItem[]) => {
+          if (categorizedArticles.length > 0) {
+            const updateResult = await updateArticleCategories(categorizedArticles);
+            if (!updateResult.ok) {
+              handleError("Kategorisieren", updateResult.error.message, $q);
             }
-          },
-          "gpt-4o-mini-2024-07-18",
-          categorySystemPrompt
-        );
+          } else {
+            handleError(
+              "Kategorisieren",
+              "Keine gueltigen kategorisierten Artikel gefunden.",
+              $q
+            );
+          }
+        });
+
+        if (!result.ok) {
+          handleError("Kategorisieren", result.error.message, $q);
+        }
       } catch (error) {
         handleError("Kategorisieren", error, $q);
       } finally {
@@ -181,34 +161,29 @@ export default defineComponent({
     };
 
     const extractUnit = async (
-      articles: { Id: string; Name: string; Quantity: number; Price: number }[]
+      savedArticles: { Id: string; Name: string; Quantity: number; Price: number }[]
     ) => {
       try {
-        const preparedArticles = prepareArticlesPrices(articles);
-        const batches = createBatches(preparedArticles, 40);
-        isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
+        isLoading.value = showLoading("Einheit extrahieren laeuft...", $q);
 
-        await processAllBatches(
-          batches,
-          detailExtractionPrompt,
-          async (extractedDetails) => {
-            const validExtractedDetails =
-              validateExtractedDetails(
-                extractedDetails as { id: string; unit: string }[]
-              );
-            if (validExtractedDetails.length > 0) {
-              await upsertArticleUnits(validExtractedDetails);
-            } else {
-              handleError(
-                "Kategorisierung",
-                "Keine gültigen extrahierten Einheiten gefunden.",
-                $q
-              );
+        const result = await extractArticleUnits(savedArticles, async (extractedDetails: ExtractUnitResultItem[]) => {
+          if (extractedDetails.length > 0) {
+            const updateResult = await updateArticleUnits(extractedDetails);
+            if (!updateResult.ok) {
+              handleError("Einheitsextraktion", updateResult.error.message, $q);
             }
-          },
-          "gpt-4o-mini-2024-07-18",
-          detailSystemPrompt
-        );
+          } else {
+            handleError(
+              "Einheitsextraktion",
+              "Keine gueltigen extrahierten Einheiten gefunden.",
+              $q
+            );
+          }
+        });
+
+        if (!result.ok) {
+          handleError("Einheitsextraktion", result.error.message, $q);
+        }
       } catch (error) {
         handleError("Einheitsextraktion", error, $q);
       } finally {
@@ -227,7 +202,7 @@ export default defineComponent({
       receiptData,
       performCategorization,
       performUnitExtraction,
-      categorizeArticles,
+      categorizeSavedArticles,
     };
   },
 });

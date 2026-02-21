@@ -44,6 +44,20 @@ Note:
 
 <http://localhost:8080/q/swagger-ui/#>
 
+Quick backend-only tests (PowerShell, from project root):
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/ai/categorize" -Method Post -ContentType "application/json" -Body (Get-Content .\tmp_categorize_payload.json -Raw)
+Invoke-RestMethod -Uri "http://localhost:8080/api/ai/extract-unit" -Method Post -ContentType "application/json" -Body (Get-Content .\tmp_extract_unit_payload.json -Raw)
+Invoke-RestMethod -Uri "http://localhost:8080/api/ai/recipe" -Method Post -ContentType "application/json" -Body (Get-Content .\tmp_recipe_payload.json -Raw)
+```
+
+Optional for more recipe variety:
+
+```env
+OPENAI_TEMPERATURE_RECIPE=0.6
+```
+
 ## Deployment production to fly.io
 
 ### Testing the container locally for fly.io

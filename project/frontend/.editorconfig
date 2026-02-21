@@ -1,9 +1,24 @@
+# .editorconfig
 root = true
 
 [*]
 charset = utf-8
-indent_style = space
-indent_size = 2
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+
+indent_style = space
+indent_size = 2
+
+# Advisory line width (many editors use this; Prettier uses its own printWidth)
+max_line_length = 120
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+[Makefile]
+indent_style = tab
+
+[{*.java,*.kt,*.kts}]
+indent_size = 4

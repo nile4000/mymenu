@@ -3,12 +3,18 @@ import { Receipt } from "./receipt.interface";
 
 export interface ExtractArticleRaw {
   id?: string | number;
-  name: string;
-  quantity: number | string;
-  price: number | string;
-  total: number | string;
-  discount: number | string;
-  category: string;
+  name?: string;
+  Name?: string;
+  quantity?: number | string;
+  Quantity?: number | string;
+  price?: number | string;
+  Price?: number | string;
+  total?: number | string;
+  Total?: number | string;
+  discount?: number | string;
+  Discount?: number | string;
+  category?: string;
+  Category?: string;
 }
 
 export interface ExtractMetadataRaw {
@@ -17,12 +23,18 @@ export interface ExtractMetadataRaw {
 }
 
 export interface ExtractResponseRaw {
-  uid: string;
-  purchaseDate: string;
-  corp: string;
-  total: number | string;
-  articles: ExtractArticleRaw[];
+  uid?: string;
+  UID?: string;
+  purchaseDate?: string;
+  PurchaseDate?: string;
+  corp?: string;
+  Corp?: string;
+  total?: number | string;
+  Total?: number | string;
+  articles?: ExtractArticleRaw[];
+  Articles?: ExtractArticleRaw[];
   metadata?: ExtractMetadataRaw;
+  Metadata?: ExtractMetadataRaw;
 }
 
 export interface NormalizedExtractResponse {

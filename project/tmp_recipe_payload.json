@@ -1,0 +1,16 @@
+{
+  "items": [
+    {"name":"Bananen","quantity":0.52,"unit":"stk"},
+    {"name":"MBud Peperoni Kapija","quantity":1,"unit":"stk"},
+    {"name":"Karotten","quantity":0.4,"unit":"stk"},
+    {"name":"Kopfsalat rot","quantity":1,"unit":"stk"},
+    {"name":"Frifrench French","quantity":1,"unit":"stk"},
+    {"name":"MBud Mozzarella","quantity":1,"unit":"stk"},
+    {"name":"Sun Queen Mangoschnitz","quantity":1,"unit":"stk"},
+    {"name":"MBud Zitronenmelisse","quantity":1,"unit":"stk"},
+    {"name":"Twix White 5x46g","quantity":1,"unit":"stk"},
+    {"name":"Alnatura Karamelwaffel","quantity":1,"unit":"stk"},
+    {"name":"Betty Bossi Trockenbackhefe 3x7g","quantity":1,"unit":"g"}
+  ],
+  "servings": 2
+}

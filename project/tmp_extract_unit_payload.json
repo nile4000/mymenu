@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "1",
+      "name": "Bananen",
+      "quantity": 0.52,
+      "price": 1.85
+    },
+    {
+      "id": "2",
+      "name": "MBud Mozzarella",
+      "quantity": 1,
+      "price": 2.45
+    },
+    {
+      "id": "3",
+      "name": "Bio Broccoli offen PLU 654",
+      "quantity": 0.374,
+      "price": 2.12
+    },
+    {
+      "id": "4",
+      "name": "Lemon Soda la Limonata 4x33cl",
+      "quantity": 1,
+      "price": 4.8
+    },
+    {
+      "id": "5",
+      "name": "Naturaplan Bio Sesamöl 250ML",
+      "quantity": 1,
+      "price": 5.6
+    }
+  ]
+}

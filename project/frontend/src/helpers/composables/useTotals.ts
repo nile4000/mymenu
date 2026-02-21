@@ -7,8 +7,11 @@ export function useTotals(
   rows: Article[] | Ref<Article[]>,
   receipts: Record<string, Receipt> | Ref<Record<string, Receipt>>
 ) {
+  const safeReceipts = () => unref(receipts) ?? {};
+  const safeRows = () => unref(rows) ?? [];
+
   const totalsPerReceipt = computed(() =>
-    Object.values(unref(receipts)).map(({ Id, Purchase_Date, Total_Receipt }) => ({
+    Object.values(safeReceipts()).map(({ Id, Purchase_Date, Total_Receipt }) => ({
       id: Id || "",
       date: Purchase_Date,
       total: Number(Total_Receipt),
@@ -16,7 +19,7 @@ export function useTotals(
   );
 
   const totalExpenses = computed<TotalExpenses>(() => {
-    const receiptValues = Object.values(unref(receipts));
+    const receiptValues = Object.values(safeReceipts());
     const sum = receiptValues.reduce((acc, { Total_Receipt }) => acc + Number(Total_Receipt), 0);
 
     if (receiptValues.length === 0) {
@@ -45,7 +48,7 @@ export function useTotals(
   });
 
   const totalsPerCategory = computed(() =>
-    unref(rows).reduce((acc, { Category, Total }) => {
+    safeRows().reduce((acc, { Category, Total }) => {
       if (Category) {
         acc[Category] = (acc[Category] ?? 0) + (Total ?? 0);
       }

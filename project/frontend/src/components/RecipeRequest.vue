@@ -95,7 +95,7 @@ import FilterPanel from "./filters/FilterPanel.vue";
 import CategoryFilterList from "./filters/CategoryFilterList.vue";
 import ReceiptFilterList from "./filters/ReceiptFilterList.vue";
 import { handleError } from "../helpers/composables/useErrors";
-import { sendSingleRecipeRequest } from "../services/recipeRequest";
+import { createRecipe } from "../services";
 import { Article } from "../helpers/interfaces/article.interface";
 import { Recipe } from "../helpers/interfaces/recipe.interface";
 import { useFilterStore } from "../stores/filterStore";
@@ -150,20 +150,25 @@ export default defineComponent({
       },
     });
 
-    const categoryFilterItems = computed(() =>
-      Array.from(
+    const categoryFilterItems = computed(() => {
+      const categories = Array.from(
         new Set(
           props.selectedItems
             .map((item) => item.Category)
             .filter((category): category is string => Boolean(category))
         )
-      )
-        .sort((a, b) => a.localeCompare(b))
-        .map((item) => ({
-          value: item,
-          label: item,
-        }))
-    );
+      ).sort((a, b) => a.localeCompare(b));
+
+      const activeCategory = categoryModel.value;
+      if (activeCategory && !categories.includes(activeCategory)) {
+        categories.unshift(activeCategory);
+      }
+
+      return categories.map((item) => ({
+        value: item,
+        label: item,
+      }));
+    });
 
     const availableReceipts = computed<ReceiptOption[]>(() => {
       const map = new Map<string, string>();
@@ -220,12 +225,16 @@ export default defineComponent({
         isLoading.value = true;
         $q.loading.show({ message: "Rezept wird erstellt..." });
 
-        const recipe = await sendSingleRecipeRequest(
+        const recipeResult = await createRecipe(
           filteredItems.value.slice(-30),
           standard.value
         );
+        if (!recipeResult.ok) {
+          handleError("Rezept erstellen", recipeResult.error.message, $q);
+          return;
+        }
 
-        emit("addRecipe", recipe as Recipe);
+        emit("addRecipe", recipeResult.data as Recipe);
         $q.notify({ type: "positive", message: "Rezept erfolgreich erstellt!" });
       } catch (error) {
         handleError("Rezept erstellen", error, $q);

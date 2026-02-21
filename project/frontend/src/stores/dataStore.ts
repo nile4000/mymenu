@@ -2,14 +2,12 @@ import { defineStore } from "pinia";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { Article } from "src/helpers/interfaces/article.interface";
 import { Receipt } from "src/helpers/interfaces/receipt.interface";
-import { readAllArticles } from "src/services/readArticles";
-import { readAllReceipts } from "src/services/readReceipts";
 import {
-  subscribeToArticleChanges,
-} from "src/services/realtimeArticles";
-import {
-  subscribeToReceiptChanges,
-} from "src/services/realtimeReceipts";
+  listArticles,
+  listReceipts,
+  subscribeArticles,
+  subscribeReceipts,
+} from "src/services";
 
 function upsertById<T extends { Id?: string }>(items: T[], next: T): T[] {
   if (!next.Id) {
@@ -51,12 +49,12 @@ export const useDataStore = defineStore("data", {
 
       this.initializing = true;
       try {
-        const [articles, receipts] = await Promise.all([
-          readAllArticles(),
-          readAllReceipts(),
+        const [articlesResult, receiptsResult] = await Promise.all([
+          listArticles(),
+          listReceipts(),
         ]);
-        this.articles = articles ?? [];
-        this.receipts = receipts ?? [];
+        this.articles = articlesResult.ok ? articlesResult.data : [];
+        this.receipts = receiptsResult.ok ? receiptsResult.data : [];
         this.initialized = true;
       } finally {
         this.initializing = false;
@@ -64,7 +62,7 @@ export const useDataStore = defineStore("data", {
     },
     startRealtime() {
       if (!this.articleChannel) {
-        this.articleChannel = subscribeToArticleChanges((payload: any) => {
+        const articleResult = subscribeArticles((payload: any) => {
           const newArticle = payload.new as Article;
           const oldArticle = payload.old as Article;
 
@@ -82,10 +80,13 @@ export const useDataStore = defineStore("data", {
               break;
           }
         });
+        if (articleResult.ok) {
+          this.articleChannel = articleResult.data;
+        }
       }
 
       if (!this.receiptChannel) {
-        this.receiptChannel = subscribeToReceiptChanges((payload: any) => {
+        const receiptResult = subscribeReceipts((payload: any) => {
           const newReceipt = payload.new as Receipt;
           const oldReceipt = payload.old as Receipt;
 
@@ -103,6 +104,9 @@ export const useDataStore = defineStore("data", {
               break;
           }
         });
+        if (receiptResult.ok) {
+          this.receiptChannel = receiptResult.data;
+        }
       }
     },
     stopRealtime() {

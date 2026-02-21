@@ -20,12 +20,7 @@
         <q-card class="receipt-card">
           <!-- Logos -->
           <div class="q-pa-md row justify-center">
-            <q-img
-              v-if="props.row.Corp === 'Coop'"
-              src="../../assets/coop.png"
-              alt="Coop"
-              style="max-width: 55px"
-            />
+            <q-img v-if="props.row.Corp === 'Coop'" src="../../assets/coop.png" alt="Coop" style="max-width: 55px" />
             <q-img
               v-if="props.row.Corp === 'Migros'"
               src="../../assets/migros.png"
@@ -37,20 +32,14 @@
           <q-card-section class="q-pa-sm">
             <div class="q-gutter-md q-pa-xs column">
               <div class="row items-center justify-between">
-                <span class="text-subtitle2">
-                  Eingekauft am: {{ formatDateShort(props.row.Purchase_Date) }}
-                </span>
+                <span class="text-subtitle2"> Eingekauft am: {{ formatDateShort(props.row.Purchase_Date) }} </span>
               </div>
               <div class="row items-center justify-between">
-                <span class="text-subtitle2">
-                  Gescannt am: {{ formatDateShort(props.row.Created_At) }}
-                </span>
+                <span class="text-subtitle2"> Gescannt am: {{ formatDateShort(props.row.Created_At) }} </span>
               </div>
 
               <div class="row items-center justify-between">
-                <span class="text-subtitle2">
-                  Total CHF: {{ props.row.Total_Receipt.toFixed(2) }}
-                </span>
+                <span class="text-subtitle2"> Total CHF: {{ props.row.Total_Receipt.toFixed(2) }} </span>
               </div>
             </div>
           </q-card-section>
@@ -64,19 +53,11 @@
           </q-card-section>
           <!-- Actions -->
           <q-card-section class="row items-center justify-center">
-            <q-btn
-              flat
-              round
-              disabled
-              icon="visibility"
-              ><q-tooltip anchor="center left" class="text-h5"
-                >PDF anzeigen</q-tooltip
-              ></q-btn
+            <q-btn flat round disabled icon="visibility"
+              ><q-tooltip anchor="center left" class="text-h5">PDF anzeigen</q-tooltip></q-btn
             >
             <q-btn flat round icon="delete" @click="deleteReceipt(props.row)">
-              <q-tooltip anchor="center left" class="text-h5"
-                >Löschen</q-tooltip
-              >
+              <q-tooltip anchor="center left" class="text-h5">Löschen</q-tooltip>
             </q-btn>
           </q-card-section>
         </q-card>
@@ -92,7 +73,7 @@ import { defineComponent, onMounted, ref } from "vue";
 import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
 import { Column } from "../../helpers/interfaces/column.interface";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
-import { deleteReceiptById } from "../../services/deleteReceipt";
+import { deleteReceipt as deleteReceiptService } from "../../services";
 import { useDataStore } from "../../stores/dataStore";
 import ScannerPage from "../scanner/ScannerPage.vue";
 import { handleError } from "src/helpers/composables/useErrors";
@@ -139,22 +120,21 @@ export default defineComponent({
       dataStore.startRealtime();
     });
 
-
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
         `Sind Sie sicher, dass Sie den Kassenzettel vom ${receipt.Purchase_Date} loeschen wollen?`
       );
       if (confirmed && receipt.Id) {
-        try {
-          await deleteReceiptById(receipt.Id);
-          dataStore.removeReceiptById(receipt.Id);
-          $q.notify({
-            type: "positive",
-            message: "Kassenzettel geloescht.",
-          });
-        } catch (error) {
-          handleError("Kassenzettel loeschen", error, $q);
+        const result = await deleteReceiptService(receipt.Id);
+        if (!result.ok) {
+          handleError("Kassenzettel löschen", result.error.message, $q);
+          return;
         }
+        dataStore.removeReceiptById(receipt.Id);
+        $q.notify({
+          type: "positive",
+          message: "Kassenzettel gelöscht.",
+        });
       }
     };
 
@@ -289,4 +269,3 @@ h5 {
   }
 }
 </style>
-

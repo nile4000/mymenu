@@ -8,21 +8,17 @@
       v-ripple
     >
       <q-icon size="1.9em" name="replay" color="secondary" />
-      <q-tooltip class="text-h6">
-        Klassifikation: {{ selectedItems.length }}</q-tooltip
-      >
+      <q-tooltip class="text-h6"> Klassifikation: {{ selectedItems.length }}</q-tooltip>
     </q-btn>
     <q-btn
       unelevated
       rounded
-      @click="deleteArticle(selectedItems[0].Id)"
+      @click="removeArticle(selectedItems[0].Id)"
       :disabled="selectedItems.length !== 1"
       v-ripple
     >
       <q-icon size="1.9em" name="delete" color="negative" />
-      <q-tooltip anchor="center left" class="text-h6"
-        >Artikel löschen</q-tooltip
-      >
+      <q-tooltip anchor="center left" class="text-h6">Artikel löschen</q-tooltip>
     </q-btn>
   </q-btn-group>
 </template>
@@ -33,27 +29,14 @@ import { defineComponent, PropType, ref } from "vue";
 import { handleError } from "../helpers/composables/useErrors";
 import { hideLoading, showLoading } from "../helpers/composables/useLoader";
 import { Article } from "../helpers/interfaces/article.interface";
+import { CategorizeResultItem, ExtractUnitResultItem } from "../services/ai/api/aiContracts";
 import {
-  createBatches,
-  prepareArticles,
-  prepareArticlesPrices,
-  processAllBatches,
-} from "../services/aiRequest";
-import { deleteArticleById } from "../services/deleteArticle";
-import {
-  upsertArticleCategories,
-  upsertArticleUnits,
-} from "../services/updateArticle";
-import {
-  categorizationPrompt,
-  categorySystemPrompt,
-  validateExtractedCategories,
-} from "./prompts/categorization";
-import {
-  detailExtractionPrompt,
-  detailSystemPrompt,
-  validateExtractedDetails,
-} from "./prompts/detailExtraction";
+  categorizeArticles,
+  deleteArticle,
+  extractArticleUnits,
+  updateArticleCategories,
+  updateArticleUnits,
+} from "../services";
 
 export default defineComponent({
   name: "CategorizationRequest",
@@ -81,17 +64,12 @@ export default defineComponent({
     const sendCategorizationRequest = async () => {
       try {
         validateSelectedItems();
-        const preparedArticles = prepareArticles(props.selectedItems);
-        const batches = createBatches(preparedArticles, 40);
         isLoading.value = showLoading("Kategorisierung läuft...", $q);
 
-        await processAllBatches(
-          batches,
-          categorizationPrompt,
-          validateAndUpdateCategory,
-          "gpt-4o-mini-2024-07-18",
-          categorySystemPrompt
-        );
+        const result = await categorizeArticles(props.selectedItems, validateAndUpdateCategory);
+        if (!result.ok) {
+          handleError("Kategorisierung", result.error.message, $q);
+        }
       } catch (error) {
         handleError("Kategorisierung", error, $q);
       } finally {
@@ -100,18 +78,16 @@ export default defineComponent({
           type: "positive",
           message: "Kategorisierung erfolgreich!",
         });
-        // further detail extraction
         await sendDetailExtractionRequest();
       }
     };
 
-    async function validateAndUpdateCategory(
-      categorizedArticles: any[]
-    ): Promise<void> {
-      const validCategorizedArticles =
-        validateExtractedCategories(categorizedArticles);
-      if (validCategorizedArticles.length > 0) {
-        await upsertArticleCategories(validCategorizedArticles);
+    async function validateAndUpdateCategory(categorizedArticles: CategorizeResultItem[]): Promise<void> {
+      if (categorizedArticles.length > 0) {
+        const result = await updateArticleCategories(categorizedArticles);
+        if (!result.ok) {
+          handleError("Kategorisierung", result.error.message, $q);
+        }
       } else {
         $q.notify({
           type: "warning",
@@ -124,18 +100,12 @@ export default defineComponent({
     const sendDetailExtractionRequest = async () => {
       try {
         validateSelectedItems();
-        const preparedArticles = prepareArticlesPrices(props.selectedItems);
-        const batches = createBatches(preparedArticles, 40);
-
         isLoading.value = showLoading("Einheit extrahieren läuft...", $q);
 
-        await processAllBatches(
-          batches,
-          detailExtractionPrompt,
-          validateAndUpdateUnitExtraction,
-          "gpt-4o-mini-2024-07-18",
-          detailSystemPrompt
-        );
+        const result = await extractArticleUnits(props.selectedItems, validateAndUpdateUnitExtraction);
+        if (!result.ok) {
+          handleError("Einheitsextraktion", result.error.message, $q);
+        }
       } catch (error) {
         handleError("Einheitsextraktion", error, $q);
       } finally {
@@ -147,12 +117,12 @@ export default defineComponent({
       }
     };
 
-    async function validateAndUpdateUnitExtraction(
-      extractedDetails: any[]
-    ): Promise<void> {
-      const validExtractedDetails = validateExtractedDetails(extractedDetails);
-      if (validExtractedDetails.length > 0) {
-        await upsertArticleUnits(validExtractedDetails);
+    async function validateAndUpdateUnitExtraction(extractedDetails: ExtractUnitResultItem[]): Promise<void> {
+      if (extractedDetails.length > 0) {
+        const result = await updateArticleUnits(extractedDetails);
+        if (!result.ok) {
+          handleError("Einheitsextraktion", result.error.message, $q);
+        }
       } else {
         $q.notify({
           type: "warning",
@@ -162,23 +132,23 @@ export default defineComponent({
       }
     }
 
-    const deleteArticle = async (id: string) => {
-      try {
-        await deleteArticleById(id);
-        emit("article-deleted", id);
-        $q.notify({
-          type: "positive",
-          message: "Artikel gelöscht!",
-        });
-      } catch (error) {
-        handleError("Artikel löschen", error, $q);
+    const removeArticle = async (id: string) => {
+      const result = await deleteArticle(id);
+      if (!result.ok) {
+        handleError("Artikel löschen", result.error.message, $q);
+        return;
       }
+      emit("article-deleted", id);
+      $q.notify({
+        type: "positive",
+        message: "Artikel gelöscht!",
+      });
     };
 
     return {
       sendCategorizationRequest,
       sendDetailExtractionRequest,
-      deleteArticle,
+      removeArticle,
       isLoading,
     };
   },

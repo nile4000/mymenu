@@ -1,46 +1,40 @@
 <template>
   <div>
     <section class="overview-block">
-    <div class="column items-center">
-      <h5>Übersicht</h5>
-    </div>
+      <div class="column items-center">
+        <h5>Übersicht</h5>
+      </div>
 
-    <div class="row q-pa-md justify-evenly overview-section">
-      <ArticleControl :totalExpenses="totalExpenses" :rows="filteredRows" />
-      <ArticleTotal
-        :totalsPerCategory="totalsPerCategory"
-        :totalsPerReceipt="totalsPerReceipt"
-        @update:selectedReceipts="handleSelectedReceipts"
-        @update:selectedCategory="handleSelectedCategory"
-      />
-      <CategorizationRequest
-        :selectedItems="selected"
-        @article-deleted="onArticleDeleted"
-      />
-    </div>
+      <div class="row q-pa-md justify-evenly overview-section">
+        <ArticleControl :totalExpenses="totalExpenses" :rows="filteredRows" />
+        <ArticleTotal
+          :totalsPerCategory="totalsPerCategory"
+          :totalsPerReceipt="totalsPerReceipt"
+        />
+        <CategorizationRequest :selectedItems="selected" @article-deleted="onArticleDeleted" />
+      </div>
 
-    <div class="column items-center">
-      <q-btn-toggle
-        v-model="viewMode"
-        class="view-mode-toggle"
-        no-caps
-        unelevated
-        rounded
-        dense
-        toggle-color="grey-4"
-        color="grey-2"
-        text-color="grey-8"
-        :options="[
-          { label: 'Tabelle', value: 'table' },
-          { label: 'Grid', value: 'grid' },
-        ]"
-      />
-    </div>
+      <div class="column items-center">
+        <q-btn-toggle
+          v-model="viewMode"
+          class="view-mode-toggle"
+          no-caps
+          unelevated
+          rounded
+          dense
+          toggle-color="grey-4"
+          color="grey-2"
+          text-color="grey-8"
+          :options="[
+            { label: 'Tabelle', value: 'table' },
+            { label: 'Grid', value: 'grid' },
+          ]"
+        />
+      </div>
 
-    <h5 class="column items-center article-counter">
-      Ausgewählt: {{ selected.length }} von {{ filteredRows.length }} Artikeln
-    </h5>
-
+      <h5 class="column items-center article-counter">
+        Markiert: {{ selected.length }} von {{ filteredRows.length }} Artikeln
+      </h5>
     </section>
     <div style="padding-bottom: 70px">
       <q-table
@@ -88,12 +82,7 @@
         </template>
 
         <template v-if="!isGridView" v-slot:body-cell-Unit="props">
-          <EditableCell
-            :props="props"
-            fieldName="Unit"
-            :updateUnit="updateUnit"
-            :updateCategory="updateCategory"
-          />
+          <EditableCell :props="props" fieldName="Unit" :updateUnit="updateUnit" :updateCategory="updateCategory" />
         </template>
       </q-table>
     </div>
@@ -106,17 +95,14 @@ import { storeToRefs } from "pinia";
 import { computed, defineComponent, onMounted, ref } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { categories } from "../../components/prompts/categorization";
-import {
-  articleColumns,
-  articleColumnsList,
-} from "../../helpers/columns/articleColumns";
+import { articleColumns, articleColumnsList } from "../../helpers/columns/articleColumns";
 import { handleError } from "../../helpers/composables/useErrors";
 import { useFilters } from "../../helpers/composables/useFilters";
 import { useTotals } from "../../helpers/composables/useTotals";
 import { useViewMode } from "../../helpers/composables/useViewMode";
 import { Article } from "../../helpers/interfaces/article.interface";
 import { useDataStore } from "../../stores/dataStore";
-import { upsertArticleCategory, upsertArticleUnit } from "../../services/updateArticle";
+import { updateArticleCategory, updateArticleUnit } from "../../services";
 import EditableCell from "./EditableCell.vue";
 import ArticleControl from "./ArticleControl.vue";
 import ArticleGrid from "./ArticleGrid.vue";
@@ -139,8 +125,7 @@ export default defineComponent({
     const { articles: rows, receiptById } = storeToRefs(dataStore);
 
     // Filter-Logik
-    const { search, selectedCategory, selectedReceiptIds, filteredRows } =
-      useFilters(rows);
+    const { search, filteredRows } = useFilters(rows);
 
     // View-Modus (Grid/Tabelle)
     const { isGridView } = useViewMode();
@@ -160,22 +145,10 @@ export default defineComponent({
       rowsPerPage: 500,
     });
 
-    const {
-      totalsPerCategory,
-      totalsPerReceipt,
-      totalExpenses,
-    } = useTotals(rows, receiptById);
+    const { totalsPerCategory, totalsPerReceipt, totalExpenses } = useTotals(rows, receiptById);
 
     function onArticleDeleted(id: string) {
       selected.value = selected.value.filter((item) => item.Id !== id);
-    }
-
-    function handleSelectedReceipts(ids: string[]) {
-      selectedReceiptIds.value = ids;
-    }
-
-    function handleSelectedCategory(cat: string | null) {
-      selectedCategory.value = cat;
     }
 
     function onItemSelected(row: Article, isSelected: boolean) {
@@ -190,18 +163,16 @@ export default defineComponent({
     }
 
     async function updateCategory(article: Article) {
-      try {
-        await upsertArticleCategory(article);
-      } catch (error) {
-        handleError("Kategorie aktualisieren", error, $q);
+      const result = await updateArticleCategory(article);
+      if (!result.ok) {
+        handleError("Kategorie aktualisieren", result.error.message, $q);
       }
     }
 
     async function updateUnit(article: Article) {
-      try {
-        await upsertArticleUnit(article.Id, article.Unit);
-      } catch (error) {
-        handleError("Einheit aktualisieren", error, $q);
+      const result = await updateArticleUnit(article.Id, article.Unit);
+      if (!result.ok) {
+        handleError("Einheit aktualisieren", result.error.message, $q);
       }
     }
 
@@ -227,12 +198,10 @@ export default defineComponent({
       categories,
       onItemSelected,
       onArticleDeleted,
-      handleSelectedReceipts,
       updateCategory,
       updateUnit,
       isGridView,
       viewMode,
-      handleSelectedCategory,
       handleSelectionUpdate,
     };
   },
@@ -305,3 +274,4 @@ h5 {
   height: 34px;
 }
 </style>
+

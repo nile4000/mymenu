@@ -9,12 +9,13 @@ export function useFilters(rows: Article[] | Ref<Article[]>) {
   const filterFields = ["Name", "Purchase_Date", "Category"] as const;
 
   const filteredRows = computed(() => {
+    const sourceRows = unref(rows) ?? [];
     const cleanedSearch = search.value.trim().toLowerCase();
     const normalizedSelectedReceiptIds = (selectedReceiptIds.value || []).map((id) =>
       String(id)
     );
 
-    return unref(rows).filter((row) => {
+    return sourceRows.filter((row) => {
       const matchesSearch =
         !cleanedSearch ||
         filterFields.some((field) =>
