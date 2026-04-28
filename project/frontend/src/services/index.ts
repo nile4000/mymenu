@@ -11,6 +11,11 @@ export { listReceipts } from "./receipts/app/listReceipts";
 export { listReceiptsByIds } from "./receipts/app/listReceiptsByIds";
 export { deleteReceipt } from "./receipts/app/deleteReceipt";
 export { saveReceiptWithArticles } from "./receipts/app/saveReceiptWithArticles";
+export {
+  getSupercardStatus,
+  setSupercardSession,
+  syncSupercardReceipts,
+} from "./receipts/app/syncSupercardReceipts";
 export { parseExtractResponse } from "./receipts/api/extractResponseParser";
 
 export { subscribeArticles } from "./realtime/app/subscribeArticles";

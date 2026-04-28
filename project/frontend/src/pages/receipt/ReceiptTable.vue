@@ -4,6 +4,37 @@
     <div class="q-pa-md row justify-evenly">
       <ScannerPage></ScannerPage>
     </div>
+    <div class="supercard-box q-pa-md">
+      <div class="text-subtitle1">Supercard Sync</div>
+      <q-input
+        v-model="supercardName"
+        outlined
+        dense
+        label="Supercard Name (optional)"
+        class="q-mt-sm"
+      />
+      <q-input
+        v-model="supercardCookie"
+        outlined
+        dense
+        type="textarea"
+        autogrow
+        label="Session Cookie Header"
+        hint="Kompletter Cookie-Header aus Browser Request kopieren"
+        class="q-mt-sm"
+      />
+      <div class="row q-gutter-sm q-mt-sm">
+        <q-btn color="primary" label="Verbinden" @click="connectSupercard" />
+        <q-btn color="secondary" label="Jetzt synchronisieren" @click="runSupercardSync" />
+      </div>
+      <div class="q-mt-sm text-caption">
+        Status: {{ supercardConnected ? "Verbunden" : "Nicht verbunden" }}
+        <span v-if="supercardStatusText"> ({{ supercardStatusText }})</span>
+      </div>
+      <div v-if="lastSyncSummary" class="q-mt-xs text-caption">
+        {{ lastSyncSummary }}
+      </div>
+    </div>
     <h5 style="margin-block-start: 15px">Meine Kassenzettel</h5>
     <q-table
       flat
@@ -73,7 +104,12 @@ import { defineComponent, onMounted, ref } from "vue";
 import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
 import { Column } from "../../helpers/interfaces/column.interface";
 import { Receipt } from "../../helpers/interfaces/receipt.interface";
-import { deleteReceipt as deleteReceiptService } from "../../services";
+import {
+  deleteReceipt as deleteReceiptService,
+  getSupercardStatus,
+  setSupercardSession,
+  syncSupercardReceipts,
+} from "../../services";
 import { useDataStore } from "../../stores/dataStore";
 import ScannerPage from "../scanner/ScannerPage.vue";
 import { handleError } from "src/helpers/composables/useErrors";
@@ -103,6 +139,11 @@ export default defineComponent({
     const { receipts: rows } = storeToRefs(dataStore);
     const filter = ref<string>("");
     const selected = ref<string[]>([]);
+    const supercardCookie = ref<string>("");
+    const supercardName = ref<string>("");
+    const supercardConnected = ref<boolean>(false);
+    const supercardStatusText = ref<string>("");
+    const lastSyncSummary = ref<string>("");
 
     const initialPagination = ref({
       sortBy: "desc",
@@ -114,11 +155,65 @@ export default defineComponent({
     onMounted(async () => {
       try {
         await dataStore.ensureInitialized();
+        const statusResult = await getSupercardStatus();
+        if (statusResult.ok) {
+          supercardConnected.value = statusResult.data.connected;
+          supercardName.value = statusResult.data.supercardName ?? "";
+          supercardStatusText.value = statusResult.data.sessionUpdatedAt ?? "";
+        }
       } catch (error) {
         handleError("Kassenzettel laden", error, $q);
       }
       dataStore.startRealtime();
     });
+
+    const connectSupercard = async () => {
+      if (!supercardCookie.value.trim()) {
+        handleError("Supercard", "Bitte Session Cookie eintragen.", $q);
+        return;
+      }
+
+      const result = await setSupercardSession({
+        cookieHeader: supercardCookie.value.trim(),
+        supercardName: supercardName.value.trim() || undefined,
+      });
+
+      if (!result.ok) {
+        handleError("Supercard verbinden", result.error.message, $q);
+        return;
+      }
+
+      supercardConnected.value = result.data.connected;
+      supercardName.value = result.data.supercardName ?? supercardName.value;
+      supercardStatusText.value = result.data.sessionUpdatedAt ?? "";
+      $q.notify({
+        type: "positive",
+        message: "Supercard Session gespeichert.",
+      });
+    };
+
+    const runSupercardSync = async () => {
+      const result = await syncSupercardReceipts();
+      if (!result.ok) {
+        handleError("Supercard Sync", result.error.message, $q);
+        return;
+      }
+
+      const { importedReceipts, skippedReceipts, failedReceipts } = result.data;
+      lastSyncSummary.value =
+        `Importiert: ${importedReceipts}, Übersprungen: ${skippedReceipts}, Fehler: ${failedReceipts}`;
+
+      if (result.data.errors?.length) {
+        console.error("Supercard sync errors", result.data.errors);
+      }
+
+      dataStore.initialized = false;
+      await dataStore.ensureInitialized();
+      $q.notify({
+        type: "positive",
+        message: "Supercard Sync abgeschlossen.",
+      });
+    };
 
     const deleteReceipt = async (receipt: Receipt) => {
       const confirmed = confirm(
@@ -146,6 +241,13 @@ export default defineComponent({
       formatDate,
       formatDateShort,
       deleteReceipt,
+      supercardCookie,
+      supercardName,
+      supercardConnected,
+      supercardStatusText,
+      lastSyncSummary,
+      connectSupercard,
+      runSupercardSync,
       initialPagination,
     };
   },
@@ -259,6 +361,14 @@ export default defineComponent({
 h5 {
   margin-block-start: 25px;
   margin-block-end: 0px;
+}
+
+.supercard-box {
+  width: min(720px, 95%);
+  border: 1px solid $primary;
+  border-radius: 12px;
+  background: $bar-background;
+  margin-top: 8px;
 }
 
 .q-item {

@@ -58,6 +58,29 @@ Optional for more recipe variety:
 OPENAI_TEMPERATURE_RECIPE=0.6
 ```
 
+## Supercard integration (manual session)
+
+Required env vars:
+
+```env
+SUPERCARD_SESSION_ENC_KEY=<base64 encoded 32-byte key>
+SUPERCARD_DB_URL=jdbc:postgresql://127.0.0.1:54322/postgres
+SUPERCARD_DB_USER=postgres
+SUPERCARD_DB_PASSWORD=postgres
+```
+
+Generate encryption key (PowerShell):
+
+```powershell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```
+
+Apply DB schema extension:
+
+```powershell
+psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f .\db\supercard_schema.sql
+```
+
 ## Deployment production to fly.io
 
 ### Testing the container locally for fly.io

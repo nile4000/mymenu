@@ -84,6 +84,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.4</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -120,15 +125,15 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <jvmTarget>17</jvmTarget>
-          <sourceDirs>
-            <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-          </sourceDirs>
-          <compilerPlugins>
-            <plugin>all-open</plugin>
-          </compilerPlugins>
-        </configuration>
+          <configuration>
+            <jvmTarget>17</jvmTarget>
+            <sourceDirs>
+              <sourceDir>src/main/kotlin</sourceDir>
+            </sourceDirs>
+            <compilerPlugins>
+              <plugin>all-open</plugin>
+            </compilerPlugins>
+          </configuration>
         <dependencies>
           <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
