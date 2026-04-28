@@ -2,11 +2,9 @@ package dev.lueem.integration.supercard.infra
 
 import jakarta.enterprise.context.ApplicationScoped
 import java.net.URI
-import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.logging.Logger
 
@@ -15,6 +13,8 @@ class SupercardHttpClient {
 
     companion object {
         private val LOGGER = Logger.getLogger(SupercardHttpClient::class.java.name)
+        private const val BROWSER_UA =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
     }
 
     private val client = HttpClient.newBuilder()
@@ -22,23 +22,31 @@ class SupercardHttpClient {
         .followRedirects(HttpClient.Redirect.NEVER)
         .build()
 
-    fun fetchReceiptOverviewHtml(cookieHeader: String): String {
+    fun fetchPurchasesJson(cookieHeader: String, page: Int = 0): String {
+        // totalAmountMin/Max use "undefined00" intentionally — this mirrors what the Supercard
+        // browser app sends (a JavaScript undefined coerced to string + "00"). Omitting these
+        // params or using valid values causes the server to return an empty result.
+        val url = "https://www.supercard.ch/bin/coop/supercard/digitalReceipt/getPurchases.json" +
+            "?currentPage=$page&totalAmountMin=undefined00&totalAmountMax=undefined00"
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html"))
+            .uri(URI.create(url))
             .timeout(Duration.ofSeconds(20))
             .header("Cookie", cookieHeader)
-            .header("User-Agent", "Mozilla/5.0")
+            .header("User-Agent", BROWSER_UA)
+            .header("Accept", "application/json, text/javascript, */*; q=0.01")
+            .header("X-Requested-With", "XMLHttpRequest")
+            .header("Referer", "https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html")
+            .header("sec-fetch-dest", "empty")
+            .header("sec-fetch-mode", "cors")
+            .header("sec-fetch-site", "same-origin")
             .GET()
             .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
         LOGGER.info(
-            "[supercard] overview status=${response.statusCode()} " +
-                "location='${response.headers().firstValue("location").orElse("")}' " +
-                "contentType='${response.headers().firstValue("content-type").orElse("")}' " +
-                "bodyChars=${response.body().length}"
+            "[supercard] purchases page=$page status=${response.statusCode()} " +
+                "bodyChars=${response.body().length} bodyPreview='${preview(response.body())}'"
         )
-        LOGGER.info("[supercard] overview bodyPreview='${preview(response.body())}'")
         validateResponse(response.statusCode(), response.headers().firstValue("location").orElse(null))
         return response.body()
     }
@@ -48,7 +56,8 @@ class SupercardHttpClient {
             .uri(URI.create(url))
             .timeout(Duration.ofSeconds(20))
             .header("Cookie", cookieHeader)
-            .header("User-Agent", "Mozilla/5.0")
+            .header("User-Agent", BROWSER_UA)
+            .header("Referer", "https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html")
             .GET()
             .build()
 
@@ -61,51 +70,6 @@ class SupercardHttpClient {
         )
         validateResponse(response.statusCode(), response.headers().firstValue("location").orElse(null))
         return response.body()
-    }
-
-    fun fetchDigitalReceiptCandidates(cookieHeader: String): List<String> {
-        val candidates = mutableListOf<String>()
-        val urls = listOf(
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt/",
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt",
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt/?type=receipt",
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt?type=receipt"
-        )
-
-        for (url in urls) {
-            runCatching { requestText(url, cookieHeader, method = "GET") }
-                .onSuccess {
-                    LOGGER.info("[supercard] candidate GET '$url' bodyChars=${it.length}")
-                    candidates.add(it)
-                }
-                .onFailure { LOGGER.info("[supercard] candidate GET '$url' failed: ${it.message}") }
-        }
-
-        val postBodies = listOf(
-            mapOf("type" to "receipt"),
-            mapOf("page" to "1", "type" to "receipt"),
-            mapOf("offset" to "0", "limit" to "500", "type" to "receipt"),
-            mapOf("start" to "2021-01-01", "end" to "2030-12-31", "plattform" to "all", "type" to "receipt")
-        )
-        val postUrls = listOf(
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt/",
-            "https://www.supercard.ch/bin/coop/supercard/digitalReceipt"
-        )
-
-        for (url in postUrls) {
-            for (params in postBodies) {
-                runCatching { requestText(url, cookieHeader, method = "POST", form = params) }
-                    .onSuccess {
-                        LOGGER.info("[supercard] candidate POST '$url' params=${params.keys} bodyChars=${it.length}")
-                        candidates.add(it)
-                    }
-                    .onFailure {
-                        LOGGER.info("[supercard] candidate POST '$url' params=${params.keys} failed: ${it.message}")
-                    }
-            }
-        }
-
-        return candidates
     }
 
     private fun validateResponse(statusCode: Int, location: String?) {
@@ -126,34 +90,4 @@ class SupercardHttpClient {
             .replace("\r", "\\r")
             .take(maxLen)
 
-    private fun requestText(
-        url: String,
-        cookieHeader: String,
-        method: String,
-        form: Map<String, String> = emptyMap()
-    ): String {
-        val builder = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .timeout(Duration.ofSeconds(20))
-            .header("Cookie", cookieHeader)
-            .header("User-Agent", "Mozilla/5.0")
-            .header("Accept", "text/html,application/json,application/xhtml+xml,*/*")
-            .header("X-Requested-With", "XMLHttpRequest")
-
-        val request = if (method == "POST") {
-            val payload = form.entries.joinToString("&") {
-                "${URLEncoder.encode(it.key, StandardCharsets.UTF_8)}=${URLEncoder.encode(it.value, StandardCharsets.UTF_8)}"
-            }
-            builder
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .POST(HttpRequest.BodyPublishers.ofString(payload))
-                .build()
-        } else {
-            builder.GET().build()
-        }
-
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        validateResponse(response.statusCode(), response.headers().firstValue("location").orElse(null))
-        return response.body()
-    }
 }

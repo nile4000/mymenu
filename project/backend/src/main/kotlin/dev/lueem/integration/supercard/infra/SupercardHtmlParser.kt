@@ -1,56 +1,37 @@
 package dev.lueem.integration.supercard.infra
 
 import jakarta.enterprise.context.ApplicationScoped
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
+import jakarta.json.Json
+import java.io.StringReader
+import java.math.BigDecimal
+import java.time.OffsetDateTime
 
 @ApplicationScoped
 class SupercardHtmlParser {
 
-    private val receiptUrlAttrRegex = Regex("""data-receipturl\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-    private val directReceiptUrlRegex = Regex(
-        """https://www\.supercard\.ch/bin/coop/kbk/kassenzettelpoc\?[^"'\s<]+""",
-        RegexOption.IGNORE_CASE
-    )
+    fun parsePurchasesJson(json: String): List<SupercardReceiptLink> {
+        val root = Json.createReader(StringReader(json)).readObject()
+        val purchases = root.getJsonArray("purchases")
+            ?: throw IllegalArgumentException("No 'purchases' array in JSON")
 
-    fun parseReceiptLinks(html: String): List<SupercardReceiptLink> {
-        val attrLinks = receiptUrlAttrRegex.findAll(html).map { it.groupValues[1] }
-        val directLinks = directReceiptUrlRegex.findAll(html).map { it.value }
-
-        val links = attrLinks
-            .plus(directLinks)
-            .map { decodeHtmlAttribute(it) }
-            .map { normalizeReceiptUrl(it) }
-            .distinct()
-            .toList()
-
-        if (links.isEmpty()) {
-            throw IllegalArgumentException("No receipt links found in Supercard response")
-        }
-
-        return links.map { link ->
-            SupercardReceiptLink(
-                receiptUrl = link,
-                externalReceiptId = extractExternalReceiptId(link)
-            )
+        return purchases.map { element ->
+            val obj = element.asJsonObject()
+            val enc = obj.getString("encBarcode")
+            val barcode = obj.getString("barcode", enc)
+            val url = "https://www.supercard.ch/bin/coop/kbk/kassenzettelpoc?bc=$enc&pdfType=receipt"
+            val purchaseDate = obj.getString("date", null)
+                ?.let { runCatching { OffsetDateTime.parse(it).toLocalDate().toString() }.getOrNull() }
+            val totalChf = runCatching {
+                val rappen = obj.getJsonObject("total").getJsonNumber("amount").longValue()
+                BigDecimal(rappen).movePointLeft(2)
+            }.getOrNull()
+            SupercardReceiptLink(receiptUrl = url, externalReceiptId = barcode, purchaseDate = purchaseDate, totalChf = totalChf)
         }
     }
 
     fun extractExternalReceiptId(url: String): String {
         val bc = Regex("[?&]bc=([^&]+)").find(url)?.groupValues?.get(1)
-        if (!bc.isNullOrBlank()) {
-            return bc
-        }
-        val digest = MessageDigest.getInstance("SHA-256").digest(url.toByteArray(StandardCharsets.UTF_8))
-        return digest.joinToString("") { "%02x".format(it) }
-    }
-
-    private fun decodeHtmlAttribute(value: String): String =
-        value.replace("&amp;", "&")
-
-    private fun normalizeReceiptUrl(raw: String): String {
-        val decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8)
-        return if (decoded.startsWith("http")) decoded else "https://www.supercard.ch$decoded"
+        if (!bc.isNullOrBlank()) return bc
+        return url
     }
 }

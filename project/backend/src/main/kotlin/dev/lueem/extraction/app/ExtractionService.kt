@@ -47,8 +47,6 @@ class ExtractionService @Inject constructor(
                 "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none).\n"
     }
 
-    private val jsonb = jakarta.json.bind.JsonbBuilder.create()
-
     /** Orchestrates the full receipt extraction pipeline. */
     fun analyzeReceipt(pdfFile: File): ReceiptResponse {
         val traceId = UUID.randomUUID().toString().substring(0, 8)

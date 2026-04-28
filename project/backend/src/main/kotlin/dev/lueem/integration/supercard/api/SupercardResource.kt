@@ -26,21 +26,17 @@ class SupercardResource @Inject constructor(
     @Path("status")
     fun status(): Response = Response.ok(supercardService.getStatus()).build()
 
-    @POST
-    @Path("sync")
-    fun sync(): Response = Response.ok(supercardService.sync()).build()
-
     @GET
     @Path("available")
     fun available(): Response = Response.ok(supercardService.available()).build()
+
+    @POST
+    @Path("sync")
+    fun sync(): Response = Response.ok(supercardService.syncAvailable()).build()
 
     @POST
     @Path("sync-single")
     @Consumes(MediaType.APPLICATION_JSON)
     fun syncSingle(request: SupercardSyncSingleRequest): Response =
         Response.ok(supercardService.syncSingle(request)).build()
-
-    @POST
-    @Path("sync-available")
-    fun syncAvailable(): Response = Response.ok(supercardService.syncAvailable()).build()
 }

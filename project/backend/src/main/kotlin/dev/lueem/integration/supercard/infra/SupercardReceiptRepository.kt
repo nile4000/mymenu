@@ -52,13 +52,15 @@ class SupercardReceiptRepository @Inject constructor(
     fun insertReceiptWithArticles(
         extraction: ReceiptResponse,
         externalSource: String,
-        externalReceiptId: String
+        externalReceiptId: String,
+        purchaseDateOverride: String? = null,
+        totalOverride: java.math.BigDecimal? = null
     ) {
         withConnection { conn ->
             conn.autoCommit = false
             try {
-                val receiptId = insertReceipt(conn, extraction, externalSource, externalReceiptId)
-                insertArticles(conn, receiptId, extraction)
+                val receiptId = insertReceipt(conn, extraction, externalSource, externalReceiptId, purchaseDateOverride, totalOverride)
+                insertArticles(conn, receiptId, extraction, purchaseDateOverride)
                 conn.commit()
             } catch (e: Exception) {
                 conn.rollback()
@@ -73,20 +75,22 @@ class SupercardReceiptRepository @Inject constructor(
         conn: java.sql.Connection,
         extraction: ReceiptResponse,
         externalSource: String,
-        externalReceiptId: String
+        externalReceiptId: String,
+        purchaseDateOverride: String? = null,
+        totalOverride: java.math.BigDecimal? = null
     ): Long {
         conn.prepareStatement(
             """
             insert into receipt ("Created_At", "Corp", "Total_Receipt", "Purchase_Date", "Uuid", "Total_R_Open_Ai", "Total_R_Extract", "External_Source", "External_Receipt_Id")
             values (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            on conflict ("External_Source", "External_Receipt_Id") do nothing
+            on conflict ("External_Source", "External_Receipt_Id") where "External_Source" is not null and "External_Receipt_Id" is not null do nothing
             returning "Id"
             """.trimIndent()
         ).use { ps ->
             ps.setTimestamp(1, Timestamp.from(Instant.now()))
             ps.setString(2, extraction.corp)
-            ps.setBigDecimal(3, extraction.total)
-            ps.setDate(4, Date.valueOf(parseDate(extraction.purchaseDate)))
+            ps.setBigDecimal(3, totalOverride ?: extraction.total)
+            ps.setDate(4, Date.valueOf(purchaseDateOverride?.let { parseDate(it) } ?: parseDate(extraction.purchaseDate)))
             ps.setString(5, extraction.uid)
             ps.setLong(6, extraction.metadata.openAiArticleCount.toLong())
             ps.setLong(7, extraction.metadata.extractedTotalRow.toLong())
@@ -118,7 +122,7 @@ class SupercardReceiptRepository @Inject constructor(
         throw IllegalStateException("Failed to resolve receipt id after insert")
     }
 
-    private fun insertArticles(conn: java.sql.Connection, receiptId: Long, extraction: ReceiptResponse) {
+    private fun insertArticles(conn: java.sql.Connection, receiptId: Long, extraction: ReceiptResponse, purchaseDateOverride: String? = null) {
         conn.prepareStatement(
             """
             insert into article ("Created_At", "Name", "Price", "Quantity", "Discount", "Total", "Category", "Purchase_Date", "Receipt_Id")
@@ -134,7 +138,7 @@ class SupercardReceiptRepository @Inject constructor(
                 ps.setBigDecimal(5, article.discount)
                 ps.setBigDecimal(6, article.total)
                 ps.setString(7, article.category)
-                ps.setDate(8, Date.valueOf(parseDate(extraction.purchaseDate)))
+                ps.setDate(8, Date.valueOf(purchaseDateOverride?.let { parseDate(it) } ?: parseDate(extraction.purchaseDate)))
                 ps.setLong(9, receiptId)
                 ps.addBatch()
             }

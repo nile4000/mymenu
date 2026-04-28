@@ -63,7 +63,7 @@
           <q-card-section class="q-pa-sm">
             <div class="q-gutter-md q-pa-xs column">
               <div class="row items-center justify-between">
-                <span class="text-subtitle2"> Eingekauft am: {{ formatDateShort(props.row.Purchase_Date) }} </span>
+                <span class="text-subtitle2"> Kaufdatum: {{ formatDateShort(props.row.Purchase_Date) }} </span>
               </div>
               <div class="row items-center justify-between">
                 <span class="text-subtitle2"> Gescannt am: {{ formatDateShort(props.row.Created_At) }} </span>

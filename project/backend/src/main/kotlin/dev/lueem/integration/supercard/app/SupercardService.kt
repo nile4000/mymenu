@@ -41,20 +41,14 @@ class SupercardService @Inject constructor(
         private const val SOURCE = "supercard"
     }
 
-    @Volatile
-    private var runtimeCookieEncrypted: String? = null
-
-    @Volatile
-    private var runtimeSupercardName: String? = null
-
-    @Volatile
-    private var runtimeSessionUpdatedAt: Instant? = null
+    @Volatile private var runtimeCookieEncrypted: String? = null
+    @Volatile private var runtimeSupercardName: String? = null
+    @Volatile private var runtimeSessionUpdatedAt: Instant? = null
+    @Volatile private var schemaEnsured: Boolean = false
 
     fun setSession(request: SupercardSessionRequest): SupercardStatusResponse {
         require(request.cookieHeader.isNotBlank()) { "cookieHeader must not be blank" }
         require(properties.encryptionKey.isNotBlank()) { "SUPERCARD_SESSION_ENC_KEY is required" }
-        // Validate login/session against Supercard first.
-        supercardHttpClient.fetchReceiptOverviewHtml(request.cookieHeader.trim())
 
         val encrypted = cookieCrypto.encrypt(request.cookieHeader.trim())
         runtimeCookieEncrypted = encrypted
@@ -96,10 +90,6 @@ class SupercardService @Inject constructor(
         )
     }
 
-    fun sync(): SupercardSyncResponse {
-        return syncAvailable()
-    }
-
     fun available(): SupercardAvailableResponse {
         val cookieHeader = resolveCookieHeader()
         val links = parseAvailableLinks(cookieHeader)
@@ -109,6 +99,7 @@ class SupercardService @Inject constructor(
         )
     }
 
+    // Imports a single receipt by direct URL or bc code — useful for manual re-sync or testing
     fun syncSingle(request: SupercardSyncSingleRequest): SupercardSyncResponse {
         val cookieHeader = resolveCookieHeader()
         val link = resolveSingleLink(request)
@@ -122,7 +113,6 @@ class SupercardService @Inject constructor(
     }
 
     private fun syncLinks(cookieHeader: String, links: List<SupercardReceiptLink>): SupercardSyncResponse {
-        require(properties.encryptionKey.isNotBlank()) { "SUPERCARD_SESSION_ENC_KEY is required" }
         require(!propertiesMissingForDb()) {
             "Missing Supercard DB config. Set SUPERCARD_DB_URL, SUPERCARD_DB_USER and SUPERCARD_DB_PASSWORD."
         }
@@ -141,12 +131,13 @@ class SupercardService @Inject constructor(
                     continue
                 }
 
+                Thread.sleep(500)
                 val pdf = supercardHttpClient.downloadReceiptPdf(link.receiptUrl, cookieHeader)
                 val tempFile = Files.createTempFile("supercard-", ".pdf").toFile()
                 try {
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
-                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.externalReceiptId)
+                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.externalReceiptId, link.purchaseDate, link.totalChf)
                     imported++
                 } finally {
                     tempFile.delete()
@@ -180,34 +171,18 @@ class SupercardService @Inject constructor(
     }
 
     private fun parseAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
-        val html = supercardHttpClient.fetchReceiptOverviewHtml(cookieHeader)
-        LOGGER.info("HTML Body Start: ${html.take(500)}")
-        runCatching { htmlParser.parseReceiptLinks(html) }
-            .onSuccess { return it }
-            .onFailure {
-                LOGGER.warning(
-                    "[supercard] parse failed on overview. htmlChars=${html.length} " +
-                        "containsReceiptAttr=${html.contains("data-receipturl", ignoreCase = true)} " +
-                        "containsKassenzettelPoc=${html.contains("kassenzettelpoc", ignoreCase = true)}"
-                )
-            }
-
-        val candidates = supercardHttpClient.fetchDigitalReceiptCandidates(cookieHeader)
-        for ((idx, candidate) in candidates.withIndex()) {
-            runCatching { htmlParser.parseReceiptLinks(candidate) }
-                .onSuccess {
-                    LOGGER.info("[supercard] parsed receipt links from fallback candidate index=$idx")
-                    return it
-                }
-                .onFailure {
-                    LOGGER.info(
-                        "[supercard] fallback candidate index=$idx had no links " +
-                            "(chars=${candidate.length})"
-                    )
-                }
+        // Supercard returns max 20 per page — fetch all pages until we get a partial page
+        val allLinks = mutableListOf<SupercardReceiptLink>()
+        var page = 0
+        while (true) {
+            val json = supercardHttpClient.fetchPurchasesJson(cookieHeader, page)
+            val pageLinks = htmlParser.parsePurchasesJson(json)
+            allLinks.addAll(pageLinks)
+            if (pageLinks.size < 20) break
+            page++
         }
-
-        throw IllegalStateException("SUPERCARD_PARSE_ERROR: No receipt links found in Supercard response")
+        LOGGER.info("[supercard] found ${allLinks.size} available receipts across ${page + 1} page(s)")
+        return allLinks
     }
 
     private fun resolveSingleLink(request: SupercardSyncSingleRequest): SupercardReceiptLink {
@@ -230,8 +205,10 @@ class SupercardService @Inject constructor(
     }
 
     private fun ensureSchema() {
+        if (schemaEnsured) return
         configStore.ensureSchema()
         receiptRepository.ensureSchema()
+        schemaEnsured = true
     }
 
     private fun propertiesMissingForDb(): Boolean {

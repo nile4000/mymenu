@@ -1,8 +1,6 @@
 package dev.lueem.extraction.app
 
 import jakarta.enterprise.context.ApplicationScoped
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.logging.Logger
 import java.util.regex.Pattern
 
@@ -27,8 +25,7 @@ class ReceiptTextProcessor {
         private val TERMINATOR_PATTERN = Pattern.compile(
             "(?m)^\\b(?:Total CHF|Rabatt|Bon)\\b.*", Pattern.CASE_INSENSITIVE
         )
-        private val TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-    }
+}
 
     fun normalizeReceiptText(content: String): String =
         content.split(System.lineSeparator())
@@ -97,6 +94,7 @@ class ReceiptTextProcessor {
         return -1
     }
 
+    // ISO format so parseDate() in the repository can handle it without a special case
     private val currentTimestamp: String
-        get() = LocalDateTime.now().format(TIMESTAMP_FORMATTER)
+        get() = java.time.LocalDate.now().toString()
 }
