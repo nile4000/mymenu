@@ -26,6 +26,12 @@ export async function upsertArticleUnit(payload: { id: string; unit: string }) {
   return data;
 }
 
+export async function upsertArticleTotal(payload: { id: string; total: number }) {
+  const { data, error } = await supabase.from("article").upsert({ Id: payload.id, Total: payload.total });
+  if (error) throw error;
+  return data;
+}
+
 export async function upsertArticleUnits(payload: { id: string; unit: string }[]) {
   const updates = payload.map((article) => ({ Id: article.id, Unit: article.unit }));
   const { data, error } = await supabase.from("article").upsert(updates);
@@ -35,6 +41,12 @@ export async function upsertArticleUnits(payload: { id: string; unit: string }[]
 
 export async function removeArticleById(id: string) {
   const { data, error } = await supabase.from("article").delete().eq("Id", id);
+  if (error) throw error;
+  return data;
+}
+
+export async function removeArticlesByIds(ids: string[]) {
+  const { data, error } = await supabase.from("article").delete().in("Id", ids);
   if (error) throw error;
   return data;
 }

@@ -52,13 +52,31 @@
             </q-card-actions>
           </q-card>
         </template>
+
       </q-table>
+
+      <div class="row justify-end q-mt-md">
+        <q-card class="total-card shadow-1">
+          <q-card-section class="q-pa-md">
+            <div class="row justify-between text-caption text-grey-7">
+              <span>Kassenzettel:</span>
+              <span class="text-black text-weight-medium">{{ rows.length }}</span>
+            </div>
+            <q-separator class="q-my-sm" />
+            <div class="row justify-between items-center">
+              <span class="text-caption text-grey-7">Total:</span>
+              <span class="text-subtitle1 text-bold">{{ totalAmount.toFixed(2) }} CHF</span>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
+import { useQuasar } from "quasar";
 import { storeToRefs } from "pinia";
 import { useDataStore } from "../../stores/dataStore";
 import ScannerPage from "../scanner/ScannerPage.vue";
@@ -67,19 +85,29 @@ import { formatDateShort } from "../../helpers/dateHelpers";
 import { deleteReceipt as deleteReceiptService } from "../../services";
 import type { Receipt } from "../../helpers/interfaces/receipt.interface";
 
+const $q = useQuasar();
 const dataStore = useDataStore();
 const { receipts: rows } = storeToRefs(dataStore);
+
+const totalAmount = computed(() =>
+  rows.value.reduce((sum, r) => sum + (r.Total_Receipt ?? 0), 0)
+);
 
 const reloadReceipts = async () => {
   dataStore.initialized = false;
   await dataStore.ensureInitialized();
 };
 
-const deleteReceipt = async (receipt: Receipt) => {
-  if (confirm("Löschen?")) {
+const deleteReceipt = (receipt: Receipt) => {
+  $q.dialog({
+    title: "Löschen bestätigen",
+    message: `Kassenzettel vom ${formatDateShort(receipt.Purchase_Date)} löschen?`,
+    ok: { label: "Löschen", color: "negative", unelevated: true },
+    cancel: { label: "Abbrechen", flat: true },
+  }).onOk(async () => {
     const result = await deleteReceiptService(receipt.Id!);
     if (result.ok) dataStore.removeReceiptById(receipt.Id!);
-  }
+  });
 };
 
 const columns = [{ name: "Purchase_Date", field: "Purchase_Date", sortable: true }];
@@ -103,6 +131,13 @@ onMounted(async () => {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
   }
+}
+
+.total-card {
+  width: 240px;
+  border-radius: 12px;
+  margin-left: auto;
+  background-color: #fafafa;
 }
 
 </style>

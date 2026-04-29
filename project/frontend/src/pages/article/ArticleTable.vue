@@ -78,13 +78,35 @@
             :categories="categories"
             :updateCategory="updateCategory"
             :updateUnit="updateUnit"
+            :selectedItems="selected"
+            :bulkUpdateCategory="bulkUpdateCategory"
           />
         </template>
 
         <template v-if="!isGridView" v-slot:body-cell-Unit="props">
           <EditableCell :props="props" fieldName="Unit" :updateUnit="updateUnit" :updateCategory="updateCategory" />
         </template>
+
+        <template v-if="!isGridView" v-slot:body-cell-Total="props">
+          <EditableCell :props="props" fieldName="Total" :updateTotal="updateTotal" />
+        </template>
       </q-table>
+
+      <div class="row justify-end q-mt-md">
+        <q-card class="total-card shadow-1">
+          <q-card-section class="q-pa-md">
+            <div class="row justify-between text-caption text-grey-7">
+              <span>Artikel:</span>
+              <span class="text-black text-weight-medium">{{ filteredRows.length }}</span>
+            </div>
+            <q-separator class="q-my-sm" />
+            <div class="row justify-between items-center">
+              <span class="text-caption text-grey-7">Total:</span>
+              <span class="text-subtitle1 text-bold">{{ totalArticlesAmount.toFixed(2) }} CHF</span>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
     </div>
   </div>
 </template>
@@ -102,7 +124,12 @@ import { useViewMode } from "../../helpers/composables/useViewMode";
 import { Article } from "../../helpers/interfaces/article.interface";
 import { useDataStore } from "../../stores/dataStore";
 import { useCategoryStore } from "../../stores/categoryStore";
-import { updateArticleCategory, updateArticleUnit } from "../../services";
+import {
+  updateArticleCategories,
+  updateArticleCategory,
+  updateArticleTotal,
+  updateArticleUnit,
+} from "../../services";
 import EditableCell from "./EditableCell.vue";
 import ArticleControl from "./ArticleControl.vue";
 import ArticleGrid from "./ArticleGrid.vue";
@@ -149,6 +176,10 @@ export default defineComponent({
 
     const { totalsPerCategory, totalsPerReceipt, totalExpenses } = useTotals(rows, receiptById);
 
+    const totalArticlesAmount = computed(() =>
+      filteredRows.value.reduce((sum, a) => sum + (a.Total ?? 0), 0)
+    );
+
     function onArticleDeleted(id: string) {
       selected.value = selected.value.filter((item) => item.Id !== id);
     }
@@ -171,10 +202,27 @@ export default defineComponent({
       }
     }
 
+    async function bulkUpdateCategory(articles: Article[], category: string) {
+      const payload = articles
+        .filter((a) => a.Id)
+        .map((a) => ({ id: a.Id, category }));
+      const result = await updateArticleCategories(payload);
+      if (!result.ok) {
+        handleError("Kategorien aktualisieren", result.error.message, $q);
+      }
+    }
+
     async function updateUnit(article: Article) {
       const result = await updateArticleUnit(article.Id, article.Unit);
       if (!result.ok) {
         handleError("Einheit aktualisieren", result.error.message, $q);
+      }
+    }
+
+    async function updateTotal(article: Article) {
+      const result = await updateArticleTotal(article.Id, article.Total);
+      if (!result.ok) {
+        handleError("Total aktualisieren", result.error.message, $q);
       }
     }
 
@@ -200,11 +248,14 @@ export default defineComponent({
       totalsPerCategory,
       totalsPerReceipt,
       totalExpenses,
+      totalArticlesAmount,
       categories,
       onItemSelected,
       onArticleDeleted,
       updateCategory,
+      bulkUpdateCategory,
       updateUnit,
+      updateTotal,
       isGridView,
       viewMode,
       handleSelectionUpdate,

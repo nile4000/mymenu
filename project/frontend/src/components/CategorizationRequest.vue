@@ -13,12 +13,14 @@
     <q-btn
       unelevated
       rounded
-      @click="removeArticle(selectedItems[0].Id)"
-      :disabled="selectedItems.length !== 1"
+      @click="removeSelectedArticles"
+      :disabled="selectedItems.length === 0"
       v-ripple
     >
       <q-icon size="1.9em" name="delete" color="negative" />
-      <q-tooltip anchor="center left" class="text-h6">Artikel löschen</q-tooltip>
+      <q-tooltip anchor="center left" class="text-h6">
+        {{ selectedItems.length > 1 ? `${selectedItems.length} Artikel löschen` : "Artikel löschen" }}
+      </q-tooltip>
     </q-btn>
   </q-btn-group>
 </template>
@@ -33,6 +35,7 @@ import { CategorizeResultItem, ExtractUnitResultItem } from "../services/ai/api/
 import {
   categorizeArticles,
   deleteArticle,
+  deleteArticles,
   extractArticleUnits,
   updateArticleCategories,
   updateArticleUnits,
@@ -145,10 +148,40 @@ export default defineComponent({
       });
     };
 
+    const removeSelectedArticles = () => {
+      const items = props.selectedItems.filter((a) => a.Id);
+      if (!items.length) return;
+
+      const message = items.length === 1
+        ? `Artikel "${items[0].Name}" löschen?`
+        : `${items.length} Artikel löschen?`;
+
+      $q.dialog({
+        title: "Löschen bestätigen",
+        message,
+        ok: { label: "Löschen", color: "negative", unelevated: true },
+        cancel: { label: "Abbrechen", flat: true },
+      }).onOk(async () => {
+        if (items.length === 1) {
+          await removeArticle(items[0].Id);
+          return;
+        }
+        const ids = items.map((a) => a.Id);
+        const result = await deleteArticles(ids);
+        if (!result.ok) {
+          handleError("Artikel löschen", result.error.message, $q);
+          return;
+        }
+        ids.forEach((id) => emit("article-deleted", id));
+        $q.notify({ type: "positive", message: `${ids.length} Artikel gelöscht!` });
+      });
+    };
+
     return {
       sendCategorizationRequest,
       sendDetailExtractionRequest,
       removeArticle,
+      removeSelectedArticles,
       isLoading,
     };
   },

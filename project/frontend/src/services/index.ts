@@ -5,7 +5,8 @@ export { extractArticleUnits, prepareArticlesPrices } from "./ai/app/extractArti
 export { listArticles } from "./articles/app/listArticles";
 export { updateArticleCategory, updateArticleCategories } from "./articles/app/updateArticleCategory";
 export { updateArticleUnit, updateArticleUnits } from "./articles/app/updateArticleUnit";
-export { deleteArticle } from "./articles/app/deleteArticle";
+export { updateArticleTotal } from "./articles/app/updateArticleTotal";
+export { deleteArticle, deleteArticles } from "./articles/app/deleteArticle";
 
 export { listReceipts } from "./receipts/app/listReceipts";
 export { listReceiptsByIds } from "./receipts/app/listReceiptsByIds";
