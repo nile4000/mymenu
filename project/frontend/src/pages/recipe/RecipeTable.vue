@@ -5,19 +5,10 @@
       <h5>Rezepte</h5>
     </div>
     <div class="row justify-center q-mb-sm">
-      <q-badge color="primary" text-color="white">
-        Zutatenbasis: {{ recipeInputArticles.length }} Artikel
-      </q-badge>
+      <q-badge color="primary" text-color="white"> Zutatenbasis: {{ recipeInputArticles.length }} Artikel </q-badge>
     </div>
     <div class="row justify-center">
-      <q-card
-        v-for="recipe in recipes"
-        :key="recipe.id"
-        flat
-        bordered
-        class="q-ma-sm cards"
-        :class="recipe.color"
-      >
+      <q-card v-for="recipe in recipes" :key="recipe.id" flat bordered class="q-ma-sm cards" :class="recipe.color">
         <q-card-section class="row justify-center">
           <div class="text-h6" style="padding-bottom: 8px">
             {{ recipe.title }}
@@ -26,8 +17,7 @@
             {{ recipe.description }}
           </div>
           <div>
-            <q-icon name="schedule" /> {{ recipe.cookingTime }} |
-            <q-icon name="category" /> {{ recipe.category }} |
+            <q-icon name="schedule" /> {{ recipe.cookingTime }} | <q-icon name="category" /> {{ recipe.category }} |
             <q-icon name="groups" /> {{ recipe.servings }}
           </div>
         </q-card-section>
@@ -35,23 +25,12 @@
           <q-btn disabled flat round icon="hub" class="btn-background">
             <q-tooltip anchor="center left" class="text-h6">Aendern</q-tooltip>
           </q-btn>
-          <q-btn
-            flat
-            round
-            color="primary"
-            icon="north_east"
-            class="btn-background"
-            @click="goToRecipe(recipe)"
-          >
+          <q-btn flat round color="primary" icon="north_east" class="btn-background" @click="goToRecipe(recipe)">
             <q-tooltip anchor="center left" class="text-h6">Details</q-tooltip>
           </q-btn>
         </q-card-actions>
       </q-card>
-      <q-banner
-        v-if="recipes.length === 0"
-        class="q-mt-md empty-state"
-        rounded
-      >
+      <q-banner v-if="recipes.length === 0" class="q-mt-md empty-state" rounded>
         Noch keine Rezepte vorhanden. Erstelle dein erstes Rezept mit dem Button.
       </q-banner>
       <q-dialog
@@ -61,11 +40,7 @@
         transition-hide="slide-down"
         @hide="closeOverlay"
       >
-        <RecipeDetail
-          v-if="selectedRecipe"
-          :recipe="selectedRecipe"
-          @close="closeOverlay"
-        />
+        <RecipeDetail v-if="selectedRecipe" :recipe="selectedRecipe" @close="closeOverlay" />
       </q-dialog>
     </div>
   </div>
@@ -98,8 +73,8 @@ function normalizeIngredient(value: unknown): RecipeIngredient | null {
   if (
     !ingredient.name ||
     typeof ingredient.name !== "string" ||
-    typeof ingredient.amount !== "number" ||
-    !Number.isFinite(ingredient.amount) ||
+    typeof ingredient.quantity !== "number" ||
+    !Number.isFinite(ingredient.quantity) ||
     typeof ingredient.unit !== "string" ||
     ingredient.unit.trim().length === 0
   ) {
@@ -108,7 +83,7 @@ function normalizeIngredient(value: unknown): RecipeIngredient | null {
 
   return {
     name: ingredient.name,
-    amount: ingredient.amount,
+    quantity: ingredient.quantity,
     unit: ingredient.unit.trim(),
   };
 }
@@ -168,10 +143,7 @@ export default defineComponent({
     const selectedRecipe = ref<Recipe | null>(null);
 
     const recipeInputArticles = computed(() =>
-      [...articles.value].sort(
-        (a, b) =>
-          new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime()
-      )
+      [...articles.value].sort((a, b) => new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime())
     );
 
     const goToRecipe = (recipe: Recipe) => {

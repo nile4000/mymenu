@@ -1,11 +1,16 @@
 package dev.lueem.integration.supercard.infra
 
 import jakarta.enterprise.context.ApplicationScoped
+import dev.lueem.integration.supercard.domain.SupercardRemoteAccessException
 import java.net.URI
 import java.net.http.HttpClient
+import java.net.http.HttpHeaders
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.logging.Logger
 
 @ApplicationScoped
@@ -13,8 +18,7 @@ class SupercardHttpClient {
 
     companion object {
         private val LOGGER = Logger.getLogger(SupercardHttpClient::class.java.name)
-        private const val BROWSER_UA =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        private const val APP_USER_AGENT = "MyMenu/0.1 receipt-sync"
     }
 
     private val client = HttpClient.newBuilder()
@@ -32,13 +36,10 @@ class SupercardHttpClient {
             .uri(URI.create(url))
             .timeout(Duration.ofSeconds(20))
             .header("Cookie", cookieHeader)
-            .header("User-Agent", BROWSER_UA)
+            .header("User-Agent", APP_USER_AGENT)
             .header("Accept", "application/json, text/javascript, */*; q=0.01")
             .header("X-Requested-With", "XMLHttpRequest")
             .header("Referer", "https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html")
-            .header("sec-fetch-dest", "empty")
-            .header("sec-fetch-mode", "cors")
-            .header("sec-fetch-site", "same-origin")
             .GET()
             .build()
 
@@ -47,7 +48,7 @@ class SupercardHttpClient {
             "[supercard] purchases page=$page status=${response.statusCode()} " +
                 "bodyChars=${response.body().length} bodyPreview='${preview(response.body())}'"
         )
-        validateResponse(response.statusCode(), response.headers().firstValue("location").orElse(null))
+        validateResponse(response.statusCode(), response.headers())
         return response.body()
     }
 
@@ -56,7 +57,7 @@ class SupercardHttpClient {
             .uri(URI.create(url))
             .timeout(Duration.ofSeconds(20))
             .header("Cookie", cookieHeader)
-            .header("User-Agent", BROWSER_UA)
+            .header("User-Agent", APP_USER_AGENT)
             .header("Referer", "https://www.supercard.ch/de/app-digitale-services/meine-einkaeufe.html")
             .GET()
             .build()
@@ -68,20 +69,36 @@ class SupercardHttpClient {
                 "contentType='${response.headers().firstValue("content-type").orElse("")}' " +
                 "bytes=${response.body().size}"
         )
-        validateResponse(response.statusCode(), response.headers().firstValue("location").orElse(null))
+        validateResponse(response.statusCode(), response.headers())
         return response.body()
     }
 
-    private fun validateResponse(statusCode: Int, location: String?) {
+    private fun validateResponse(statusCode: Int, headers: HttpHeaders) {
+        val location = headers.firstValue("location").orElse(null)
+        val retryAfter = parseRetryAfter(headers.firstValue("retry-after").orElse(null))
         if (statusCode == 401 || statusCode == 403) {
-            throw IllegalStateException("Supercard session is invalid or expired")
+            throw SupercardRemoteAccessException("Supercard session is invalid or expired", statusCode, retryAfter)
+        }
+        if (statusCode == 429) {
+            throw SupercardRemoteAccessException("Supercard rate limit reached", statusCode, retryAfter)
         }
         if (statusCode in 300..399 && (location?.contains("login", ignoreCase = true) == true)) {
-            throw IllegalStateException("Supercard session is invalid or expired")
+            throw SupercardRemoteAccessException("Supercard session is invalid or expired", 401, retryAfter)
         }
         if (statusCode !in 200..299) {
             throw IllegalStateException("Supercard request failed with status $statusCode")
         }
+    }
+
+    private fun parseRetryAfter(value: String?): Duration? {
+        val trimmed = value?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        trimmed.toLongOrNull()?.let { seconds ->
+            return Duration.ofSeconds(seconds.coerceAtLeast(0))
+        }
+        return runCatching {
+            val retryAt = ZonedDateTime.parse(trimmed, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()
+            Duration.between(Instant.now(), retryAt).takeIf { !it.isNegative }
+        }.getOrNull()
     }
 
     private fun preview(body: String, maxLen: Int = 500): String =

@@ -38,7 +38,7 @@ class SupercardHtmlParserTest {
         val links = parser.parsePurchasesJson(json)
 
         assertEquals(1, links.size)
-        assertEquals("9900050524627042600116402543", links[0].externalReceiptId)
+        assertEquals("9900050524627042600116402543", links[0].supercardReceiptBarcode)
         assertEquals("Burgdorf Schuetzenmat", links[0].locationName)
         assertEquals("2026-04-27", links[0].purchaseDate)
         assertEquals("116.40", links[0].totalChf?.toPlainString())
@@ -46,15 +46,15 @@ class SupercardHtmlParserTest {
     }
 
     @Test
-    fun `extractExternalReceiptId returns bc query parameter`() {
-        val id = parser.extractExternalReceiptId("https://example.org/receipt?bc=abc123&pdfType=receipt")
+    fun `extractSupercardReceiptBarcode returns bc query parameter`() {
+        val id = parser.extractSupercardReceiptBarcode("https://example.org/receipt?bc=abc123&pdfType=receipt")
         assertEquals("abc123", id)
     }
 
     @Test
-    fun `extractExternalReceiptId falls back to original url when bc missing`() {
+    fun `extractSupercardReceiptBarcode falls back to original url when bc missing`() {
         val url = "https://example.org/receipt?id=1"
-        val id = parser.extractExternalReceiptId(url)
+        val id = parser.extractSupercardReceiptBarcode(url)
         assertEquals(url, id)
         assertTrue(id.contains("receipt"))
     }

@@ -34,7 +34,7 @@ class SupercardReceiptRepository @Inject constructor(
         }
     }
 
-    fun existsByExternalId(externalSource: String, externalReceiptId: String): Boolean = withConnection { conn ->
+    fun existsByExternalId(externalSource: String, supercardExternalReceipt: String): Boolean = withConnection { conn ->
         conn.prepareStatement(
             """
             select 1
@@ -44,18 +44,18 @@ class SupercardReceiptRepository @Inject constructor(
             """.trimIndent()
         ).use { ps ->
             ps.setString(1, externalSource)
-            ps.setString(2, externalReceiptId)
+            ps.setString(2, supercardExternalReceipt)
             ps.executeQuery().use { rs -> rs.next() }
         }
     }
 
-    fun findExistingExternalIds(externalSource: String, externalReceiptIds: Collection<String>): Set<String> {
-        if (externalReceiptIds.isEmpty()) {
+    fun findExistingExternalIds(externalSource: String, supercardExternalReceipts: Collection<String>): Set<String> {
+        if (supercardExternalReceipts.isEmpty()) {
             return emptySet()
         }
 
         return withConnection { conn ->
-            externalReceiptIds
+            supercardExternalReceipts
                 .distinct()
                 .chunked(500)
                 .flatMapTo(linkedSetOf()) { chunk ->
@@ -87,14 +87,14 @@ class SupercardReceiptRepository @Inject constructor(
     fun insertReceiptWithArticles(
         extraction: ReceiptResponse,
         externalSource: String,
-        externalReceiptId: String,
+        supercardExternalReceipt: String,
         purchaseDateOverride: String? = null,
         totalOverride: java.math.BigDecimal? = null
     ) {
         withConnection { conn ->
             conn.autoCommit = false
             try {
-                val receiptId = insertReceipt(conn, extraction, externalSource, externalReceiptId, purchaseDateOverride, totalOverride)
+                val receiptId = insertReceipt(conn, extraction, externalSource, supercardExternalReceipt, purchaseDateOverride, totalOverride)
                 insertArticles(conn, receiptId, extraction, purchaseDateOverride)
                 conn.commit()
             } catch (e: Exception) {
@@ -110,7 +110,7 @@ class SupercardReceiptRepository @Inject constructor(
         conn: java.sql.Connection,
         extraction: ReceiptResponse,
         externalSource: String,
-        externalReceiptId: String,
+        supercardExternalReceipt: String,
         purchaseDateOverride: String? = null,
         totalOverride: java.math.BigDecimal? = null
     ): Long {
@@ -130,7 +130,7 @@ class SupercardReceiptRepository @Inject constructor(
             ps.setLong(6, extraction.metadata.openAiArticleCount.toLong())
             ps.setLong(7, extraction.metadata.extractedTotalRow.toLong())
             ps.setString(8, externalSource)
-            ps.setString(9, externalReceiptId)
+            ps.setString(9, supercardExternalReceipt)
             ps.executeQuery().use { rs ->
                 if (rs.next()) {
                     return rs.getLong(1)
@@ -146,7 +146,7 @@ class SupercardReceiptRepository @Inject constructor(
             """.trimIndent()
         ).use { ps ->
             ps.setString(1, externalSource)
-            ps.setString(2, externalReceiptId)
+            ps.setString(2, supercardExternalReceipt)
             ps.executeQuery().use { rs ->
                 if (rs.next()) {
                     return rs.getLong(1)

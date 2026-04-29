@@ -1,12 +1,12 @@
 package dev.lueem.ai.api.dto
 
-data class RecipeItemDto(
+data class RecipeItem(
     var name: String = "",
     var quantity: Double = 0.0,
     var unit: String = "",
 )
 
-data class RecipeRequestDto(
-    var items: List<RecipeItemDto> = emptyList(),
+data class RecipeRequest(
+    var items: List<RecipeItem> = emptyList(),
     var servings: Int = 1,
 )

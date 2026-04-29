@@ -5,7 +5,7 @@ export interface SupercardStatusResponse {
 
 export interface SupercardAvailableReceipt {
   receiptUrl: string;
-  externalReceiptId: string;
+  supercardReceiptBarcode: string;
   locationName?: string | null;
   logoUrl?: string | null;
   purchaseDate?: string | null;

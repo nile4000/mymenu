@@ -1,6 +1,6 @@
 export interface RecipeIngredient {
   name: string;
-  amount: number;
+  quantity: number;
   unit: string;
 }
 

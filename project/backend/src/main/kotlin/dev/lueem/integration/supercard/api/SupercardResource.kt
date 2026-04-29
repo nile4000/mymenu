@@ -1,5 +1,6 @@
 package dev.lueem.integration.supercard.api
 
+import dev.lueem.integration.supercard.api.dto.SupercardSessionRequest
 import dev.lueem.integration.supercard.app.SupercardService
 import jakarta.inject.Inject
 import jakarta.ws.rs.Consumes
@@ -33,10 +34,4 @@ class SupercardResource @Inject constructor(
     @POST
     @Path("sync")
     fun sync(): Response = Response.ok(supercardService.syncAvailable()).build()
-
-    @POST
-    @Path("sync-single")
-    @Consumes(MediaType.APPLICATION_JSON)
-    fun syncSingle(request: SupercardSyncSingleRequest): Response =
-        Response.ok(supercardService.syncSingle(request)).build()
 }

@@ -97,7 +97,7 @@ export default defineComponent({
     const activeTab = ref("ingredients");
 
     function formatIngredient(ingredient: RecipeIngredient): string {
-      return `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`;
+      return `${ingredient.quantity} ${ingredient.unit} ${ingredient.name}`;
     }
 
     return {

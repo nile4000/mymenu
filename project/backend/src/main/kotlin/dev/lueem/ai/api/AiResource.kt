@@ -17,20 +17,20 @@ class AiResource @Inject constructor(private val aiGatewayService: AiGatewayServ
     @Path("categorize")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun categorize(request: CategorizeRequestDto): Response =
+    fun categorize(request: CategorizeRequest): Response =
         Response.ok(aiGatewayService.categorize(request)).build()
 
     @POST
     @Path("extract-unit")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun extractUnit(request: ExtractUnitRequestDto): Response =
+    fun extractUnit(request: ExtractUnitRequest): Response =
         Response.ok(aiGatewayService.extractUnit(request)).build()
 
     @POST
     @Path("recipe")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun recipe(request: RecipeRequestDto): Response =
+    fun recipe(request: RecipeRequest): Response =
         Response.ok(aiGatewayService.recipe(request)).build()
 }

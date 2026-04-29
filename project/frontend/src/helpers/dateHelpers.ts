@@ -1,56 +1,74 @@
+const DATE_LOCALE = "de-CH";
+
+const longDateFormatter = new Intl.DateTimeFormat(DATE_LOCALE, {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+const shortDateFormatter = new Intl.DateTimeFormat(DATE_LOCALE, {
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat(DATE_LOCALE, {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const monthFormatter = new Intl.DateTimeFormat(DATE_LOCALE, {
+  month: "short",
+});
+
+function parseDate(value?: string | null): Date | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+
+  const date = new Date(trimmed);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatWithFallback(value: string | null | undefined, formatter: Intl.DateTimeFormat): string {
+  const date = parseDate(value);
+  return date ? formatter.format(date) : value || "";
+}
+
+function toIsoDateParts(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export function formatDate(dateString: string) {
-  if (!dateString) return dateString || "";
-
-  const date = new Date(dateString.trim());
-
-  if (isNaN(date.getTime())) {
-    return dateString || "";
-  }
-
-  // Format the valid date
-  return new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
+  return formatWithFallback(dateString, longDateFormatter);
 }
 
 export function formatDateShort(dateString: string) {
-  if (!dateString) return dateString || "";
+  return formatWithFallback(dateString, shortDateFormatter);
+}
 
-  const date = new Date(dateString.trim());
+export function formatDateTimeCh(value?: string | null): string {
+  const date = parseDate(value);
+  return date ? dateTimeFormatter.format(date) : "Nie";
+}
 
-  if (isNaN(date.getTime())) {
-    return dateString || "";
-  }
-
-  // Format the valid date
-  return new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-  }).format(date);
+export function formatOptionalDateShort(value?: string | null): string {
+  return formatDateShort(value ?? "");
 }
 
 export function formatMonth(monthNumber: number): string {
-  const monthNames = [
-    "Jan.",
-    "Feb.",
-    "März",
-    "April",
-    "Mai",
-    "Juni",
-    "Juli",
-    "Aug.",
-    "Sept.",
-    "Okt.",
-    "Nov.",
-    "Dez.",
-  ];
-  return monthNames[monthNumber - 1] || "Unbekannt";
+  if (!Number.isInteger(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    return "Unbekannt";
+  }
+  return monthFormatter.format(new Date(2000, monthNumber - 1, 1));
 }
 
-// (DD.MM.YY -> YYYY-MM-DD)
+// Converts display dates like DD.MM.YY/DD.MM.YYYY or parseable date strings to YYYY-MM-DD.
 export function convertToISODate(dateString: string): string {
   try {
     const value = (dateString || "").trim();
@@ -59,22 +77,27 @@ export function convertToISODate(dateString: string): string {
     if (value.includes(".")) {
       const [day, month, year] = value.split(".");
       if (!day || !month || !year) throw new Error("invalid dotted date");
-      const fullYear = year.length === 2 ? `20${year}` : year;
-      return `${fullYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+      const fullYear = Number(year.length === 2 ? `20${year}` : year);
+      const monthNumber = Number(month);
+      const dayNumber = Number(day);
+      const parsed = new Date(fullYear, monthNumber - 1, dayNumber);
+
+      if (
+        parsed.getFullYear() !== fullYear ||
+        parsed.getMonth() !== monthNumber - 1 ||
+        parsed.getDate() !== dayNumber
+      ) {
+        throw new Error("invalid dotted date");
+      }
+
+      return toIsoDateParts(parsed);
     }
 
-    const parsed = new Date(value);
-    if (isNaN(parsed.getTime())) throw new Error("invalid date");
-
-    const yyyy = parsed.getFullYear();
-    const mm = String(parsed.getMonth() + 1).padStart(2, "0");
-    const dd = String(parsed.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    const parsed = parseDate(value);
+    if (!parsed) throw new Error("invalid date");
+    return toIsoDateParts(parsed);
   } catch (error) {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    return toIsoDateParts(new Date());
   }
 }

@@ -1,25 +1,27 @@
 package dev.lueem.integration.supercard.app
 
 import dev.lueem.extraction.app.ExtractionService
-import dev.lueem.integration.supercard.api.SupercardSessionRequest
-import dev.lueem.integration.supercard.api.SupercardSyncSingleRequest
-import dev.lueem.integration.supercard.api.SupercardAvailableResponse
-import dev.lueem.integration.supercard.api.SupercardAvailableReceipt
-import dev.lueem.integration.supercard.api.SupercardStatusResponse
-import dev.lueem.integration.supercard.api.SupercardSyncResponse
+import dev.lueem.integration.supercard.api.dto.SupercardAvailableReceipt
+import dev.lueem.integration.supercard.api.dto.SupercardAvailableResponse
+import dev.lueem.integration.supercard.api.dto.SupercardSessionRequest
+import dev.lueem.integration.supercard.api.dto.SupercardStatusResponse
+import dev.lueem.integration.supercard.api.dto.SupercardSyncResponse
+import dev.lueem.integration.supercard.domain.SupercardCooldownException
+import dev.lueem.integration.supercard.domain.SupercardRemoteAccessException
+import dev.lueem.integration.supercard.domain.SupercardReceiptLink
+import dev.lueem.integration.supercard.domain.SupercardSyncInProgressException
 import dev.lueem.integration.supercard.infra.CookieCrypto
 import dev.lueem.integration.supercard.infra.SupercardConfigStore
 import dev.lueem.integration.supercard.infra.SupercardHtmlParser
 import dev.lueem.integration.supercard.infra.SupercardHttpClient
-import dev.lueem.integration.supercard.infra.SupercardReceiptLink
 import dev.lueem.integration.supercard.infra.SupercardReceiptRepository
 import dev.lueem.shared.config.SupercardProperties
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import java.nio.file.Files
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.locks.ReentrantLock
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -38,13 +40,26 @@ class SupercardService @Inject constructor(
         private val LOGGER = Logger.getLogger(SupercardService::class.java.name)
         private const val KEY_COOKIE = "supercard_session_encrypted"
         private const val SOURCE = "supercard"
-        private const val MAX_PURCHASE_PAGES = 50
+        private const val MAX_PURCHASE_PAGES = 2
         private const val SUPERCARD_PAGE_SIZE = 20
+        private const val MAX_RECEIPTS_PER_SYNC = 5
+        private val AVAILABLE_CACHE_TTL: Duration = Duration.ofMinutes(10)
+        private val DEFAULT_COOLDOWN: Duration = Duration.ofMinutes(15)
+        private val PDF_DOWNLOAD_DELAY: Duration = Duration.ofSeconds(5)
     }
+
+    private data class AvailableLinksCache(
+        val links: List<SupercardReceiptLink>,
+        val fetchedAt: Instant,
+    )
 
     @Volatile private var runtimeCookieEncrypted: String? = null
     @Volatile private var runtimeSessionUpdatedAt: Instant? = null
     @Volatile private var schemaEnsured: Boolean = false
+    @Volatile private var availableLinksCache: AvailableLinksCache? = null
+    @Volatile private var nextAllowedSupercardRequestAt: Instant? = null
+    private val cacheLock = Any()
+    private val syncLock = ReentrantLock()
 
     fun setSession(request: SupercardSessionRequest): SupercardStatusResponse {
         require(request.cookieHeader.isNotBlank()) { "cookieHeader must not be blank" }
@@ -53,6 +68,8 @@ class SupercardService @Inject constructor(
         val encrypted = cookieCrypto.encrypt(request.cookieHeader.trim())
         runtimeCookieEncrypted = encrypted
         runtimeSessionUpdatedAt = Instant.now()
+        availableLinksCache = null
+        nextAllowedSupercardRequestAt = null
 
         if (!propertiesMissingForDb()) {
             ensureSchema()
@@ -83,43 +100,66 @@ class SupercardService @Inject constructor(
 
     fun available(): SupercardAvailableResponse {
         val cookieHeader = resolveCookieHeader()
-        val links = parseAvailableLinks(cookieHeader)
+        val links = getAvailableLinks(cookieHeader)
         val importableLinks = if (propertiesMissingForDb()) {
             links
         } else {
             ensureSchema()
             val existingIds = receiptRepository.findExistingExternalIds(
                 SOURCE,
-                links.map { it.externalReceiptId }
+                links.map { it.supercardReceiptBarcode }
             )
-            links.filterNot { it.externalReceiptId in existingIds }
+            links.filterNot { it.supercardReceiptBarcode in existingIds }
         }
         return SupercardAvailableResponse(
             count = importableLinks.size,
-            receipts = importableLinks.map {
-                SupercardAvailableReceipt(
-                    receiptUrl = it.receiptUrl,
-                    externalReceiptId = it.externalReceiptId,
-                    locationName = it.locationName,
-                    logoUrl = it.logoUrl,
-                    purchaseDate = it.purchaseDate,
-                    totalChf = it.totalChf?.toPlainString()
-                )
-            }
+            receipts = importableLinks.map { it.toDto() }
         )
     }
 
-    // Imports a single receipt by direct URL or bc code — useful for manual re-sync or testing
-    fun syncSingle(request: SupercardSyncSingleRequest): SupercardSyncResponse {
-        val cookieHeader = resolveCookieHeader()
-        val link = resolveSingleLink(request)
-        return syncLinks(cookieHeader, listOf(link))
+    fun syncAvailable(): SupercardSyncResponse {
+        if (!syncLock.tryLock()) {
+            throw SupercardSyncInProgressException()
+        }
+        try {
+            val cookieHeader = resolveCookieHeader()
+            val links = getAvailableLinks(cookieHeader)
+            return syncLinks(cookieHeader, links)
+        } finally {
+            syncLock.unlock()
+        }
     }
 
-    fun syncAvailable(): SupercardSyncResponse {
-        val cookieHeader = resolveCookieHeader()
-        val links = parseAvailableLinks(cookieHeader)
-        return syncLinks(cookieHeader, links)
+    private fun getAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
+        val now = Instant.now()
+        availableLinksCache
+            ?.takeIf { Duration.between(it.fetchedAt, now) < AVAILABLE_CACHE_TTL }
+            ?.let {
+                LOGGER.info("[supercard] using cached purchase list links=${it.links.size}")
+                return it.links
+            }
+
+        synchronized(cacheLock) {
+            val currentNow = Instant.now()
+            availableLinksCache
+                ?.takeIf { Duration.between(it.fetchedAt, currentNow) < AVAILABLE_CACHE_TTL }
+                ?.let {
+                    LOGGER.info("[supercard] using cached purchase list links=${it.links.size}")
+                    return it.links
+                }
+
+            ensureRemoteRequestsAllowed()
+            val links = runCatching {
+                parseAvailableLinks(cookieHeader)
+            }.getOrElse { e ->
+                if (e is SupercardRemoteAccessException) {
+                    startCooldown(e)
+                }
+                throw e
+            }
+            availableLinksCache = AvailableLinksCache(links = links, fetchedAt = Instant.now())
+            return links
+        }
     }
 
     private fun syncLinks(cookieHeader: String, links: List<SupercardReceiptLink>): SupercardSyncResponse {
@@ -129,38 +169,51 @@ class SupercardService @Inject constructor(
         ensureSchema()
 
         var imported = 0
-        var skipped = 0
         var failed = 0
         val errors = mutableListOf<String>()
         val existingIds = receiptRepository.findExistingExternalIds(
             SOURCE,
-            links.map { it.externalReceiptId }
+            links.map { it.supercardReceiptBarcode }
         ).toMutableSet()
+        val importableLinks = links.filterNot { it.supercardReceiptBarcode in existingIds }
+        val skipped = links.size - importableLinks.size
+        val linksToSync = importableLinks.take(MAX_RECEIPTS_PER_SYNC)
+        val deferred = importableLinks.size - linksToSync.size
+        if (deferred > 0) {
+            LOGGER.info("[supercard] deferring $deferred receipt(s) to a later sync run")
+        }
 
-        for (link in links) {
+        for ((index, link) in linksToSync.withIndex()) {
             try {
-                if (link.externalReceiptId in existingIds) {
-                    skipped++
-                    continue
+                ensureRemoteRequestsAllowed()
+                if (index > 0) {
+                    pauseBetweenPdfDownloads()
                 }
-
-                Thread.sleep(500)
                 val pdf = supercardHttpClient.downloadReceiptPdf(link.receiptUrl, cookieHeader)
                 val tempFile = Files.createTempFile("supercard-", ".pdf").toFile()
                 try {
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
-                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.externalReceiptId, link.purchaseDate, link.totalChf)
-                    existingIds.add(link.externalReceiptId)
+                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf)
+                    existingIds.add(link.supercardReceiptBarcode)
                     imported++
                 } finally {
                     tempFile.delete()
                 }
+            } catch (e: SupercardRemoteAccessException) {
+                failed++
+                val retryAt = startCooldown(e)
+                val msg = "${link.supercardReceiptBarcode}: ${e.message}; paused until $retryAt"
+                errors.add(msg)
+                LOGGER.log(Level.WARNING, "Supercard sync paused for ${link.supercardReceiptBarcode}", e)
+                break
+            } catch (e: SupercardCooldownException) {
+                throw e
             } catch (e: Exception) {
                 failed++
-                val msg = "${link.externalReceiptId}: ${e.message}"
+                val msg = "${link.supercardReceiptBarcode}: ${e.message}"
                 errors.add(msg)
-                LOGGER.log(Level.WARNING, "Supercard sync failed for ${link.externalReceiptId}", e)
+                LOGGER.log(Level.WARNING, "Supercard sync failed for ${link.supercardReceiptBarcode}", e)
             }
         }
 
@@ -184,6 +237,40 @@ class SupercardService @Inject constructor(
         return cookieCrypto.decrypt(encrypted)
     }
 
+    private fun ensureRemoteRequestsAllowed() {
+        val retryAt = nextAllowedSupercardRequestAt ?: return
+        val now = Instant.now()
+        if (now.isBefore(retryAt)) {
+            throw SupercardCooldownException(retryAt)
+        }
+        nextAllowedSupercardRequestAt = null
+    }
+
+    private fun startCooldown(e: SupercardRemoteAccessException): Instant {
+        val duration = e.retryAfter
+            ?.takeIf { !it.isNegative && !it.isZero }
+            ?: DEFAULT_COOLDOWN
+        val retryAt = Instant.now().plus(duration)
+        val currentRetryAt = nextAllowedSupercardRequestAt
+        if (currentRetryAt == null || retryAt.isAfter(currentRetryAt)) {
+            nextAllowedSupercardRequestAt = retryAt
+        }
+        LOGGER.warning(
+            "[supercard] remote access paused until ${nextAllowedSupercardRequestAt} " +
+                "(status=${e.upstreamStatus}, retryAfter=${e.retryAfter})"
+        )
+        return nextAllowedSupercardRequestAt ?: retryAt
+    }
+
+    private fun pauseBetweenPdfDownloads() {
+        try {
+            Thread.sleep(PDF_DOWNLOAD_DELAY.toMillis())
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw IllegalStateException("Supercard sync was interrupted", e)
+        }
+    }
+
     private fun parseAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
         // Supercard returns max 20 per page — fetch all pages until we get a partial page
         val allLinks = mutableListOf<SupercardReceiptLink>()
@@ -205,24 +292,14 @@ class SupercardService @Inject constructor(
         return allLinks
     }
 
-    private fun resolveSingleLink(request: SupercardSyncSingleRequest): SupercardReceiptLink {
-        val explicitUrl = request.receiptUrl?.trim().orEmpty()
-        if (explicitUrl.isNotBlank()) {
-            return SupercardReceiptLink(
-                receiptUrl = explicitUrl,
-                externalReceiptId = htmlParser.extractExternalReceiptId(explicitUrl)
-            )
-        }
-
-        val bc = request.bc?.trim().orEmpty()
-        require(bc.isNotBlank()) { "receiptUrl or bc is required for sync-single" }
-        val encodedBc = URLEncoder.encode(bc, StandardCharsets.UTF_8)
-        val url = "https://www.supercard.ch/bin/coop/kbk/kassenzettelpoc?bc=$encodedBc&pdfType=receipt"
-        return SupercardReceiptLink(
-            receiptUrl = url,
-            externalReceiptId = bc
-        )
-    }
+    private fun SupercardReceiptLink.toDto() = SupercardAvailableReceipt(
+        receiptUrl = receiptUrl,
+        supercardReceiptBarcode = supercardReceiptBarcode,
+        locationName = locationName,
+        logoUrl = logoUrl,
+        purchaseDate = purchaseDate,
+        totalChf = totalChf?.toPlainString(),
+    )
 
     private fun ensureSchema() {
         if (schemaEnsured) return

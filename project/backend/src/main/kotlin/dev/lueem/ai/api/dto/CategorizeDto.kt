@@ -1,15 +1,15 @@
 package dev.lueem.ai.api.dto
 
-data class CategorizeItemDto(
+data class CategorizeItem(
     var id: String = "",
     var name: String = "",
 )
 
-data class CategorizeRequestDto(
-    var items: List<CategorizeItemDto> = emptyList(),
+data class CategorizeRequest(
+    var items: List<CategorizeItem> = emptyList(),
 )
 
-data class CategorizeResultItemDto(
+data class CategorizeResultItem(
     var id: String = "",
     var category: String = "",
 )

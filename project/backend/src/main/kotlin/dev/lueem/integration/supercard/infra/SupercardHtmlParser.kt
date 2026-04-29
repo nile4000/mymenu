@@ -1,5 +1,6 @@
 package dev.lueem.integration.supercard.infra
 
+import dev.lueem.integration.supercard.domain.SupercardReceiptLink
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.json.Json
 import java.io.StringReader
@@ -40,7 +41,7 @@ class SupercardHtmlParser {
             }.getOrNull()
             SupercardReceiptLink(
                 receiptUrl = url,
-                externalReceiptId = barcode,
+                supercardReceiptBarcode = barcode,
                 locationName = locationName,
                 logoUrl = logoUrl,
                 purchaseDate = purchaseDate,
@@ -49,7 +50,7 @@ class SupercardHtmlParser {
         }
     }
 
-    fun extractExternalReceiptId(url: String): String {
+    fun extractSupercardReceiptBarcode(url: String): String {
         val bc = Regex("[?&]bc=([^&]+)").find(url)?.groupValues?.get(1)
         if (!bc.isNullOrBlank()) return bc
         return url
