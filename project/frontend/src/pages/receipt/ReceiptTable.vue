@@ -19,11 +19,7 @@
         <template v-slot:item="props">
           <q-card class="receipt-card q-ma-sm shadow-1">
             <q-card-section class="text-center q-py-sm">
-              <q-img
-                :src="props.row.Corp === 'Coop' ? '/assets/coop.png' : '/assets/migros.png'"
-                style="width: 45px"
-                fit="contain"
-              />
+              <div class="text-subtitle1 text-weight-bold">{{ props.row.Corp }}</div>
             </q-card-section>
 
             <q-separator inset />
@@ -52,7 +48,6 @@
             </q-card-actions>
           </q-card>
         </template>
-
       </q-table>
 
       <div class="row justify-end q-mt-md">
@@ -89,9 +84,7 @@ const $q = useQuasar();
 const dataStore = useDataStore();
 const { receipts: rows } = storeToRefs(dataStore);
 
-const totalAmount = computed(() =>
-  rows.value.reduce((sum, r) => sum + (r.Total_Receipt ?? 0), 0)
-);
+const totalAmount = computed(() => rows.value.reduce((sum, r) => sum + (r.Total_Receipt ?? 0), 0));
 
 const reloadReceipts = async () => {
   dataStore.initialized = false;
@@ -139,5 +132,4 @@ onMounted(async () => {
   margin-left: auto;
   background-color: #fafafa;
 }
-
 </style>
