@@ -132,36 +132,26 @@ class SupercardService @Inject constructor(
     }
 
     private fun getAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
-        val now = Instant.now()
-        availableLinksCache
-            ?.takeIf { Duration.between(it.fetchedAt, now) < AVAILABLE_CACHE_TTL }
-            ?.let {
-                LOGGER.info("[supercard] using cached purchase list links=${it.links.size}")
-                return it.links
-            }
+        availableLinksCache?.takeIfFresh()?.let { return it.links }
 
         synchronized(cacheLock) {
-            val currentNow = Instant.now()
-            availableLinksCache
-                ?.takeIf { Duration.between(it.fetchedAt, currentNow) < AVAILABLE_CACHE_TTL }
-                ?.let {
-                    LOGGER.info("[supercard] using cached purchase list links=${it.links.size}")
-                    return it.links
-                }
+            availableLinksCache?.takeIfFresh()?.let { return it.links }
 
             ensureRemoteRequestsAllowed()
             val links = runCatching {
                 parseAvailableLinks(cookieHeader)
             }.getOrElse { e ->
-                if (e is SupercardRemoteAccessException) {
-                    startCooldown(e)
-                }
+                if (e is SupercardRemoteAccessException) startCooldown(e)
                 throw e
             }
             availableLinksCache = AvailableLinksCache(links = links, fetchedAt = Instant.now())
             return links
         }
     }
+
+    private fun AvailableLinksCache.takeIfFresh(): AvailableLinksCache? =
+        takeIf { Duration.between(it.fetchedAt, Instant.now()) < AVAILABLE_CACHE_TTL }
+            ?.also { LOGGER.info("[supercard] using cached purchase list links=${it.links.size}") }
 
     private fun syncLinks(cookieHeader: String, links: List<SupercardReceiptLink>): SupercardSyncResponse {
         require(!propertiesMissingForDb()) {
@@ -252,15 +242,14 @@ class SupercardService @Inject constructor(
             ?.takeIf { !it.isNegative && !it.isZero }
             ?: DEFAULT_COOLDOWN
         val retryAt = Instant.now().plus(duration)
-        val currentRetryAt = nextAllowedSupercardRequestAt
-        if (currentRetryAt == null || retryAt.isAfter(currentRetryAt)) {
+        if (nextAllowedSupercardRequestAt == null || retryAt.isAfter(nextAllowedSupercardRequestAt)) {
             nextAllowedSupercardRequestAt = retryAt
         }
         LOGGER.warning(
-            "[supercard] remote access paused until ${nextAllowedSupercardRequestAt} " +
+            "[supercard] remote access paused until $nextAllowedSupercardRequestAt " +
                 "(status=${e.upstreamStatus}, retryAfter=${e.retryAfter})"
         )
-        return nextAllowedSupercardRequestAt ?: retryAt
+        return nextAllowedSupercardRequestAt!!
     }
 
     private fun pauseBetweenPdfDownloads() {
