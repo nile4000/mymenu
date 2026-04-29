@@ -50,20 +50,20 @@ class ExtractionService @Inject constructor(
     /** Orchestrates the full receipt extraction pipeline. */
     fun analyzeReceipt(pdfFile: File): ReceiptResponse {
         val traceId = UUID.randomUUID().toString().substring(0, 8)
-        LOGGER.info("[extract:$traceId] Start extraction for file='${pdfFile.name}' size=${pdfFile.length()} bytes")
+        LOGGER.fine("[extract:$traceId] Start extraction for file='${pdfFile.name}' size=${pdfFile.length()} bytes")
 
         val documentContent = PdfFileHandler.extractTextFromFile(pdfFile)
             ?: throw IllegalArgumentException("Failed to extract text from PDF file.")
 
         val cleanedContent = textProcessor.normalizeReceiptText(documentContent)
-        LOGGER.info(
+        LOGGER.fine(
             "[extract:$traceId] OCR normalized content chars=${cleanedContent.length} lines=${countLines(cleanedContent)}"
         )
         val extractTotal = textProcessor.extractTotal(cleanedContent)
         val extractDate = textProcessor.extractDate(cleanedContent)
         val totalRowNumber = textProcessor.findTotalLineIndex(cleanedContent)
         val articlesSection = textProcessor.extractArticlesSection(cleanedContent)
-        LOGGER.info(
+        LOGGER.fine(
             "[extract:$traceId] Article section chars=${articlesSection.length} lines=${countLines(articlesSection)}"
         )
         if (articlesSection.length < 40) {
@@ -114,7 +114,7 @@ class ExtractionService @Inject constructor(
         return try {
             val systemContent = EXTRACTION_SYSTEM_PROMPT + EXTRACTION_EXAMPLE_JSON.trimIndent()
             val userPrompt = QUESTION_PREFIX + extractedText
-            LOGGER.info(
+            LOGGER.fine(
                 "[extract:$traceId] Prompt prepared model='${properties.defaultModel}' systemChars=${systemContent.length} userChars=${userPrompt.length}"
             )
 

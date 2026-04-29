@@ -43,22 +43,14 @@ class SupercardService @Inject constructor(
         private const val MAX_PURCHASE_PAGES = 2
         private const val SUPERCARD_PAGE_SIZE = 20
         private const val MAX_RECEIPTS_PER_SYNC = 5
-        private val AVAILABLE_CACHE_TTL: Duration = Duration.ofMinutes(10)
         private val DEFAULT_COOLDOWN: Duration = Duration.ofMinutes(15)
         private val PDF_DOWNLOAD_DELAY: Duration = Duration.ofSeconds(5)
     }
 
-    private data class AvailableLinksCache(
-        val links: List<SupercardReceiptLink>,
-        val fetchedAt: Instant,
-    )
-
     @Volatile private var runtimeCookieEncrypted: String? = null
     @Volatile private var runtimeSessionUpdatedAt: Instant? = null
     @Volatile private var schemaEnsured: Boolean = false
-    @Volatile private var availableLinksCache: AvailableLinksCache? = null
     @Volatile private var nextAllowedSupercardRequestAt: Instant? = null
-    private val cacheLock = Any()
     private val syncLock = ReentrantLock()
 
     fun setSession(request: SupercardSessionRequest): SupercardStatusResponse {
@@ -68,7 +60,6 @@ class SupercardService @Inject constructor(
         val encrypted = cookieCrypto.encrypt(request.cookieHeader.trim())
         runtimeCookieEncrypted = encrypted
         runtimeSessionUpdatedAt = Instant.now()
-        availableLinksCache = null
         nextAllowedSupercardRequestAt = null
         supercardHttpClient.resetRequestCounter()
 
@@ -101,21 +92,19 @@ class SupercardService @Inject constructor(
 
     fun available(): SupercardAvailableResponse {
         val cookieHeader = resolveCookieHeader()
-        val links = getAvailableLinks(cookieHeader)
-        val importableLinks = if (propertiesMissingForDb()) {
-            links
-        } else {
-            ensureSchema()
-            val existingIds = receiptRepository.findExistingExternalIds(
-                SOURCE,
-                links.map { it.supercardReceiptBarcode }
-            )
-            links.filterNot { it.supercardReceiptBarcode in existingIds }
-        }
+        val links = getImportableLinks(cookieHeader)
         return SupercardAvailableResponse(
-            count = importableLinks.size,
-            receipts = importableLinks.map { it.toDto() }
+            count = links.size,
+            receipts = links.map { it.toDto() }
         )
+    }
+
+    private fun getImportableLinks(cookieHeader: String): List<SupercardReceiptLink> {
+        val links = parseAvailableLinks(cookieHeader)
+        if (propertiesMissingForDb()) return links
+        ensureSchema()
+        val existingIds = receiptRepository.findExistingExternalIds(SOURCE, links.map { it.supercardReceiptBarcode })
+        return links.filterNot { it.supercardReceiptBarcode in existingIds }
     }
 
     fun syncAvailable(): SupercardSyncResponse {
@@ -124,34 +113,12 @@ class SupercardService @Inject constructor(
         }
         try {
             val cookieHeader = resolveCookieHeader()
-            val links = getAvailableLinks(cookieHeader)
+            val links = getImportableLinks(cookieHeader)
             return syncLinks(cookieHeader, links)
         } finally {
             syncLock.unlock()
         }
     }
-
-    private fun getAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
-        availableLinksCache?.takeIfFresh()?.let { return it.links }
-
-        synchronized(cacheLock) {
-            availableLinksCache?.takeIfFresh()?.let { return it.links }
-
-            ensureRemoteRequestsAllowed()
-            val links = runCatching {
-                parseAvailableLinks(cookieHeader)
-            }.getOrElse { e ->
-                if (e is SupercardRemoteAccessException) startCooldown(e)
-                throw e
-            }
-            availableLinksCache = AvailableLinksCache(links = links, fetchedAt = Instant.now())
-            return links
-        }
-    }
-
-    private fun AvailableLinksCache.takeIfFresh(): AvailableLinksCache? =
-        takeIf { Duration.between(it.fetchedAt, Instant.now()) < AVAILABLE_CACHE_TTL }
-            ?.also { LOGGER.info("[supercard] using cached purchase list links=${it.links.size}") }
 
     private fun syncLinks(cookieHeader: String, links: List<SupercardReceiptLink>): SupercardSyncResponse {
         require(!propertiesMissingForDb()) {
@@ -162,16 +129,10 @@ class SupercardService @Inject constructor(
         var imported = 0
         var failed = 0
         val errors = mutableListOf<String>()
-        val existingIds = receiptRepository.findExistingExternalIds(
-            SOURCE,
-            links.map { it.supercardReceiptBarcode }
-        ).toMutableSet()
-        val importableLinks = links.filterNot { it.supercardReceiptBarcode in existingIds }
-        val skipped = links.size - importableLinks.size
-        val linksToSync = importableLinks.take(MAX_RECEIPTS_PER_SYNC)
-        val deferred = importableLinks.size - linksToSync.size
+        val linksToSync = links.take(MAX_RECEIPTS_PER_SYNC)
+        val deferred = links.size - linksToSync.size
         if (deferred > 0) {
-            LOGGER.info("[supercard] deferring $deferred receipt(s) to a later sync run")
+            LOGGER.info("[supercard] deferring $deferred receipt(s) to next sync run")
         }
 
         for ((index, link) in linksToSync.withIndex()) {
@@ -186,7 +147,6 @@ class SupercardService @Inject constructor(
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
                     receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf)
-                    existingIds.add(link.supercardReceiptBarcode)
                     imported++
                 } finally {
                     tempFile.delete()
@@ -210,7 +170,7 @@ class SupercardService @Inject constructor(
 
         return SupercardSyncResponse(
             importedReceipts = imported,
-            skippedReceipts = skipped,
+            deferredReceipts = deferred,
             failedReceipts = failed,
             errors = errors
         )

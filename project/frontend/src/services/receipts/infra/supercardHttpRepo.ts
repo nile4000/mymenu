@@ -22,6 +22,6 @@ export async function fetchSupercardAvailable(): Promise<SupercardAvailableRespo
 }
 
 export async function postSupercardSync(): Promise<SupercardSyncResponse> {
-  const { data } = await http.post<SupercardSyncResponse>("/api/integrations/supercard/sync");
+  const { data } = await http.post<SupercardSyncResponse>("/api/integrations/supercard/sync", undefined, { timeout: 300_000 });
   return data;
 }

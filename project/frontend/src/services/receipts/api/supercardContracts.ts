@@ -19,7 +19,7 @@ export interface SupercardAvailableResponse {
 
 export interface SupercardSyncResponse {
   importedReceipts: number;
-  skippedReceipts: number;
+  deferredReceipts: number;
   failedReceipts: number;
   errors: string[];
 }

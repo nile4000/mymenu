@@ -74,7 +74,7 @@ class SupercardHttpClient {
         val response = client.send(request, HttpResponse.BodyHandlers.ofByteArray())
         val n = requestCount.incrementAndGet()
         val elapsed = Duration.between(sessionStartedAt, Instant.now()).toSeconds()
-        LOGGER.info("[supercard] req#$n (+${elapsed}s) pdf status=${response.statusCode()} bytes=${response.body().size}")
+        LOGGER.fine("[supercard] req#$n (+${elapsed}s) pdf status=${response.statusCode()} bytes=${response.body().size}")
         validateResponse(response.statusCode(), response.headers())
         return response.body()
     }

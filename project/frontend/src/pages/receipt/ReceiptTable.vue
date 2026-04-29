@@ -30,7 +30,7 @@
 
             <q-card-section class="q-pa-md">
               <div class="row justify-between text-caption text-grey-7">
-                <span>Gekauft:</span>
+                <span>Kaufdatum:</span>
                 <span class="text-black text-weight-medium">{{ formatDateShort(props.row.Purchase_Date) }}</span>
               </div>
               <div class="row justify-between q-mt-xs">

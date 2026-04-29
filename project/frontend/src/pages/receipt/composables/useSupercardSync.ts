@@ -14,14 +14,16 @@ type UseSupercardSyncOptions = {
 function buildSyncSummary(result: SupercardSyncResponse): { message: string; tone: SyncSummaryTone } {
   if (result.importedReceipts === 0 && result.failedReceipts === 0) {
     return {
-      message: result.skippedReceipts > 0 ? "Keine neuen Belege importiert." : "Keine Belege importiert.",
+      message: result.deferredReceipts > 0
+        ? `Keine neuen Belege importiert. Noch ${result.deferredReceipts} ausstehend.`
+        : "Alle Belege bereits importiert.",
       tone: "positive",
     };
   }
 
   const parts = [`${result.importedReceipts} importiert`];
-  if (result.skippedReceipts > 0) {
-    parts.push(`${result.skippedReceipts} übersprungen`);
+  if (result.deferredReceipts > 0) {
+    parts.push(`${result.deferredReceipts} ausstehend`);
   }
   if (result.failedReceipts > 0) {
     parts.push(`${result.failedReceipts} fehlgeschlagen`);
