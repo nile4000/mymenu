@@ -10,6 +10,7 @@ import dev.lueem.shared.client.OpenAiClient
 import dev.lueem.shared.config.OpenAiProperties
 import dev.lueem.shared.error.UpstreamOpenAiException
 import dev.lueem.shared.util.JsonSanitizer
+import dev.lueem.category.domain.Categories
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.json.bind.JsonbBuilder
@@ -20,21 +21,6 @@ class AiGatewayService @Inject constructor(
     private val properties: OpenAiProperties
 ) {
     companion object {
-        private val CATEGORIES = listOf(
-            "Obst und Gemuese",
-            "Milchprodukte, Eier und Alternativen",
-            "Fleisch, Fisch und pflanzliche Proteine",
-            "Backwaren und Getreide",
-            "Getraenke (alkoholisch & alkoholfrei)",
-            "Snacks, Apero und Suesswaren",
-            "Reinigungsmittel und Haushaltsreiniger",
-            "Koerperpflegeprodukte und Hygieneartikel",
-            "Tierbedarf und Sonstiges",
-            "Tiefkuehlprodukte",
-            "Konserven und Vorratsartikel",
-            "Gewuerze, Kraeuter und Saucen"
-        )
-
         private const val CATEGORIZATION_SYSTEM_PROMPT =
             "You are a categorization assistant. Return only valid JSON in the exact format " +
                 "[{\"id\":\"string\",\"category\":\"string\"}] with no markdown and no extra text."
@@ -70,11 +56,11 @@ class AiGatewayService @Inject constructor(
     fun categorize(request: CategorizeRequest): List<CategorizeResultItem> {
         validateCategorizeRequest(request)
         val itemsText = request.items.joinToString("\n") { "ID: ${it.id}, Name: ${it.name}" }
-        val categories = CATEGORIES.joinToString("\n")
+        val categories = Categories.NAMES.joinToString("\n")
         val userPrompt =
             "Categorize these articles:\n$itemsText\n" +
-                "Use only these categories:\n$categories\n" +
-                "If none fits, use category \"Andere\"."
+                "Use only these categories (use the exact spelling, including umlauts):\n$categories\n" +
+                "If none fits, use category \"${Categories.FALLBACK_NAME}\"."
 
         val content = openAiClient.chatCompletion(
             CATEGORIZATION_SYSTEM_PROMPT,

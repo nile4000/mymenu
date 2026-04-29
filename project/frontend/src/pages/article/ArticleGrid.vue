@@ -50,8 +50,9 @@
 <script lang="ts">
 import { QVueGlobals, useQuasar } from "quasar";
 import { defineComponent, PropType } from "vue";
-import { categoryIcon } from "../../components/prompts/categorization";
+import { storeToRefs } from "pinia";
 import { Article } from "../../helpers/interfaces/article.interface";
+import { useCategoryStore } from "../../stores/categoryStore";
 
 interface Column {
   name: string;
@@ -78,16 +79,14 @@ export default defineComponent({
   emits: ["update:selected"],
   setup() {
     const q: QVueGlobals = useQuasar();
+    const categoryStore = useCategoryStore();
+    const { metaByName } = storeToRefs(categoryStore);
 
-    const getCategoryIcon = (categoryName: string): string => {
-      const cat = categoryIcon.find((c) => c.name === categoryName);
-      return cat ? cat.icon : "help_outline";
-    };
+    const getCategoryIcon = (categoryName: string): string =>
+      metaByName.value[categoryName]?.icon ?? "help_outline";
 
-    const getCategoryColor = (categoryName: string): string => {
-      const cat = categoryIcon.find((c) => c.name === categoryName);
-      return cat ? cat.color : "primary";
-    };
+    const getCategoryColor = (categoryName: string): string =>
+      metaByName.value[categoryName]?.color ?? "primary";
 
     return {
       q,

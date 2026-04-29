@@ -94,7 +94,6 @@ import { useQuasar } from "quasar";
 import { storeToRefs } from "pinia";
 import { computed, defineComponent, onMounted, ref } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
-import { categories } from "../../components/prompts/categorization";
 import { articleColumns, articleColumnsList } from "../../helpers/columns/articleColumns";
 import { handleError } from "../../helpers/composables/useErrors";
 import { useFilters } from "../../helpers/composables/useFilters";
@@ -102,6 +101,7 @@ import { useTotals } from "../../helpers/composables/useTotals";
 import { useViewMode } from "../../helpers/composables/useViewMode";
 import { Article } from "../../helpers/interfaces/article.interface";
 import { useDataStore } from "../../stores/dataStore";
+import { useCategoryStore } from "../../stores/categoryStore";
 import { updateArticleCategory, updateArticleUnit } from "../../services";
 import EditableCell from "./EditableCell.vue";
 import ArticleControl from "./ArticleControl.vue";
@@ -122,7 +122,9 @@ export default defineComponent({
   setup() {
     const $q = useQuasar();
     const dataStore = useDataStore();
+    const categoryStore = useCategoryStore();
     const { articles: rows, receiptById } = storeToRefs(dataStore);
+    const { names: categories } = storeToRefs(categoryStore);
 
     // Filter-Logik
     const { search, filteredRows } = useFilters(rows);
@@ -178,7 +180,10 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        await dataStore.ensureInitialized();
+        await Promise.all([
+          dataStore.ensureInitialized(),
+          categoryStore.ensureLoaded(),
+        ]);
       } catch (error) {
         handleError("Daten laden", error, $q);
       }

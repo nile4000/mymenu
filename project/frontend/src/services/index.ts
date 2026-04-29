@@ -22,4 +22,7 @@ export { parseExtractResponse } from "./receipts/api/extractResponseParser";
 export { subscribeArticles } from "./realtime/app/subscribeArticles";
 export { subscribeReceipts, unsubscribeRealtime } from "./realtime/app/subscribeReceipts";
 
+export { listCategories } from "./categories/app/listCategories";
+export type { CategoryDto } from "./categories/api/categoryContracts";
+
 export type { ServiceResult, ServiceError } from "./shared/app/result";

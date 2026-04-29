@@ -69,12 +69,12 @@
 <script lang="ts">
 import { storeToRefs } from "pinia";
 import { computed, defineComponent, PropType, ref, watch } from "vue";
-import { categoryIcon } from "../../components/prompts/categorization";
 import { formatDate } from "../../helpers/dateHelpers";
 import FilterPanel from "../../components/filters/FilterPanel.vue";
 import CategoryFilterList from "../../components/filters/CategoryFilterList.vue";
 import ReceiptFilterList from "../../components/filters/ReceiptFilterList.vue";
 import { useFilterStore } from "../../stores/filterStore";
+import { useCategoryStore } from "../../stores/categoryStore";
 
 export default defineComponent({
   name: "ArticleTotal",
@@ -95,20 +95,11 @@ export default defineComponent({
   },
   setup(props) {
     const filterStore = useFilterStore();
+    const categoryStore = useCategoryStore();
     const { selectedReceiptIds, selectedCategory } = storeToRefs(filterStore);
+    const { metaByName: categoryMetaByName } = storeToRefs(categoryStore);
     const receiptSortCriteria = ref<"Datum" | "Total">("Datum");
     const categorySortCriteria = ref<"Name" | "Total">("Name");
-
-    const categoryMetaByName = computed<Record<string, { icon: string; color: string }>>(
-      () =>
-        categoryIcon.reduce<Record<string, { icon: string; color: string }>>(
-          (acc, { name, icon, color }) => {
-            acc[name] = { icon, color };
-            return acc;
-          },
-          {}
-        )
-    );
 
     const sortedTotalsPerReceipt = computed(() =>
       [...props.totalsPerReceipt].sort((a, b) =>
