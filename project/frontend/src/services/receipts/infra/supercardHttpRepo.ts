@@ -1,5 +1,6 @@
 import { http } from "src/services/shared/infra/http";
 import {
+  SupercardAvailableResponse,
   SetSupercardSessionRequest,
   SupercardStatusResponse,
   SupercardSyncResponse,
@@ -12,6 +13,11 @@ export async function postSupercardSession(payload: SetSupercardSessionRequest):
 
 export async function fetchSupercardStatus(): Promise<SupercardStatusResponse> {
   const { data } = await http.get<SupercardStatusResponse>("/api/integrations/supercard/status");
+  return data;
+}
+
+export async function fetchSupercardAvailable(): Promise<SupercardAvailableResponse> {
+  const { data } = await http.get<SupercardAvailableResponse>("/api/integrations/supercard/available");
   return data;
 }
 

@@ -49,6 +49,41 @@ class SupercardReceiptRepository @Inject constructor(
         }
     }
 
+    fun findExistingExternalIds(externalSource: String, externalReceiptIds: Collection<String>): Set<String> {
+        if (externalReceiptIds.isEmpty()) {
+            return emptySet()
+        }
+
+        return withConnection { conn ->
+            externalReceiptIds
+                .distinct()
+                .chunked(500)
+                .flatMapTo(linkedSetOf()) { chunk ->
+                    val placeholders = chunk.joinToString(",") { "?" }
+                    conn.prepareStatement(
+                        """
+                        select "External_Receipt_Id"
+                        from receipt
+                        where "External_Source" = ?
+                          and "External_Receipt_Id" in ($placeholders)
+                        """.trimIndent()
+                    ).use { ps ->
+                        ps.setString(1, externalSource)
+                        chunk.forEachIndexed { index, id ->
+                            ps.setString(index + 2, id)
+                        }
+                        ps.executeQuery().use { rs ->
+                            buildList {
+                                while (rs.next()) {
+                                    add(rs.getString(1))
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
     fun insertReceiptWithArticles(
         extraction: ReceiptResponse,
         externalSource: String,

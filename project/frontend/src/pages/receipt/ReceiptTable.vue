@@ -1,381 +1,340 @@
 <template>
-  <q-page class="column items-center">
-    <h5>Scanner</h5>
-    <div class="q-pa-md row justify-evenly">
-      <ScannerPage></ScannerPage>
-    </div>
-    <div class="supercard-box q-pa-md">
-      <div class="text-subtitle1">Supercard Sync</div>
-      <q-input
-        v-model="supercardName"
-        outlined
-        dense
-        label="Supercard Name (optional)"
-        class="q-mt-sm"
-      />
-      <q-input
-        v-model="supercardCookie"
-        outlined
-        dense
-        type="textarea"
-        autogrow
-        label="Session Cookie Header"
-        hint="Kompletter Cookie-Header aus Browser Request kopieren"
-        class="q-mt-sm"
-      />
-      <div class="row q-gutter-sm q-mt-sm">
-        <q-btn color="primary" label="Verbinden" @click="connectSupercard" />
-        <q-btn color="secondary" label="Jetzt synchronisieren" @click="runSupercardSync" />
+  <q-page class="column items-center q-pa-md bg-grey-1">
+    <div class="text-h5 q-mb-md">Scanner</div>
+    <ScannerPage class="q-mb-xl" />
+
+    <div class="supercard-card shadow-2 q-pa-md">
+      <div class="row items-center justify-between q-mb-md">
+        <div class="column">
+          <span class="text-subtitle1 text-bold text-primary">Supercard Sync</span>
+          <span class="text-caption text-grey-7">Automatischer Beleg-Import</span>
+        </div>
+        <q-chip
+          dense
+          square
+          :color="supercardConnected ? 'positive' : 'orange'"
+          text-color="white"
+          class="text-weight-bold"
+        >
+          {{ supercardConnected ? "Verbunden" : "Session fehlt" }}
+        </q-chip>
       </div>
-      <div class="q-mt-sm text-caption">
-        Status: {{ supercardConnected ? "Verbunden" : "Nicht verbunden" }}
-        <span v-if="supercardStatusText"> ({{ supercardStatusText }})</span>
+
+      <div class="step-container q-mb-sm">
+        <div class="row items-center no-wrap q-gutter-sm">
+          <div class="step-badge">1</div>
+          <div class="col">
+            <div class="text-weight-bold">Zugangsdaten</div>
+            <div class="text-caption text-grey-8 truncate-ts">
+              {{
+                supercardConnected
+                  ? `Aktiv seit: ${formatStatusTimestamp(supercardStatusText)}`
+                  : "Cookie aus DevTools einfügen"
+              }}
+            </div>
+          </div>
+          <q-btn
+            flat
+            dense
+            color="primary"
+            :icon="showCookieInput ? 'expand_less' : 'edit'"
+            @click="showCookieInput = !showCookieInput"
+          />
+        </div>
+
+        <q-slide-transition>
+          <div v-if="showCookieInput || !supercardConnected" class="q-mt-sm">
+            <q-input
+              v-model="supercardCookie"
+              outlined
+              dense
+              type="textarea"
+              autogrow
+              label="Cookie Header einfügen"
+              placeholder="JSESSIONID=...; "
+              class="bg-white"
+            />
+            <div class="row q-gutter-sm q-mt-xs">
+              <q-btn
+                unelevated
+                color="primary"
+                label="Verbindung speichern"
+                class="col"
+                :loading="isConnecting"
+                @click="connectSupercard"
+              />
+              <q-btn flat dense color="grey-7" icon="delete_sweep" @click="resetSupercardDraft" />
+            </div>
+          </div>
+        </q-slide-transition>
       </div>
-      <div v-if="lastSyncSummary" class="q-mt-xs text-caption">
+
+      <div v-if="supercardConnected" class="step-container q-mb-sm">
+        <div class="row items-center no-wrap q-gutter-sm">
+          <div class="step-badge">2</div>
+          <div class="col">
+            <div class="text-weight-bold">Vorschau</div>
+            <div class="text-caption text-grey-8">{{ availableReceiptsCount }} neue Belege gefunden</div>
+          </div>
+          <q-btn
+            flat
+            round
+            dense
+            icon="refresh"
+            color="secondary"
+            :loading="isLoadingAvailable"
+            @click="loadAvailableReceipts"
+          />
+        </div>
+
+        <q-scroll-area
+          v-if="availableReceiptsLoaded && availableReceipts.length"
+          style="height: 180px"
+          class="q-mt-sm border-grey rounded-borders bg-white"
+        >
+          <q-list dense separator>
+            <q-item v-for="receipt in availableReceipts" :key="receipt.externalReceiptId">
+              <q-item-section avatar>
+                <q-img :src="receipt.logoUrl || ''" width="28px" height="28px" fit="contain" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-caption text-weight-medium">{{ receipt.locationName }}</q-item-label>
+                <q-item-label caption>{{ formatDateShort(receipt.purchaseDate) }}</q-item-label>
+              </q-item-section>
+              <q-item-section side class="text-black text-weight-bold">
+                {{ formatAvailableAmount(receipt.totalChf) }}
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-scroll-area>
+      </div>
+
+      <div v-if="availableReceiptsCount > 0" class="q-mt-md">
+        <q-btn
+          unelevated
+          color="accent"
+          size="lg"
+          class="full-width text-bold shadow-2"
+          :loading="isSyncing"
+          @click="runSupercardSync"
+        >
+          <q-icon name="cloud_download" class="q-mr-sm" />
+          {{ availableReceiptsCount }} Belege importieren
+        </q-btn>
+      </div>
+
+      <div v-if="lastSyncSummary" class="text-center text-caption q-mt-sm text-grey-7">
         {{ lastSyncSummary }}
       </div>
     </div>
-    <h5 style="margin-block-start: 15px">Meine Kassenzettel</h5>
-    <q-table
-      flat
-      bordered
-      grid
-      :rows="rows"
-      :columns="columns"
-      hide-header
-      hide-bottom
-      no-data-label="Keine Daten gefunden"
-      :pagination="initialPagination"
-    >
-      <template v-slot:item="props">
-        <q-card class="receipt-card">
-          <!-- Logos -->
-          <div class="q-pa-md row justify-center">
-            <q-img v-if="props.row.Corp === 'Coop'" src="../../assets/coop.png" alt="Coop" style="max-width: 55px" />
-            <q-img
-              v-if="props.row.Corp === 'Migros'"
-              src="../../assets/migros.png"
-              alt="Migros"
-              style="max-width: 55px"
-            />
-          </div>
-          <!-- PDF Icon -->
-          <q-card-section class="q-pa-sm">
-            <div class="q-gutter-md q-pa-xs column">
-              <div class="row items-center justify-between">
-                <span class="text-subtitle2"> Kaufdatum: {{ formatDateShort(props.row.Purchase_Date) }} </span>
+
+    <div class="full-width q-px-md" style="max-width: 1200px">
+      <h5 class="text-center q-mt-xl q-mb-md">Meine Kassenzettel</h5>
+      <q-table
+        grid
+        flat
+        :rows="rows"
+        :columns="columns"
+        row-key="Id"
+        :pagination="{ rowsPerPage: 12 }"
+        class="justify-center"
+      >
+        <template v-slot:item="props">
+          <q-card class="receipt-card q-ma-sm shadow-1">
+            <q-card-section class="text-center q-py-sm">
+              <q-img
+                :src="props.row.Corp === 'Coop' ? '/assets/coop.png' : '/assets/migros.png'"
+                style="width: 45px"
+                fit="contain"
+              />
+            </q-card-section>
+
+            <q-separator inset />
+
+            <q-card-section class="q-pa-md">
+              <div class="row justify-between text-caption text-grey-7">
+                <span>Gekauft:</span>
+                <span class="text-black text-weight-medium">{{ formatDateShort(props.row.Purchase_Date) }}</span>
               </div>
-              <div class="row items-center justify-between">
-                <span class="text-subtitle2"> Gescannt am: {{ formatDateShort(props.row.Created_At) }} </span>
+              <div class="row justify-between q-mt-xs">
+                <span class="text-subtitle1 text-bold">{{ props.row.Total_Receipt.toFixed(2) }} CHF</span>
               </div>
 
-              <div class="row items-center justify-between">
-                <span class="text-subtitle2"> Total CHF: {{ props.row.Total_Receipt.toFixed(2) }} </span>
-              </div>
-            </div>
-          </q-card-section>
-          <q-card-section>
-            <q-img
-              :src="props.row.Thumbnail"
-              alt="PDF Vorschau"
-              style="max-width: 100%; max-height: 150px"
-              v-if="props.row.Thumbnail"
-            />
-          </q-card-section>
-          <!-- Actions -->
-          <q-card-section class="row items-center justify-center">
-            <q-btn flat round disabled icon="visibility"
-              ><q-tooltip anchor="center left" class="text-h5">PDF anzeigen</q-tooltip></q-btn
-            >
-            <q-btn flat round icon="delete" @click="deleteReceipt(props.row)">
-              <q-tooltip anchor="center left" class="text-h5">Löschen</q-tooltip>
-            </q-btn>
-          </q-card-section>
-        </q-card>
-      </template>
-    </q-table>
+              <q-img
+                v-if="props.row.Thumbnail"
+                :src="props.row.Thumbnail"
+                class="q-mt-sm rounded-borders border-grey"
+                style="height: 100px"
+                fit="cover"
+              />
+            </q-card-section>
+
+            <q-card-actions align="around" class="q-pt-none">
+              <q-btn flat round dense icon="visibility" color="grey-7" disabled />
+              <q-btn flat round dense icon="delete" color="negative" @click="deleteReceipt(props.row)" />
+            </q-card-actions>
+          </q-card>
+        </template>
+      </q-table>
+    </div>
   </q-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
-import { defineComponent, onMounted, ref } from "vue";
-import { formatDate, formatDateShort } from "../../helpers/dateHelpers";
-import { Column } from "../../helpers/interfaces/column.interface";
-import { Receipt } from "../../helpers/interfaces/receipt.interface";
+import { useDataStore } from "../../stores/dataStore";
+import ScannerPage from "../scanner/ScannerPage.vue";
+import { formatDateShort, formatDate } from "../../helpers/dateHelpers";
 import {
   deleteReceipt as deleteReceiptService,
+  getSupercardAvailable,
   getSupercardStatus,
   setSupercardSession,
   syncSupercardReceipts,
 } from "../../services";
-import { useDataStore } from "../../stores/dataStore";
-import ScannerPage from "../scanner/ScannerPage.vue";
 import { handleError } from "src/helpers/composables/useErrors";
+import type { Receipt } from "../../helpers/interfaces/receipt.interface";
 
-// Defining the columns
-const columns: Column[] = [
-  {
-    name: "Purchase_Date",
-    required: true,
-    label: "Receipt Key",
-    align: "left",
-    field: "Purchase_Date",
-    format: (val: string) => `${formatDateShort(val)}`,
-    sortable: true,
-  },
-];
+// Store & Quasar
+const $q = useQuasar();
+const dataStore = useDataStore();
+const { receipts: rows } = storeToRefs(dataStore);
 
-export default defineComponent({
-  name: "ReceiptTable",
-  components: {
-    ScannerPage,
-  },
+// States
+const showCookieInput = ref(false);
+const supercardCookie = ref("");
+const supercardConnected = ref(false);
+const supercardStatusText = ref("");
+const lastSyncSummary = ref("");
+const isConnecting = ref(false);
+const isLoadingAvailable = ref(false);
+const isSyncing = ref(false);
+const availableReceipts = ref<any[]>([]);
+const availableReceiptsLoaded = ref(false);
 
-  setup() {
-    const $q = useQuasar();
-    const dataStore = useDataStore();
-    const { receipts: rows } = storeToRefs(dataStore);
-    const filter = ref<string>("");
-    const selected = ref<string[]>([]);
-    const supercardCookie = ref<string>("");
-    const supercardName = ref<string>("");
-    const supercardConnected = ref<boolean>(false);
-    const supercardStatusText = ref<string>("");
-    const lastSyncSummary = ref<string>("");
+const availableReceiptsCount = computed(() => availableReceipts.value.length);
 
-    const initialPagination = ref({
-      sortBy: "desc",
-      descending: false,
-      page: 1,
-      rowsPerPage: 500,
-    });
+// Formatierungshilfen
+const formatStatusTimestamp = (val: string) => (val ? new Date(val).toLocaleString("de-CH") : "Nie");
+const formatAvailableAmount = (val: any) =>
+  new Intl.NumberFormat("de-CH", { style: "currency", currency: "CHF" }).format(Number(val));
 
-    onMounted(async () => {
-      try {
-        await dataStore.ensureInitialized();
-        const statusResult = await getSupercardStatus();
-        if (statusResult.ok) {
-          supercardConnected.value = statusResult.data.connected;
-          supercardName.value = statusResult.data.supercardName ?? "";
-          supercardStatusText.value = statusResult.data.sessionUpdatedAt ?? "";
-        }
-      } catch (error) {
-        handleError("Kassenzettel laden", error, $q);
-      }
-      dataStore.startRealtime();
-    });
+// Actions
+const loadAvailableReceipts = async () => {
+  isLoadingAvailable.value = true;
+  const result = await getSupercardAvailable();
+  isLoadingAvailable.value = false;
+  if (result.ok) {
+    availableReceipts.value = result.data.receipts;
+    availableReceiptsLoaded.value = true;
+  } else {
+    handleError("Belege laden", result.error.message, $q);
+  }
+};
 
-    const connectSupercard = async () => {
-      if (!supercardCookie.value.trim()) {
-        handleError("Supercard", "Bitte Session Cookie eintragen.", $q);
-        return;
-      }
+const connectSupercard = async () => {
+  if (supercardCookie.value.length < 20) return;
+  isConnecting.value = true;
+  const result = await setSupercardSession({ cookieHeader: supercardCookie.value.trim() });
+  isConnecting.value = false;
 
-      const result = await setSupercardSession({
-        cookieHeader: supercardCookie.value.trim(),
-        supercardName: supercardName.value.trim() || undefined,
-      });
+  if (result.ok) {
+    supercardConnected.value = true;
+    supercardStatusText.value = result.data.sessionUpdatedAt;
+    showCookieInput.value = false;
+    await loadAvailableReceipts();
+  } else {
+    handleError("Verbindung", result.error.message, $q);
+  }
+};
 
-      if (!result.ok) {
-        handleError("Supercard verbinden", result.error.message, $q);
-        return;
-      }
+const runSupercardSync = async () => {
+  isSyncing.value = true;
+  const result = await syncSupercardReceipts();
+  isSyncing.value = false;
+  if (result.ok) {
+    lastSyncSummary.value = `Erfolg: ${result.data.importedReceipts} importiert.`;
+    dataStore.initialized = false;
+    await dataStore.ensureInitialized();
+    await loadAvailableReceipts();
+  }
+};
 
-      supercardConnected.value = result.data.connected;
-      supercardName.value = result.data.supercardName ?? supercardName.value;
-      supercardStatusText.value = result.data.sessionUpdatedAt ?? "";
-      $q.notify({
-        type: "positive",
-        message: "Supercard Session gespeichert.",
-      });
-    };
+const resetSupercardDraft = () => {
+  supercardCookie.value = "";
+  availableReceipts.value = [];
+  showCookieInput.value = true;
+};
 
-    const runSupercardSync = async () => {
-      const result = await syncSupercardReceipts();
-      if (!result.ok) {
-        handleError("Supercard Sync", result.error.message, $q);
-        return;
-      }
+const deleteReceipt = async (receipt: Receipt) => {
+  if (confirm("Löschen?")) {
+    const result = await deleteReceiptService(receipt.Id!);
+    if (result.ok) dataStore.removeReceiptById(receipt.Id!);
+  }
+};
 
-      const { importedReceipts, skippedReceipts, failedReceipts } = result.data;
-      lastSyncSummary.value =
-        `Importiert: ${importedReceipts}, Übersprungen: ${skippedReceipts}, Fehler: ${failedReceipts}`;
+const columns = [{ name: "Purchase_Date", field: "Purchase_Date", sortable: true }];
 
-      if (result.data.errors?.length) {
-        console.error("Supercard sync errors", result.data.errors);
-      }
-
-      dataStore.initialized = false;
-      await dataStore.ensureInitialized();
-      $q.notify({
-        type: "positive",
-        message: "Supercard Sync abgeschlossen.",
-      });
-    };
-
-    const deleteReceipt = async (receipt: Receipt) => {
-      const confirmed = confirm(
-        `Sind Sie sicher, dass Sie den Kassenzettel vom ${receipt.Purchase_Date} loeschen wollen?`
-      );
-      if (confirmed && receipt.Id) {
-        const result = await deleteReceiptService(receipt.Id);
-        if (!result.ok) {
-          handleError("Kassenzettel löschen", result.error.message, $q);
-          return;
-        }
-        dataStore.removeReceiptById(receipt.Id);
-        $q.notify({
-          type: "positive",
-          message: "Kassenzettel gelöscht.",
-        });
-      }
-    };
-
-    return {
-      filter,
-      selected,
-      columns,
-      rows,
-      formatDate,
-      formatDateShort,
-      deleteReceipt,
-      supercardCookie,
-      supercardName,
-      supercardConnected,
-      supercardStatusText,
-      lastSyncSummary,
-      connectSupercard,
-      runSupercardSync,
-      initialPagination,
-    };
-  },
+onMounted(async () => {
+  await dataStore.ensureInitialized();
+  const status = await getSupercardStatus();
+  if (status.ok && status.data.connected) {
+    supercardConnected.value = true;
+    supercardStatusText.value = status.data.sessionUpdatedAt;
+    loadAvailableReceipts();
+  }
+  dataStore.startRealtime();
 });
 </script>
 
 <style scoped lang="scss">
-:deep(.q-table--grid) .q-table__grid-content {
+.supercard-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.step-container {
+  background: #fcfcfc;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.step-badge {
+  width: 26px;
+  height: 26px;
+  background: $primary;
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.border-grey {
+  border: 1px solid #ececec;
 }
 
 .receipt-card {
-  position: relative;
-  width: 220px;
-  margin: 10px;
-  transition: background-color 0.3s ease;
-  background-color: $bar-background;
-  border: none;
-  overflow: hidden;
-
-  .q-img {
-    margin-top: 25px;
-  }
-
-  --clip-path: polygon(
-    0% 5%,
-    5% 0%,
-    10% 5%,
-    15% 0%,
-    20% 5%,
-    25% 0%,
-    30% 5%,
-    35% 0%,
-    40% 5%,
-    45% 0%,
-    50% 5%,
-    55% 0%,
-    60% 5%,
-    65% 0%,
-    70% 5%,
-    75% 0%,
-    80% 5%,
-    85% 0%,
-    90% 5%,
-    95% 0%,
-    100% 5%,
-    100% 95%,
-    95% 100%,
-    90% 95%,
-    85% 100%,
-    80% 95%,
-    75% 100%,
-    70% 95%,
-    65% 100%,
-    60% 95%,
-    55% 100%,
-    50% 95%,
-    45% 100%,
-    40% 95%,
-    35% 100%,
-    30% 95%,
-    25% 100%,
-    20% 95%,
-    15% 100%,
-    10% 95%,
-    5% 100%,
-    0% 95%
-  );
-
-  clip-path: var(--clip-path);
-
-  &:hover {
-    box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.5);
-    .custom-separator {
-      background-color: $dark;
-    }
-    .q-item:last-child {
-      .q-item__label {
-        color: black;
-      }
-    }
-  }
-}
-
-.q-btn {
-  :deep(.q-icon) {
-    text-decoration: underline;
-    text-decoration-color: $dark;
-    transition: text-decoration-color 0.5s ease;
-    text-underline-offset: 4px;
-    text-decoration-thickness: 1.5px;
-    &:hover {
-      background-color: none;
-      text-decoration: underline;
-      text-decoration-color: $negative;
-    }
-  }
-  :deep(.q-focus-helper) {
-    display: none;
-  }
-}
-
-.receipt-card .q-icon {
-  margin-right: 10px;
-}
-
-.custom-list {
-  margin-bottom: 5px;
-}
-
-h5 {
-  margin-block-start: 25px;
-  margin-block-end: 0px;
-}
-
-.supercard-box {
-  width: min(720px, 95%);
-  border: 1px solid $primary;
+  width: 200px;
   border-radius: 12px;
-  background: $bar-background;
-  margin-top: 8px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
 }
 
-.q-item {
-  &:not(:last-child) {
-    .q-item__label {
-      font-style: italic;
-    }
-  }
+.truncate-ts {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

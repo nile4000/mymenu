@@ -37,12 +37,12 @@ class SupercardService @Inject constructor(
     companion object {
         private val LOGGER = Logger.getLogger(SupercardService::class.java.name)
         private const val KEY_COOKIE = "supercard_session_encrypted"
-        private const val KEY_NAME = "supercard_name"
         private const val SOURCE = "supercard"
+        private const val MAX_PURCHASE_PAGES = 50
+        private const val SUPERCARD_PAGE_SIZE = 20
     }
 
     @Volatile private var runtimeCookieEncrypted: String? = null
-    @Volatile private var runtimeSupercardName: String? = null
     @Volatile private var runtimeSessionUpdatedAt: Instant? = null
     @Volatile private var schemaEnsured: Boolean = false
 
@@ -52,20 +52,14 @@ class SupercardService @Inject constructor(
 
         val encrypted = cookieCrypto.encrypt(request.cookieHeader.trim())
         runtimeCookieEncrypted = encrypted
-        runtimeSupercardName = request.supercardName?.trim()
         runtimeSessionUpdatedAt = Instant.now()
 
         if (!propertiesMissingForDb()) {
             ensureSchema()
             configStore.upsertEncrypted(KEY_COOKIE, encrypted)
-            val providedName = request.supercardName
-            if (providedName != null) {
-                configStore.upsertText(KEY_NAME, providedName.trim())
-            }
         }
         return SupercardStatusResponse(
             connected = true,
-            supercardName = runtimeSupercardName,
             sessionUpdatedAt = runtimeSessionUpdatedAt?.toString()
         )
     }
@@ -74,18 +68,15 @@ class SupercardService @Inject constructor(
         if (propertiesMissingForDb()) {
             return SupercardStatusResponse(
                 connected = !runtimeCookieEncrypted.isNullOrBlank(),
-                supercardName = runtimeSupercardName,
                 sessionUpdatedAt = runtimeSessionUpdatedAt?.toString()
             )
         }
         ensureSchema()
         val encrypted = configStore.getEncrypted(KEY_COOKIE) ?: runtimeCookieEncrypted
-        val name = configStore.getText(KEY_NAME) ?: runtimeSupercardName
         val updatedAt = configStore.getUpdatedAt(KEY_COOKIE)?.toString() ?: runtimeSessionUpdatedAt?.toString()
 
         return SupercardStatusResponse(
             connected = !encrypted.isNullOrBlank(),
-            supercardName = name,
             sessionUpdatedAt = updatedAt
         )
     }
@@ -93,9 +84,28 @@ class SupercardService @Inject constructor(
     fun available(): SupercardAvailableResponse {
         val cookieHeader = resolveCookieHeader()
         val links = parseAvailableLinks(cookieHeader)
+        val importableLinks = if (propertiesMissingForDb()) {
+            links
+        } else {
+            ensureSchema()
+            val existingIds = receiptRepository.findExistingExternalIds(
+                SOURCE,
+                links.map { it.externalReceiptId }
+            )
+            links.filterNot { it.externalReceiptId in existingIds }
+        }
         return SupercardAvailableResponse(
-            count = links.size,
-            receipts = links.map { SupercardAvailableReceipt(it.receiptUrl, it.externalReceiptId) }
+            count = importableLinks.size,
+            receipts = importableLinks.map {
+                SupercardAvailableReceipt(
+                    receiptUrl = it.receiptUrl,
+                    externalReceiptId = it.externalReceiptId,
+                    locationName = it.locationName,
+                    logoUrl = it.logoUrl,
+                    purchaseDate = it.purchaseDate,
+                    totalChf = it.totalChf?.toPlainString()
+                )
+            }
         )
     }
 
@@ -122,11 +132,14 @@ class SupercardService @Inject constructor(
         var skipped = 0
         var failed = 0
         val errors = mutableListOf<String>()
+        val existingIds = receiptRepository.findExistingExternalIds(
+            SOURCE,
+            links.map { it.externalReceiptId }
+        ).toMutableSet()
 
         for (link in links) {
             try {
-                val exists = receiptRepository.existsByExternalId(SOURCE, link.externalReceiptId)
-                if (exists) {
+                if (link.externalReceiptId in existingIds) {
                     skipped++
                     continue
                 }
@@ -138,6 +151,7 @@ class SupercardService @Inject constructor(
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
                     receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.externalReceiptId, link.purchaseDate, link.totalChf)
+                    existingIds.add(link.externalReceiptId)
                     imported++
                 } finally {
                     tempFile.delete()
@@ -174,14 +188,20 @@ class SupercardService @Inject constructor(
         // Supercard returns max 20 per page — fetch all pages until we get a partial page
         val allLinks = mutableListOf<SupercardReceiptLink>()
         var page = 0
-        while (true) {
+        var pagesFetched = 0
+        while (page < MAX_PURCHASE_PAGES) {
             val json = supercardHttpClient.fetchPurchasesJson(cookieHeader, page)
+            pagesFetched++
             val pageLinks = htmlParser.parsePurchasesJson(json)
             allLinks.addAll(pageLinks)
-            if (pageLinks.size < 20) break
+            if (pageLinks.size < SUPERCARD_PAGE_SIZE) break
             page++
         }
-        LOGGER.info("[supercard] found ${allLinks.size} available receipts across ${page + 1} page(s)")
+        val hitPageLimit = pagesFetched >= MAX_PURCHASE_PAGES
+        LOGGER.info(
+            "[supercard] found ${allLinks.size} available receipts across $pagesFetched page(s)" +
+                if (hitPageLimit) " (capped at $MAX_PURCHASE_PAGES pages)" else ""
+        )
         return allLinks
     }
 

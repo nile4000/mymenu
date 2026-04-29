@@ -2,12 +2,10 @@ package dev.lueem.integration.supercard.api
 
 class SupercardSessionRequest {
     var cookieHeader: String = ""
-    var supercardName: String? = null
 }
 
 data class SupercardStatusResponse(
     val connected: Boolean,
-    val supercardName: String?,
     val sessionUpdatedAt: String?
 )
 
@@ -25,7 +23,11 @@ class SupercardSyncSingleRequest {
 
 data class SupercardAvailableReceipt(
     val receiptUrl: String,
-    val externalReceiptId: String
+    val externalReceiptId: String,
+    val locationName: String?,
+    val logoUrl: String?,
+    val purchaseDate: String?,
+    val totalChf: String?
 )
 
 data class SupercardAvailableResponse(

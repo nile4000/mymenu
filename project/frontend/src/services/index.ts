@@ -12,6 +12,7 @@ export { listReceiptsByIds } from "./receipts/app/listReceiptsByIds";
 export { deleteReceipt } from "./receipts/app/deleteReceipt";
 export { saveReceiptWithArticles } from "./receipts/app/saveReceiptWithArticles";
 export {
+  getSupercardAvailable,
   getSupercardStatus,
   setSupercardSession,
   syncSupercardReceipts,

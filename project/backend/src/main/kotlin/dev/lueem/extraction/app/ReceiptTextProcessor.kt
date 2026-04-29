@@ -5,8 +5,7 @@ import java.util.logging.Logger
 import java.util.regex.Pattern
 
 /**
- * Pure text-processing logic for parsing Swiss supermarket receipts.
- * No external dependencies — belongs in the app layer, easily unit-testable.
+ * Pure text-processing logic for parsing supermarket receipts from Coop or Migros.
  */
 @ApplicationScoped
 class ReceiptTextProcessor {

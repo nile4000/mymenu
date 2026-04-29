@@ -1,11 +1,11 @@
 package dev.lueem.ai.app
 
-import dev.lueem.ai.api.CategorizeRequest
-import dev.lueem.ai.api.CategorizeResultItem
-import dev.lueem.ai.api.ExtractUnitRequest
-import dev.lueem.ai.api.ExtractUnitResultItem
-import dev.lueem.ai.api.RecipeRequest
-import dev.lueem.ai.api.RecipeResponse
+import dev.lueem.ai.api.dto.CategorizeRequestDto
+import dev.lueem.ai.api.dto.CategorizeResultItemDto
+import dev.lueem.ai.api.dto.ExtractUnitRequestDto
+import dev.lueem.ai.api.dto.ExtractUnitResultItemDto
+import dev.lueem.ai.api.dto.RecipeRequestDto
+import dev.lueem.ai.domain.Recipe
 import dev.lueem.shared.client.OpenAiClient
 import dev.lueem.shared.config.OpenAiProperties
 import dev.lueem.shared.error.UpstreamOpenAiException
@@ -67,7 +67,7 @@ class AiGatewayService @Inject constructor(
 
     private val jsonb = JsonbBuilder.create()
 
-    fun categorize(request: CategorizeRequest): List<CategorizeResultItem> {
+    fun categorize(request: CategorizeRequestDto): List<CategorizeResultItemDto> {
         validateCategorizeRequest(request)
         val itemsText = request.items.joinToString("\n") { "ID: ${it.id}, Name: ${it.name}" }
         val categories = CATEGORIES.joinToString("\n")
@@ -85,7 +85,7 @@ class AiGatewayService @Inject constructor(
         return parseCategorizeResponse(content)
     }
 
-    fun extractUnit(request: ExtractUnitRequest): List<ExtractUnitResultItem> {
+    fun extractUnit(request: ExtractUnitRequestDto): List<ExtractUnitResultItemDto> {
         validateExtractUnitRequest(request)
         val itemsText = request.items.joinToString("\n") {
             "ID: ${it.id}, Name: ${it.name}, Quantity: ${it.quantity}, Price: ${it.price}"
@@ -105,7 +105,7 @@ class AiGatewayService @Inject constructor(
         return parseExtractUnitResponse(content)
     }
 
-    fun recipe(request: RecipeRequest): RecipeResponse {
+    fun recipe(request: RecipeRequestDto): Recipe {
         validateRecipeRequest(request)
         val filteredItems = request.items.filter {
             it.quantity > 0.0 &&
@@ -134,7 +134,7 @@ class AiGatewayService @Inject constructor(
         return parseRecipeResponse(content)
     }
 
-    private fun validateCategorizeRequest(request: CategorizeRequest) {
+    private fun validateCategorizeRequest(request: CategorizeRequestDto) {
         require(request.items.isNotEmpty()) { "items must not be empty" }
         require(request.items.size <= 40) { "items must not contain more than 40 entries" }
         require(request.items.all { it.id.isNotBlank() && it.name.isNotBlank() }) {
@@ -142,7 +142,7 @@ class AiGatewayService @Inject constructor(
         }
     }
 
-    private fun validateExtractUnitRequest(request: ExtractUnitRequest) {
+    private fun validateExtractUnitRequest(request: ExtractUnitRequestDto) {
         require(request.items.isNotEmpty()) { "items must not be empty" }
         require(request.items.size <= 40) { "items must not contain more than 40 entries" }
         require(request.items.all {
@@ -150,7 +150,7 @@ class AiGatewayService @Inject constructor(
         }) { "each item requires id, name, quantity and price" }
     }
 
-    private fun validateRecipeRequest(request: RecipeRequest) {
+    private fun validateRecipeRequest(request: RecipeRequestDto) {
         require(request.items.isNotEmpty()) { "items must not be empty" }
         require(request.items.size <= 30) { "items must not contain more than 30 entries" }
         require(request.servings in 1..10) { "servings must be between 1 and 10" }
@@ -159,10 +159,10 @@ class AiGatewayService @Inject constructor(
         }
     }
 
-    private fun parseCategorizeResponse(content: String): List<CategorizeResultItem> {
+    private fun parseCategorizeResponse(content: String): List<CategorizeResultItemDto> {
         val sanitized = JsonSanitizer.sanitize(content, '[')
         val parsed = runCatching {
-            jsonb.fromJson(sanitized, Array<CategorizeResultItem>::class.java).toList()
+            jsonb.fromJson(sanitized, Array<CategorizeResultItemDto>::class.java).toList()
         }.getOrElse {
             throw UpstreamOpenAiException("Invalid categorize JSON from AI", it)
         }
@@ -173,10 +173,10 @@ class AiGatewayService @Inject constructor(
         return parsed
     }
 
-    private fun parseExtractUnitResponse(content: String): List<ExtractUnitResultItem> {
+    private fun parseExtractUnitResponse(content: String): List<ExtractUnitResultItemDto> {
         val sanitized = JsonSanitizer.sanitize(content, '[')
         val parsed = runCatching {
-            jsonb.fromJson(sanitized, Array<ExtractUnitResultItem>::class.java).toList()
+            jsonb.fromJson(sanitized, Array<ExtractUnitResultItemDto>::class.java).toList()
         }.getOrElse {
             throw UpstreamOpenAiException("Invalid extract-unit JSON from AI", it)
         }
@@ -187,10 +187,10 @@ class AiGatewayService @Inject constructor(
         return parsed
     }
 
-    private fun parseRecipeResponse(content: String): RecipeResponse {
+    private fun parseRecipeResponse(content: String): Recipe {
         val sanitized = JsonSanitizer.sanitize(content, '{')
         val parsed = runCatching {
-            jsonb.fromJson(sanitized, RecipeResponse::class.java)
+            jsonb.fromJson(sanitized, Recipe::class.java)
         }.getOrElse {
             throw UpstreamOpenAiException("Invalid recipe JSON from AI", it)
         }

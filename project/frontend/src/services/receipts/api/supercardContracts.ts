@@ -1,7 +1,20 @@
 export interface SupercardStatusResponse {
   connected: boolean;
-  supercardName?: string | null;
   sessionUpdatedAt?: string | null;
+}
+
+export interface SupercardAvailableReceipt {
+  receiptUrl: string;
+  externalReceiptId: string;
+  locationName?: string | null;
+  logoUrl?: string | null;
+  purchaseDate?: string | null;
+  totalChf?: string | null;
+}
+
+export interface SupercardAvailableResponse {
+  count: number;
+  receipts: SupercardAvailableReceipt[];
 }
 
 export interface SupercardSyncResponse {
@@ -13,5 +26,4 @@ export interface SupercardSyncResponse {
 
 export interface SetSupercardSessionRequest {
   cookieHeader: string;
-  supercardName?: string;
 }
