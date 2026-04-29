@@ -40,7 +40,7 @@ class SupercardService @Inject constructor(
         private val LOGGER = Logger.getLogger(SupercardService::class.java.name)
         private const val KEY_COOKIE = "supercard_session_encrypted"
         private const val SOURCE = "supercard"
-        private const val MAX_PURCHASE_PAGES = 2
+        private const val MAX_PURCHASE_PAGES = 5
         private const val SUPERCARD_PAGE_SIZE = 20
         private const val MAX_RECEIPTS_PER_SYNC = 5
         private val DEFAULT_COOLDOWN: Duration = Duration.ofMinutes(15)
@@ -224,14 +224,20 @@ class SupercardService @Inject constructor(
     private fun parseAvailableLinks(cookieHeader: String): List<SupercardReceiptLink> {
         // Supercard returns max 20 per page — fetch all pages until we get a partial page
         val allLinks = mutableListOf<SupercardReceiptLink>()
+        val seenReceiptBarcodes = mutableSetOf<String>()
         var page = 0
         var pagesFetched = 0
         while (page < MAX_PURCHASE_PAGES) {
             val json = supercardHttpClient.fetchPurchasesJson(cookieHeader, page)
             pagesFetched++
             val pageLinks = htmlParser.parsePurchasesJson(json)
-            allLinks.addAll(pageLinks)
-            if (pageLinks.size < SUPERCARD_PAGE_SIZE) break
+            val newPageLinks = pageLinks.filter { seenReceiptBarcodes.add(it.supercardReceiptBarcode) }
+            if (pageLinks.isNotEmpty() && newPageLinks.isEmpty()) {
+                LOGGER.info("[supercard] stopping purchases paging at page=$page because it repeated a previous page")
+                break
+            }
+            allLinks.addAll(newPageLinks)
+            if (pageLinks.size != SUPERCARD_PAGE_SIZE) break
             page++
         }
         val hitPageLimit = pagesFetched >= MAX_PURCHASE_PAGES
