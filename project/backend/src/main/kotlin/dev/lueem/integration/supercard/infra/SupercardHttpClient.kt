@@ -11,6 +11,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
 @ApplicationScoped
@@ -19,6 +20,15 @@ class SupercardHttpClient {
     companion object {
         private val LOGGER = Logger.getLogger(SupercardHttpClient::class.java.name)
         private const val APP_USER_AGENT = "MyMenu/0.1 receipt-sync"
+    }
+
+    private val requestCount = AtomicInteger(0)
+    private var sessionStartedAt: Instant = Instant.now()
+
+    fun resetRequestCounter() {
+        requestCount.set(0)
+        sessionStartedAt = Instant.now()
+        LOGGER.info("[supercard] request counter reset")
     }
 
     private val client = HttpClient.newBuilder()
@@ -44,10 +54,9 @@ class SupercardHttpClient {
             .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        LOGGER.info(
-            "[supercard] purchases page=$page status=${response.statusCode()} " +
-                "bodyChars=${response.body().length} bodyPreview='${preview(response.body())}'"
-        )
+        val n = requestCount.incrementAndGet()
+        val elapsed = Duration.between(sessionStartedAt, Instant.now()).toSeconds()
+        LOGGER.info("[supercard] req#$n (+${elapsed}s) purchases page=$page status=${response.statusCode()} chars=${response.body().length}")
         validateResponse(response.statusCode(), response.headers())
         return response.body()
     }
@@ -63,12 +72,9 @@ class SupercardHttpClient {
             .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofByteArray())
-        LOGGER.info(
-            "[supercard] pdf status=${response.statusCode()} " +
-                "location='${response.headers().firstValue("location").orElse("")}' " +
-                "contentType='${response.headers().firstValue("content-type").orElse("")}' " +
-                "bytes=${response.body().size}"
-        )
+        val n = requestCount.incrementAndGet()
+        val elapsed = Duration.between(sessionStartedAt, Instant.now()).toSeconds()
+        LOGGER.info("[supercard] req#$n (+${elapsed}s) pdf status=${response.statusCode()} bytes=${response.body().size}")
         validateResponse(response.statusCode(), response.headers())
         return response.body()
     }

@@ -70,6 +70,7 @@ class SupercardService @Inject constructor(
         runtimeSessionUpdatedAt = Instant.now()
         availableLinksCache = null
         nextAllowedSupercardRequestAt = null
+        supercardHttpClient.resetRequestCounter()
 
         if (!propertiesMissingForDb()) {
             ensureSchema()
