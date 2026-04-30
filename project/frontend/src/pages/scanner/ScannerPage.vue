@@ -75,19 +75,19 @@ export default defineComponent({
   color: white !important;
 }
 .uploader {
-  max-width: 400px;
+  width: 340px;
   min-height: 200px;
-  border-radius: 15px;
-  border: 1px solid $primary;
-  box-shadow: none;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
 }
 .custom {
   margin-left: 0;
   padding-left: 0;
-  padding-top: 10px;
+  padding-top: 0;
 }
 :deep(.q-uploader__file) {
-  border-radius: 15px;
+  border-radius: 12px;
   .q-icon {
     color: black !important;
   }

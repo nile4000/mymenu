@@ -39,6 +39,7 @@ function normalizeReceipt(raw: ExtractResponseRaw): Receipt {
 
   return {
     Uuid: String(firstDefined(raw.uid, raw.UID) ?? ""),
+    Barcode: raw.barcode ?? undefined,
     Purchase_Date: String(firstDefined(raw.purchaseDate, raw.PurchaseDate) ?? ""),
     Created_At: nowIso,
     Corp: String(firstDefined(raw.corp, raw.Corp) ?? "Unknown"),

@@ -160,8 +160,9 @@ const {
   width: 100%;
   max-width: 480px;
   background: white;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
 }
 
 .step-container {

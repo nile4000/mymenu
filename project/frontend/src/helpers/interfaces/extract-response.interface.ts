@@ -35,6 +35,7 @@ export interface ExtractResponseRaw {
   Articles?: ExtractArticleRaw[];
   metadata?: ExtractMetadataRaw;
   Metadata?: ExtractMetadataRaw;
+  barcode?: string;
 }
 
 export interface NormalizedExtractResponse {

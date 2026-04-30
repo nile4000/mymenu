@@ -24,6 +24,9 @@ class ReceiptTextProcessor {
         private val TERMINATOR_PATTERN = Pattern.compile(
             "(?m)^\\b(?:Total CHF|Bon)\\b.*", Pattern.CASE_INSENSITIVE
         )
+
+        // Kassenbon-Barcode: mindestens 10 aufeinanderfolgende Ziffern, allein auf einer Zeile
+        private val BARCODE_PATTERN = Pattern.compile("(?m)^\\s*(\\d{10,})\\s*$")
 }
 
     fun normalizeReceiptText(content: String): String =
@@ -76,6 +79,11 @@ class ReceiptTextProcessor {
         }
 
         return receipt.substring(startCharOffset.coerceAtMost(endCharOffset), endCharOffset).trim()
+    }
+
+    fun extractBarcode(text: String): String? {
+        val matcher = BARCODE_PATTERN.matcher(text)
+        return if (matcher.find()) matcher.group(1) else null
     }
 
     fun findTotalLineIndex(receipt: String): Int {

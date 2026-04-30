@@ -8,7 +8,8 @@ data class ReceiptResponse(
     val corp: String,
     val total: BigDecimal,
     val articles: List<ArticleDto>,
-    val metadata: ReceiptMetadata
+    val metadata: ReceiptMetadata,
+    val barcode: String? = null
 )
 
 data class ReceiptMetadata(

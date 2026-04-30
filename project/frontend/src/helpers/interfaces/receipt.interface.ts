@@ -3,6 +3,7 @@ import { Article } from "./article.interface";
 export interface Receipt {
   Id?: string;
   Uuid?: string;
+  Barcode?: string;
   Total_Receipt: number;
   Total_Calculated?: number;
   Purchase_Date: string;

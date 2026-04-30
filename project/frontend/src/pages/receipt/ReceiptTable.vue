@@ -1,12 +1,14 @@
 <template>
   <q-page class="column items-center q-pa-md bg-grey-1">
     <div class="text-h5 q-mb-md">Scanner</div>
-    <ScannerPage class="q-mb-xl" />
 
-    <SupercardSyncCard @synced="reloadReceipts" />
+    <div class="row q-gutter-lg q-mb-xl items-start justify-center full-width" style="max-width: 1200px">
+      <ScannerPage class="col-auto" />
+      <SupercardSyncCard @synced="reloadReceipts" class="col-auto" />
+    </div>
 
     <div class="full-width q-px-md" style="max-width: 1200px">
-      <h5 class="text-center q-mt-xl q-mb-md">Meine Kassenzettel</h5>
+      <h5 class="text-center q-mt-none q-mb-md">Kassenzettel</h5>
       <q-table
         grid
         flat
@@ -33,7 +35,7 @@
                 <span>Eingelesen am:</span>
                 <span>{{ formatDateShort(props.row.Created_At) }}</span>
               </div>
-              <div class="row justify-between items-center q-mt-sm text-caption text-black text-weight-bold">
+              <div class="row justify-between items-center q-mt-sm text-body2 text-weight-bold">
                 <span>Total:</span>
                 <span>{{ props.row.Total_Receipt.toFixed(2) }} CHF</span>
               </div>
@@ -48,7 +50,6 @@
             </q-card-section>
 
             <q-card-actions align="around" class="q-pt-none">
-              <q-btn flat round dense icon="visibility" color="grey-7" disabled />
               <q-btn flat round dense icon="delete" color="negative" @click="deleteReceipt(props.row)" />
             </q-card-actions>
           </q-card>
@@ -112,7 +113,7 @@ const deleteReceipt = (receipt: Receipt) => {
   });
 };
 
-const columns = [{ name: "Purchase_Date", field: "Purchase_Date", sortable: true }];
+const columns = [{ name: "Purchase_Date", label: "Kaufdatum", field: "Purchase_Date", sortable: true }];
 
 onMounted(async () => {
   await dataStore.ensureInitialized();
@@ -128,17 +129,19 @@ onMounted(async () => {
 .receipt-card {
   width: 200px;
   border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
   }
 }
 
 .total-card {
   width: 240px;
   border-radius: 12px;
-  margin-left: auto;
-  background-color: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07) !important;
 }
 </style>

@@ -26,7 +26,7 @@ export async function saveReceiptWithArticles(
       Corp: receiptData.Corp,
       Total_Receipt: receiptData.Total_Receipt,
       External_Source: "manual",
-      External_Receipt_Id: receiptData.Uuid,
+      External_Receipt_Id: receiptData.Barcode ?? receiptData.Uuid,
     };
 
     const receiptInsertData = await insertReceipt(receiptPayload);

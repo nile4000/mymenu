@@ -92,8 +92,9 @@ class ExtractionService @Inject constructor(
         val articleDtos = domainArticles.map { it.toDto() }
 
         val corp = textProcessor.extractRetailer(cleanedContent)
+        val barcode = textProcessor.extractBarcode(cleanedContent)
         LOGGER.info(
-            "[extract:$traceId] Final response corp='$corp' purchaseDate='$extractDate' total=$extractTotal items=${articleDtos.size}"
+            "[extract:$traceId] Final response corp='$corp' purchaseDate='$extractDate' total=$extractTotal items=${articleDtos.size} barcode=${barcode ?: "none"}"
         )
 
         return ReceiptResponse(
@@ -105,7 +106,8 @@ class ExtractionService @Inject constructor(
             metadata = ReceiptMetadata(
                 extractedTotalRow = if (totalRowNumber >= 0) totalRowNumber else 0,
                 openAiArticleCount = articleDtos.size
-            )
+            ),
+            barcode = barcode
         )
     }
 
