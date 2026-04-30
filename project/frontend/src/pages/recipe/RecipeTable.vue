@@ -23,7 +23,7 @@
         </q-card-section>
         <q-card-actions align="center" class="q-px-md">
           <q-btn disabled flat round icon="hub" class="btn-background">
-            <q-tooltip anchor="center left" class="text-h6">Aendern</q-tooltip>
+            <q-tooltip anchor="center left" class="text-h6">Ändern</q-tooltip>
           </q-btn>
           <q-btn flat round color="primary" icon="north_east" class="btn-background" @click="goToRecipe(recipe)">
             <q-tooltip anchor="center left" class="text-h6">Details</q-tooltip>

@@ -39,7 +39,7 @@ export default defineComponent({
 
     const apiUrl = computed(() => {
       const apiUrl = process.env.API_URL;
-      return `${apiUrl}/api/extract`;
+      return `${apiUrl}/api/extract-pdf`;
     });
 
     function onRejected(rejectedEntries: any) {

@@ -16,7 +16,7 @@ class ExtractionResource @Inject constructor(private val extractionService: Extr
 
     /** Accepts a multipart upload and extracts receipt data from a PDF file. */
     @POST
-    @Path("extract")
+    @Path("extract-pdf")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     fun extractArticlesFromPdf(input: MultipartFormDataInput): Response {

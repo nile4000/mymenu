@@ -1,4 +1,5 @@
 package dev.lueem.shared.error
+import jakarta.ws.rs.WebApplicationException
 import jakarta.ws.rs.ext.ExceptionMapper
 import jakarta.ws.rs.ext.Provider
 import jakarta.ws.rs.core.Response
@@ -14,6 +15,7 @@ class GlobalExceptionMapper : ExceptionMapper<Exception> {
 
     override fun toResponse(e: Exception): Response {
         return when (e) {
+            is WebApplicationException -> e.response
             is IllegalArgumentException -> {
                 LOGGER.log(Level.WARNING, "Validation error: ${e.message}")
                 Response.status(422)

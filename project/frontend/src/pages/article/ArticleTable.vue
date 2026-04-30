@@ -14,24 +14,6 @@
         <CategorizationRequest :selectedItems="selected" @article-deleted="onArticleDeleted" />
       </div>
 
-      <div class="column items-center">
-        <q-btn-toggle
-          v-model="viewMode"
-          class="view-mode-toggle"
-          no-caps
-          unelevated
-          rounded
-          dense
-          toggle-color="grey-4"
-          color="grey-2"
-          text-color="grey-8"
-          :options="[
-            { label: 'Tabelle', value: 'table' },
-            { label: 'Grid', value: 'grid' },
-          ]"
-        />
-      </div>
-
       <h5 class="column items-center article-counter">
         Markiert: {{ selected.length }} von {{ filteredRows.length }} Artikeln
       </h5>
@@ -49,10 +31,30 @@
         @update:selected="handleSelectionUpdate"
         selection="multiple"
         class="table-custom"
+        :virtual-scroll="true"
         no-data-label="Keine Daten gefunden / keine Kassenzettel eingeblendet"
       >
         <template v-slot:top>
-          <TableSearchInput v-model="search" />
+          <div class="table-top-controls">
+            <div class="table-search">
+              <TableSearchInput v-model="search" />
+            </div>
+            <q-btn-toggle
+              v-model="viewMode"
+              class="view-mode-toggle"
+              no-caps
+              unelevated
+              rounded
+              dense
+              toggle-color="grey-4"
+              color="grey-2"
+              text-color="grey-8"
+              :options="[
+                { label: 'Tabelle', value: 'table' },
+                { label: 'Grid', value: 'grid' },
+              ]"
+            />
+          </div>
         </template>
 
         <template v-if="isGridView" v-slot:item="props">
@@ -62,13 +64,6 @@
             :selected="props.selected"
             @update:selected="(val) => onItemSelected(props.row, val)"
           />
-        </template>
-
-        <template v-if="!isGridView" v-slot:header-selection="scope">
-          <q-toggle v-model="scope.selected" />
-        </template>
-        <template v-if="!isGridView" v-slot:body-selection="scope">
-          <q-toggle v-model="scope.selected" />
         </template>
 
         <template v-if="!isGridView" v-slot:body-cell-Category="props">
@@ -171,7 +166,7 @@ export default defineComponent({
       sortBy: "desc",
       descending: false,
       page: 1,
-      rowsPerPage: 500,
+      rowsPerPage: 25,
     });
 
     const { totalsPerCategory, totalsPerReceipt, totalExpenses } = useTotals(rows, receiptById);
@@ -322,12 +317,40 @@ h5 {
   border-radius: 999px;
   background-color: rgba(255, 255, 255, 0.6);
   padding: 2px;
+  flex: 0 0 auto;
 }
 
 .view-mode-toggle :deep(.q-btn) {
   min-width: 76px;
   font-weight: 500;
   height: 34px;
+}
+
+.table-custom :deep(.q-table__top) {
+  width: 100%;
+}
+
+.table-top-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.table-search {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .table-top-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .view-mode-toggle {
+    align-self: flex-end;
+  }
 }
 </style>
 
