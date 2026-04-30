@@ -19,6 +19,18 @@ class SupercardProperties {
     @ConfigProperty(name = "SUPERCARD_DB_PASSWORD")
     var dbPasswordValue: Optional<String> = Optional.empty()
 
+    @ConfigProperty(name = "SUPERCARD_MAX_PURCHASE_PAGES", defaultValue = "5")
+    var maxPurchasePages: Int = 5
+
+    @ConfigProperty(name = "SUPERCARD_PAGE_SIZE", defaultValue = "20")
+    var pageSize: Int = 20
+
+    @ConfigProperty(name = "SUPERCARD_MAX_RECEIPTS_PER_SYNC", defaultValue = "5")
+    var maxReceiptsPerSync: Int = 5
+
+    @ConfigProperty(name = "SUPERCARD_PDF_DOWNLOAD_DELAY_SECONDS", defaultValue = "5")
+    var pdfDownloadDelaySeconds: Long = 5
+
     val encryptionKey: String
         get() = encryptionKeyValue.normalized()
 

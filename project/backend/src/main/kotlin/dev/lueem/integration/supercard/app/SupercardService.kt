@@ -40,11 +40,7 @@ class SupercardService @Inject constructor(
         private val LOGGER = Logger.getLogger(SupercardService::class.java.name)
         private const val KEY_COOKIE = "supercard_session_encrypted"
         private const val SOURCE = "supercard"
-        private const val MAX_PURCHASE_PAGES = 5
-        private const val SUPERCARD_PAGE_SIZE = 20
-        private const val MAX_RECEIPTS_PER_SYNC = 5
         private val DEFAULT_COOLDOWN: Duration = Duration.ofMinutes(15)
-        private val PDF_DOWNLOAD_DELAY: Duration = Duration.ofSeconds(5)
     }
 
     @Volatile private var runtimeCookieEncrypted: String? = null
@@ -129,7 +125,7 @@ class SupercardService @Inject constructor(
         var imported = 0
         var failed = 0
         val errors = mutableListOf<String>()
-        val linksToSync = links.take(MAX_RECEIPTS_PER_SYNC)
+        val linksToSync = links.take(properties.maxReceiptsPerSync)
         val deferred = links.size - linksToSync.size
         if (deferred > 0) {
             LOGGER.info("[supercard] deferring $deferred receipt(s) to next sync run")
@@ -214,7 +210,7 @@ class SupercardService @Inject constructor(
 
     private fun pauseBetweenPdfDownloads() {
         try {
-            Thread.sleep(PDF_DOWNLOAD_DELAY.toMillis())
+            Thread.sleep(Duration.ofSeconds(properties.pdfDownloadDelaySeconds).toMillis())
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw IllegalStateException("Supercard sync was interrupted", e)
@@ -227,7 +223,7 @@ class SupercardService @Inject constructor(
         val seenReceiptBarcodes = mutableSetOf<String>()
         var page = 0
         var pagesFetched = 0
-        while (page < MAX_PURCHASE_PAGES) {
+        while (page < properties.maxPurchasePages) {
             val json = supercardHttpClient.fetchPurchasesJson(cookieHeader, page)
             pagesFetched++
             val pageLinks = htmlParser.parsePurchasesJson(json)
@@ -237,13 +233,13 @@ class SupercardService @Inject constructor(
                 break
             }
             allLinks.addAll(newPageLinks)
-            if (pageLinks.size != SUPERCARD_PAGE_SIZE) break
+            if (pageLinks.size != properties.pageSize) break
             page++
         }
-        val hitPageLimit = pagesFetched >= MAX_PURCHASE_PAGES
+        val hitPageLimit = pagesFetched >= properties.maxPurchasePages
         LOGGER.info(
             "[supercard] found ${allLinks.size} available receipts across $pagesFetched page(s)" +
-                if (hitPageLimit) " (capped at $MAX_PURCHASE_PAGES pages)" else ""
+                if (hitPageLimit) " (capped at ${properties.maxPurchasePages} pages)" else ""
         )
         return allLinks
     }
