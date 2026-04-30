@@ -3,11 +3,29 @@ import { computed, Ref, unref } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { useFilterStore } from "src/stores/filterStore";
 import { formatDate } from "../dateHelpers";
+import { isArticleAdjustment } from "../articleAdjustments";
 
 export function useFilters(rows: Article[] | Ref<Article[]>) {
   const filterStore = useFilterStore();
-  const { search, selectedCategory, selectedReceiptIds } = storeToRefs(filterStore);
+  const { search, selectedCategory, selectedReceiptIds, quickFilter } = storeToRefs(filterStore);
   const filterFields = ["Name", "Purchase_Date", "Category"] as const;
+
+  const matchesQuickFilter = (row: Article): boolean => {
+    switch (quickFilter.value) {
+      case "articles":
+        return !isArticleAdjustment(row);
+      case "adjustments":
+        return isArticleAdjustment(row);
+      case "negative":
+        return (row.Total ?? 0) < 0;
+      case "uncategorized":
+        return !row.Category;
+      case "noUnit":
+        return !row.Unit;
+      default:
+        return true;
+    }
+  };
 
   const filteredRows = computed(() => {
     const sourceRows = unref(rows) ?? [];
@@ -37,7 +55,7 @@ export function useFilters(rows: Article[] | Ref<Article[]>) {
       const matchesCategory =
         !selectedCategory.value || row.Category === selectedCategory.value;
 
-      return matchesSearch && matchesReceipt && matchesCategory;
+      return matchesSearch && matchesReceipt && matchesCategory && matchesQuickFilter(row);
     });
   });
 
@@ -45,6 +63,7 @@ export function useFilters(rows: Article[] | Ref<Article[]>) {
     search,
     selectedCategory,
     selectedReceiptIds,
+    quickFilter,
     filteredRows,
   };
 }

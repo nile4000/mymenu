@@ -44,7 +44,10 @@ class ExtractionService @Inject constructor(
         """
         private const val QUESTION_PREFIX =
             "Extract articles from the given receipt and return a list in a valid JSON format.\n" +
-                "Each article should include the following fields: Name, Price, Quantity, Discount, Total (or 0 if none).\n"
+                "Each article should include the following fields: Name, Price, Quantity, Discount, Total.\n" +
+                "For receipts with columns 'Artikel Menge Preis Aktion Total Zusatz', use the value under Total as Total. " +
+                "Do not treat Aktion as a discount amount when it is the final action price. " +
+                "Rows beginning with Rabatt are negative adjustment rows and must use a negative Total.\n"
     }
 
     /** Orchestrates the full receipt extraction pipeline. */
@@ -88,11 +91,7 @@ class ExtractionService @Inject constructor(
         )
         val articleDtos = domainArticles.map { it.toDto() }
 
-        val corp = try {
-            textProcessor.extractRetailer(cleanedContent)
-        } catch (e: IllegalArgumentException) {
-            "Unknown"
-        }
+        val corp = textProcessor.extractRetailer(cleanedContent)
         LOGGER.info(
             "[extract:$traceId] Final response corp='$corp' purchaseDate='$extractDate' total=$extractTotal items=${articleDtos.size}"
         )

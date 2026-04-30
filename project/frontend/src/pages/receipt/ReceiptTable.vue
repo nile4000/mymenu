@@ -29,8 +29,13 @@
                 <span>Kaufdatum:</span>
                 <span class="text-black text-weight-medium">{{ formatDateShort(props.row.Purchase_Date) }}</span>
               </div>
-              <div class="row justify-between q-mt-xs">
-                <span class="text-subtitle1 text-bold">{{ props.row.Total_Receipt.toFixed(2) }} CHF</span>
+              <div v-if="props.row.Created_At" class="row justify-between text-caption text-grey-7 q-mt-xs">
+                <span>Eingelesen am:</span>
+                <span>{{ formatDateShort(props.row.Created_At) }}</span>
+              </div>
+              <div class="row justify-between items-center q-mt-sm text-caption text-black text-weight-bold">
+                <span>Total:</span>
+                <span>{{ props.row.Total_Receipt.toFixed(2) }} CHF</span>
               </div>
 
               <q-img
@@ -58,9 +63,9 @@
               <span class="text-black text-weight-medium">{{ rows.length }}</span>
             </div>
             <q-separator class="q-my-sm" />
-            <div class="row justify-between items-center">
-              <span class="text-caption text-grey-7">Total:</span>
-              <span class="text-subtitle1 text-bold">{{ totalAmount.toFixed(2) }} CHF</span>
+            <div class="row justify-between items-center text-caption text-black text-weight-bold">
+              <span>Total:</span>
+              <span>{{ totalAmount.toFixed(2) }} CHF</span>
             </div>
           </q-card-section>
         </q-card>
@@ -82,7 +87,11 @@ import type { Receipt } from "../../helpers/interfaces/receipt.interface";
 
 const $q = useQuasar();
 const dataStore = useDataStore();
-const { receipts: rows } = storeToRefs(dataStore);
+const { receipts } = storeToRefs(dataStore);
+
+const rows = computed(() =>
+  [...receipts.value].sort((a, b) => new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime())
+);
 
 const totalAmount = computed(() => rows.value.reduce((sum, r) => sum + (r.Total_Receipt ?? 0), 0));
 

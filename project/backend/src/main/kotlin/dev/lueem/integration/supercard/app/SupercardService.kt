@@ -146,7 +146,7 @@ class SupercardService @Inject constructor(
                 try {
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
-                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf)
+                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf, link.locationName)
                     imported++
                 } finally {
                     tempFile.delete()

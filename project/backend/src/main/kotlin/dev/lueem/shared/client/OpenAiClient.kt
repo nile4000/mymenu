@@ -18,9 +18,9 @@ import java.util.logging.Logger
  * Responsibilities:
  * - Build and execute HTTP requests
  * - Translate HTTP / network errors into UpstreamOpenAiException
- * - Return the raw response body string
+ * - Return the assistant message content
  *
- * Does NOT contain business logic, prompt construction, or JSON parsing.
+ * Does NOT contain business logic or prompt construction.
  */
 @ApplicationScoped
 class OpenAiClient @Inject constructor(
@@ -58,7 +58,7 @@ class OpenAiClient @Inject constructor(
         )
         val responseBody = executeRequest(requestBody)
         val response = jsonb.fromJson(responseBody, OpenAiResponse::class.java)
-        return response.choices?.firstOrNull()?.message?.content
+        return response.choices?.firstOrNull()?.message?.content?.takeIf { it.isNotBlank() }
             ?: throw UpstreamOpenAiException("OpenAI response missing message content")
     }
 

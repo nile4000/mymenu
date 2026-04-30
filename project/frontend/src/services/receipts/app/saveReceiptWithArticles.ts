@@ -25,10 +25,16 @@ export async function saveReceiptWithArticles(
       Purchase_Date: formattedDate,
       Corp: receiptData.Corp,
       Total_Receipt: receiptData.Total_Receipt,
+      External_Source: "manual",
+      External_Receipt_Id: receiptData.Uuid,
     };
 
     const receiptInsertData = await insertReceipt(receiptPayload);
     const receipt = receiptInsertData[0] as Receipt;
+
+    if (!receipt?.Id) {
+      throw new Error("Kassenzettel wurde ohne ID zurückgegeben.");
+    }
 
     const articlePayload = articles.map((article) => {
       const price = Number(article.Price ?? 0);

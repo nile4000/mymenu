@@ -9,7 +9,7 @@
           :rows="articles"
           :columns="columns"
           row-key="Name"
-          no-data-label="Keine Daten gefunden"
+          no-data-label="Keine Daten im PDF gefunden"
         >
         </q-table>
       </q-card-section>
@@ -126,7 +126,7 @@ export default defineComponent({
     };
 
     const categorizeSavedArticles = async (
-      savedArticles: { Id: string; Name: string; Quantity: number; Price: number }[]
+      savedArticles: { Id: string; Name: string; Quantity: number; Price: number; Total?: number }[]
     ) => {
       try {
         isLoading.value = showLoading("Kategorisierung läuft...", $q);
@@ -161,7 +161,7 @@ export default defineComponent({
     };
 
     const extractUnit = async (
-      savedArticles: { Id: string; Name: string; Quantity: number; Price: number }[]
+      savedArticles: { Id: string; Name: string; Quantity: number; Price: number; Total?: number }[]
     ) => {
       try {
         isLoading.value = showLoading("Einheit extrahieren laeuft...", $q);

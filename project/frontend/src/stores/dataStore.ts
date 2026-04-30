@@ -53,8 +53,8 @@ export const useDataStore = defineStore("data", {
           listArticles(),
           listReceipts(),
         ]);
-        this.articles = articlesResult.ok ? articlesResult.data : [];
-        this.receipts = receiptsResult.ok ? receiptsResult.data : [];
+        if (articlesResult.ok) this.articles = articlesResult.data;
+        if (receiptsResult.ok) this.receipts = receiptsResult.data;
         this.initialized = true;
       } finally {
         this.initializing = false;
@@ -82,6 +82,8 @@ export const useDataStore = defineStore("data", {
         });
         if (articleResult.ok) {
           this.articleChannel = articleResult.data;
+        } else {
+          console.error("[dataStore] Artikel-Realtime-Subscription fehlgeschlagen:", articleResult.error);
         }
       }
 
@@ -106,6 +108,8 @@ export const useDataStore = defineStore("data", {
         });
         if (receiptResult.ok) {
           this.receiptChannel = receiptResult.data;
+        } else {
+          console.error("[dataStore] Kassenzettel-Realtime-Subscription fehlgeschlagen:", receiptResult.error);
         }
       }
     },

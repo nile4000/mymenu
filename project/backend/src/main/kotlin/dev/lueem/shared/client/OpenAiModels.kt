@@ -12,11 +12,9 @@ data class OpenAiMessage(
 )
 
 data class OpenAiResponse(
-    var id: String? = null,
     var choices: List<OpenAiChoice>? = null
 )
 
 data class OpenAiChoice(
-    var index: Int = 0,
     var message: OpenAiMessage? = null
 )

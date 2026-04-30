@@ -74,6 +74,7 @@
         </q-list>
       </q-card-section>
     </q-card>
+
   </div>
 </template>
 
@@ -81,6 +82,7 @@
 import { defineComponent, PropType } from "vue";
 import { TotalExpenses } from "../../helpers/interfaces/totalExpenses.interface";
 import { formatMonth, formatDate } from "../../helpers/dateHelpers";
+import { withoutArticleAdjustments } from "../../helpers/articleAdjustments";
 
 export default defineComponent({
   name: "ArticleControl",
@@ -90,13 +92,17 @@ export default defineComponent({
       type: Object as PropType<TotalExpenses>,
       required: true,
     },
+    totalsPerCategory: {
+      type: Object as () => Record<string, number>,
+      required: true,
+    },
     rows: {
       type: Array as PropType<
         Array<{
           Name: string;
           Total: number;
           Purchase_Date: string;
-          Category: string;
+          Category?: string;
         }>
       >,
       default: () => [],
@@ -104,22 +110,15 @@ export default defineComponent({
   },
   computed: {
     topCategory() {
-      const categoryTotals: Record<string, number> = {};
-      (this.rows || []).forEach((item) => {
-        const category = item.Category;
-        if (category) {
-          categoryTotals[category] =
-            (categoryTotals[category] || 0) + item.Total;
-        }
-      });
-      const topCategory = Object.entries(categoryTotals).reduce(
+      return Object.entries(this.totalsPerCategory).reduce(
         (max, [name, total]) => (total > max.total ? { name, total } : max),
         { name: "", total: 0 }
       );
-      return topCategory;
     },
     topFiveItems() {
-      return [...this.rows].sort((a, b) => b.Total - a.Total).slice(0, 5);
+      return withoutArticleAdjustments(this.rows || [])
+        .sort((a, b) => b.Total - a.Total)
+        .slice(0, 5);
     },
   },
   methods: {

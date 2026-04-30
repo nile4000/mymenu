@@ -2,6 +2,7 @@ import { computed, Ref, unref } from "vue";
 import { Article } from "../interfaces/article.interface";
 import { Receipt } from "../interfaces/receipt.interface";
 import { TotalExpenses } from "../interfaces/totalExpenses.interface";
+import { withoutArticleAdjustments } from "../articleAdjustments";
 
 export function useTotals(
   rows: Article[] | Ref<Article[]>,
@@ -11,10 +12,11 @@ export function useTotals(
   const safeRows = () => unref(rows) ?? [];
 
   const totalsPerReceipt = computed(() =>
-    Object.values(safeReceipts()).map(({ Id, Purchase_Date, Total_Receipt }) => ({
+    Object.values(safeReceipts()).map(({ Id, Purchase_Date, Total_Receipt, Corp }) => ({
       id: Id || "",
       date: Purchase_Date,
       total: Number(Total_Receipt),
+      corp: Corp,
     }))
   );
 
@@ -48,7 +50,7 @@ export function useTotals(
   });
 
   const totalsPerCategory = computed(() =>
-    safeRows().reduce((acc, { Category, Total }) => {
+    withoutArticleAdjustments(safeRows()).reduce((acc, { Category, Total }) => {
       if (Category) {
         acc[Category] = (acc[Category] ?? 0) + (Total ?? 0);
       }

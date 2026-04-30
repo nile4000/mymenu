@@ -53,6 +53,7 @@ import { computed, defineComponent, onMounted, ref, watch } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import RecipeRequest from "../../components/RecipeRequest.vue";
 import { handleError } from "../../helpers/composables/useErrors";
+import { withoutArticleAdjustments } from "../../helpers/articleAdjustments";
 import { Recipe, RecipeIngredient } from "../../helpers/interfaces/recipe.interface";
 import { useDataStore } from "../../stores/dataStore";
 import RecipeDetail from "./RecipeDetail.vue";
@@ -143,7 +144,8 @@ export default defineComponent({
     const selectedRecipe = ref<Recipe | null>(null);
 
     const recipeInputArticles = computed(() =>
-      [...articles.value].sort((a, b) => new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime())
+      withoutArticleAdjustments([...articles.value])
+        .sort((a, b) => new Date(b.Purchase_Date).getTime() - new Date(a.Purchase_Date).getTime())
     );
 
     const goToRecipe = (recipe: Recipe) => {

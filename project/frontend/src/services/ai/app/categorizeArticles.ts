@@ -4,13 +4,14 @@ import { createBatches } from "src/services/shared/app/batch";
 import { withRetry } from "src/services/shared/app/retry";
 import { ServiceResult, ok, err } from "src/services/shared/app/result";
 import { toServiceError } from "src/services/shared/app/serviceError";
+import { withoutArticleAdjustments } from "src/helpers/articleAdjustments";
 
-export function prepareArticles(items: { Id: string; Name: string }[]) {
-  return items.map((item) => ({ id: String(item.Id), name: item.Name }));
+export function prepareArticles(items: { Id: string; Name: string; Total?: number }[]) {
+  return withoutArticleAdjustments(items).map((item) => ({ id: String(item.Id), name: item.Name }));
 }
 
 export async function categorizeArticles(
-  items: { Id: string; Name: string }[],
+  items: { Id: string; Name: string; Total?: number }[],
   handleBatchResponse: (data: CategorizeResultItem[]) => Promise<void>
 ): Promise<ServiceResult<void>> {
   try {

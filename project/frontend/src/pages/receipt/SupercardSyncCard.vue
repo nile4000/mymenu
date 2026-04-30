@@ -5,7 +5,13 @@
         <span class="text-subtitle1 text-bold text-primary">Supercard Sync</span>
         <span class="text-caption text-grey-7">Automatischer Beleg-Import</span>
       </div>
-      <q-chip dense square :color="session.connected ? 'positive' : 'orange'" text-color="white" class="text-weight-bold">
+      <q-chip
+        dense
+        square
+        :color="session.connected ? 'positive' : 'orange'"
+        text-color="white"
+        class="text-weight-bold"
+      >
         {{ session.connected ? "Verbunden" : "Session fehlt" }}
       </q-chip>
     </div>
@@ -33,7 +39,7 @@
       </div>
 
       <q-slide-transition>
-        <div v-if="cookieForm.visible || !session.connected" class="q-mt-sm">
+        <div v-if="cookieForm.visible || session.connected === false" class="q-mt-sm">
           <q-input
             v-model="cookieForm.value"
             outlined
@@ -41,7 +47,7 @@
             type="textarea"
             autogrow
             label="Cookie Header einfügen"
-            placeholder="JSESSIONID=...; "
+            placeholder="accessmode=external;..."
             class="bg-white"
           />
           <div class="row q-gutter-sm q-mt-xs">

@@ -52,7 +52,7 @@ export async function removeArticlesByIds(ids: string[]) {
 }
 
 export async function insertArticles(payload: Record<string, unknown>[]) {
-  const { data, error } = await supabase.from("article").insert(payload).select("Id,Name,Quantity,Price");
+  const { data, error } = await supabase.from("article").insert(payload).select("Id,Name,Quantity,Price,Total");
   if (error) throw error;
   return data;
 }

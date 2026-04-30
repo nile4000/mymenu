@@ -4,7 +4,6 @@ import jakarta.json.Json
 import jakarta.json.JsonValue
 import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class ArticleMapperTest {
@@ -52,9 +51,9 @@ class ArticleMapperTest {
                 Json.createObjectBuilder()
                     .add(ArticleJsonSchema.NAME_FIELD, "Test")
                     .add(ArticleJsonSchema.PRICE_FIELD, 2.0)
-                    .add(ArticleJsonSchema.QUANTITY_FIELD, -1.0)   // negative → clamped to 0
+                    .add(ArticleJsonSchema.QUANTITY_FIELD, -1.0)
                     .add(ArticleJsonSchema.DISCOUNT_FIELD, 1.0)
-                    .add(ArticleJsonSchema.TOTAL_FIELD, 999.0)    // overridden by calculation
+                    .add(ArticleJsonSchema.TOTAL_FIELD, 999.0)
             )
             .build()
 
@@ -64,10 +63,48 @@ class ArticleMapperTest {
         val article = articles[0]
         assertEquals("Test", article.name)
         assertBigDecimalEquals(BigDecimal("2.0"), article.price)
-        assertBigDecimalEquals(BigDecimal.ZERO, article.quantity)      // clamped
+        assertBigDecimalEquals(BigDecimal.ZERO, article.quantity)
         assertBigDecimalEquals(BigDecimal("1.0"), article.discount)
-        assertBigDecimalEquals(BigDecimal.ZERO, article.total)         // 2*0 - 1 = -1 → 0
+        assertBigDecimalEquals(BigDecimal("999.0"), article.total)
         assertEquals("", article.category)
+    }
+
+    @Test
+    fun mapToArticles_calculatesTotalWhenMissingOrZero() {
+        val input = Json.createArrayBuilder()
+            .add(
+                Json.createObjectBuilder()
+                    .add(ArticleJsonSchema.NAME_FIELD, "Discounted")
+                    .add(ArticleJsonSchema.PRICE_FIELD, 11.90)
+                    .add(ArticleJsonSchema.QUANTITY_FIELD, 1.0)
+                    .add(ArticleJsonSchema.DISCOUNT_FIELD, 9.50)
+                    .add(ArticleJsonSchema.TOTAL_FIELD, 0.0)
+            )
+            .build()
+
+        val articles = mapper.mapToArticles(input)
+
+        assertEquals(1, articles.size)
+        assertBigDecimalEquals(BigDecimal("2.400"), articles[0].total)
+    }
+
+    @Test
+    fun mapToArticles_keepsNegativeTotal() {
+        val input = Json.createArrayBuilder()
+            .add(
+                Json.createObjectBuilder()
+                    .add(ArticleJsonSchema.NAME_FIELD, "Returned")
+                    .add(ArticleJsonSchema.PRICE_FIELD, 19.95)
+                    .add(ArticleJsonSchema.QUANTITY_FIELD, -1.0)
+                    .add(ArticleJsonSchema.DISCOUNT_FIELD, 0.0)
+                    .add(ArticleJsonSchema.TOTAL_FIELD, -19.95)
+            )
+            .build()
+
+        val articles = mapper.mapToArticles(input)
+
+        assertEquals(1, articles.size)
+        assertBigDecimalEquals(BigDecimal("-19.95"), articles[0].total)
     }
 
     @Test

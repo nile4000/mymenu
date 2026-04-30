@@ -5,7 +5,7 @@
       <q-btn size="sm" flat color="negative" label="Keine" @click="clearAll" />
     </div>
 
-    <q-list>
+    <q-list class="receipt-list">
       <q-item
         v-for="item in options"
         :key="item.id"
@@ -13,9 +13,12 @@
         :class="{ 'active-filter-item': isSelected(item.id) }"
         @click="toggle(item.id)"
       >
-        <q-item-section>{{ item.label }}</q-item-section>
-        <q-item-section v-if="typeof item.amount === 'number'">
-          <div class="text-body1">{{ item.amount.toFixed(2) }} CHF</div>
+        <q-item-section>
+          <div class="text-body2 text-weight-medium">{{ item.label }}</div>
+          <div v-if="item.sublabel" class="text-caption text-grey-6">{{ item.sublabel }}</div>
+        </q-item-section>
+        <q-item-section v-if="typeof item.amount === 'number'" side>
+          <div class="text-body2">{{ item.amount.toFixed(2) }} CHF</div>
         </q-item-section>
         <q-item-section side>
           <q-icon
@@ -50,6 +53,7 @@ import { computed, defineComponent, PropType } from "vue";
 type ReceiptFilterItem = {
   id: string;
   label: string;
+  sublabel?: string;
   amount?: number;
 };
 
@@ -136,6 +140,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+.receipt-list {
+  overflow: hidden;
+}
+
 .active-filter-item {
   background-color: rgba(34, 46, 87, 0.08);
   border-left: 3px solid $primary;

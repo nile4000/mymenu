@@ -6,7 +6,7 @@
       </div>
 
       <div class="row q-pa-md justify-evenly overview-section">
-        <ArticleControl :totalExpenses="totalExpenses" :rows="filteredRows" />
+        <ArticleControl :totalExpenses="totalExpenses" :totalsPerCategory="totalsPerCategory" :rows="filteredRows" />
         <ArticleTotal
           :totalsPerCategory="totalsPerCategory"
           :totalsPerReceipt="totalsPerReceipt"
@@ -32,28 +32,50 @@
         selection="multiple"
         class="table-custom"
         :virtual-scroll="true"
-        no-data-label="Keine Daten gefunden / keine Kassenzettel eingeblendet"
+        no-data-label="Keine Daten gefunden / Keine Kassenzettel eingeblendet"
       >
         <template v-slot:top>
-          <div class="table-top-controls">
-            <div class="table-search">
-              <TableSearchInput v-model="search" />
+          <div class="table-toolbar">
+            <div class="table-top-controls">
+              <div class="table-search">
+                <TableSearchInput v-model="search" />
+              </div>
+              <q-btn-toggle
+                v-model="viewMode"
+                class="view-mode-toggle"
+                no-caps
+                unelevated
+                rounded
+                dense
+                toggle-color="grey-4"
+                color="grey-2"
+                text-color="grey-8"
+                :options="[
+                  { label: 'Tabelle', value: 'table' },
+                  { label: 'Grid', value: 'grid' },
+                ]"
+              />
             </div>
-            <q-btn-toggle
-              v-model="viewMode"
-              class="view-mode-toggle"
-              no-caps
-              unelevated
-              rounded
-              dense
-              toggle-color="grey-4"
-              color="grey-2"
-              text-color="grey-8"
-              :options="[
-                { label: 'Tabelle', value: 'table' },
-                { label: 'Grid', value: 'grid' },
-              ]"
-            />
+            <div class="quick-filter-row">
+              <div class="quick-filter-chips">
+                <q-chip
+                  v-for="option in quickFilterOptions"
+                  :key="option.value"
+                  clickable
+                  dense
+                  :color="quickFilter === option.value ? 'primary' : 'grey-2'"
+                  :text-color="quickFilter === option.value ? 'white' : 'grey-8'"
+                  @click="quickFilter = option.value"
+                >
+                  {{ option.label }}
+                </q-chip>
+              </div>
+              <div class="filter-stats-pill">
+                <span class="filter-stats-count">Anzahl: {{ filteredRows.length }}</span>
+                <span class="filter-stats-sep">·</span>
+                <span class="filter-stats-total">{{ totalArticlesAmount.toFixed(2) }} CHF</span>
+              </div>
+            </div>
           </div>
         </template>
 
@@ -87,21 +109,6 @@
         </template>
       </q-table>
 
-      <div class="row justify-end q-mt-md">
-        <q-card class="total-card shadow-1">
-          <q-card-section class="q-pa-md">
-            <div class="row justify-between text-caption text-grey-7">
-              <span>Artikel:</span>
-              <span class="text-black text-weight-medium">{{ filteredRows.length }}</span>
-            </div>
-            <q-separator class="q-my-sm" />
-            <div class="row justify-between items-center">
-              <span class="text-caption text-grey-7">Total:</span>
-              <span class="text-subtitle1 text-bold">{{ totalArticlesAmount.toFixed(2) }} CHF</span>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
     </div>
   </div>
 </template>
@@ -109,7 +116,7 @@
 <script lang="ts">
 import { useQuasar } from "quasar";
 import { storeToRefs } from "pinia";
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, onMounted, ref, watch } from "vue";
 import CategorizationRequest from "../../components/CategorizationRequest.vue";
 import { articleColumns, articleColumnsList } from "../../helpers/columns/articleColumns";
 import { handleError } from "../../helpers/composables/useErrors";
@@ -130,6 +137,16 @@ import ArticleControl from "./ArticleControl.vue";
 import ArticleGrid from "./ArticleGrid.vue";
 import ArticleTotal from "./ArticleTotal.vue";
 import TableSearchInput from "src/components/TableSearchInput.vue";
+import { ArticleQuickFilter } from "src/stores/filterStore";
+
+const quickFilterOptions: { label: string; value: ArticleQuickFilter }[] = [
+  { label: "Alle", value: "all" },
+  { label: "Artikel", value: "articles" },
+  { label: "Korrekturen", value: "adjustments" },
+  { label: "Minus", value: "negative" },
+  { label: "Ohne Kategorie", value: "uncategorized" },
+  { label: "Ohne Einheit", value: "noUnit" },
+];
 
 export default defineComponent({
   name: "ArticleTable",
@@ -149,7 +166,7 @@ export default defineComponent({
     const { names: categories } = storeToRefs(categoryStore);
 
     // Filter-Logik
-    const { search, filteredRows } = useFilters(rows);
+    const { search, quickFilter, filteredRows } = useFilters(rows);
 
     // View-Modus (Grid/Tabelle)
     const { isGridView } = useViewMode();
@@ -174,6 +191,11 @@ export default defineComponent({
     const totalArticlesAmount = computed(() =>
       filteredRows.value.reduce((sum, a) => sum + (a.Total ?? 0), 0)
     );
+
+    watch(filteredRows, (newRows) => {
+      const idSet = new Set(newRows.map((r) => r.Id));
+      selected.value = selected.value.filter((item) => idSet.has(item.Id));
+    });
 
     function onArticleDeleted(id: string) {
       selected.value = selected.value.filter((item) => item.Id !== id);
@@ -238,6 +260,8 @@ export default defineComponent({
       columns: articleColumns,
       filteredRows,
       search,
+      quickFilter,
+      quickFilterOptions,
       selected,
       initialPagination,
       totalsPerCategory,
@@ -337,9 +361,61 @@ h5 {
   width: 100%;
 }
 
+.table-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
 .table-search {
   flex: 1 1 280px;
   min-width: 0;
+}
+
+.quick-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quick-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.quick-filter-chips :deep(.q-chip) {
+  margin: 0;
+}
+
+.filter-stats-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-stats-count {
+  font-weight: 600;
+  color: $dark;
+}
+
+.filter-stats-sep {
+  color: #bbb;
+}
+
+.filter-stats-total {
+  font-weight: 600;
+  color: $primary;
 }
 
 @media (max-width: 600px) {

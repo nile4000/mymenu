@@ -8,24 +8,14 @@ object JsonSanitizer {
         return extractFirstJsonPayload(trimmed, expectedStart, anchorKey) ?: trimmed
     }
 
-    private fun stripCodeFence(content: String): String {
-        var trimmed = content
-        if (trimmed.startsWith("```")) {
-            trimmed = trimmed.removePrefix("```")
-            val firstNewline = trimmed.indexOf('\n')
-            if (firstNewline >= 0) {
-                trimmed = trimmed.substring(firstNewline + 1)
-            }
-            trimmed = trimmed.removeSuffix("```").trim()
-        }
-        return trimmed
-    }
+    private fun stripCodeFence(content: String): String =
+        content.takeUnless { it.startsWith("```") }
+            ?: content.removePrefix("```")
+                .let { it.substringAfter('\n', missingDelimiterValue = it) }
+                .removeSuffix("```")
+                .trim()
 
-    private fun extractFirstJsonPayload(
-        text: String,
-        expectedStart: Char,
-        anchorKey: String?
-    ): String? {
+    private fun extractFirstJsonPayload(text: String, expectedStart: Char, anchorKey: String?): String? {
         val expectedEnd = when (expectedStart) {
             '[' -> ']'
             '{' -> '}'

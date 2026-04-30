@@ -68,12 +68,14 @@ class ReceiptTextProcessorTest {
             Artikel Menge Preis Total
             Milk 1 1.50 1.50
             Bread 1 2.00 2.00
+            Rabatt Bread -0.50
             Total CHF 3.50
             Points: 100
         """.trimIndent()
         val section = processor.extractArticlesSection(receipt)
         assert(section.contains("Milk"))
         assert(section.contains("Bread"))
+        assert(section.contains("Rabatt Bread"))
         assert(!section.contains("Total CHF"))
     }
 

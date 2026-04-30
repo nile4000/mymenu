@@ -4,11 +4,12 @@ import { createBatches } from "src/services/shared/app/batch";
 import { withRetry } from "src/services/shared/app/retry";
 import { ServiceResult, ok, err } from "src/services/shared/app/result";
 import { toServiceError } from "src/services/shared/app/serviceError";
+import { withoutArticleAdjustments } from "src/helpers/articleAdjustments";
 
 export function prepareArticlesPrices(
   items: { Id: string; Name: string; Quantity: number; Total?: number; Price?: number }[]
 ) {
-  return items.map((item) => ({
+  return withoutArticleAdjustments(items).map((item) => ({
     id: String(item.Id),
     name: item.Name,
     quantity: item.Quantity,

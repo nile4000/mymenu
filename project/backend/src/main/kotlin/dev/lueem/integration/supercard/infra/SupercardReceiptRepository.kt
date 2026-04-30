@@ -89,12 +89,13 @@ class SupercardReceiptRepository @Inject constructor(
         externalSource: String,
         supercardExternalReceipt: String,
         purchaseDateOverride: String? = null,
-        totalOverride: java.math.BigDecimal? = null
+        totalOverride: java.math.BigDecimal? = null,
+        corpOverride: String? = null
     ) {
         withConnection { conn ->
             conn.autoCommit = false
             try {
-                val receiptId = insertReceipt(conn, extraction, externalSource, supercardExternalReceipt, purchaseDateOverride, totalOverride)
+                val receiptId = insertReceipt(conn, extraction, externalSource, supercardExternalReceipt, purchaseDateOverride, totalOverride, corpOverride)
                 insertArticles(conn, receiptId, extraction, purchaseDateOverride)
                 conn.commit()
             } catch (e: Exception) {
@@ -112,7 +113,8 @@ class SupercardReceiptRepository @Inject constructor(
         externalSource: String,
         supercardExternalReceipt: String,
         purchaseDateOverride: String? = null,
-        totalOverride: java.math.BigDecimal? = null
+        totalOverride: java.math.BigDecimal? = null,
+        corpOverride: String? = null
     ): Long {
         conn.prepareStatement(
             """
@@ -123,7 +125,7 @@ class SupercardReceiptRepository @Inject constructor(
             """.trimIndent()
         ).use { ps ->
             ps.setTimestamp(1, Timestamp.from(Instant.now()))
-            ps.setString(2, extraction.corp)
+            ps.setString(2, corpOverride ?: extraction.corp)
             ps.setBigDecimal(3, totalOverride ?: extraction.total)
             ps.setDate(4, Date.valueOf(purchaseDateOverride?.let { parseDate(it) } ?: parseDate(extraction.purchaseDate)))
             ps.setString(5, extraction.uid)

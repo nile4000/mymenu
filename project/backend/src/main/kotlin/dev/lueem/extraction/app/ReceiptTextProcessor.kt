@@ -16,13 +16,13 @@ class ReceiptTextProcessor {
         private val COOP_PATTERN = Pattern.compile("Coop", Pattern.CASE_INSENSITIVE)
         private val MIGROS_PATTERN = Pattern.compile("Migros", Pattern.CASE_INSENSITIVE)
         private val TOTAL_PATTERN = Pattern.compile("(?m)^\\bTotal CHF\\b.*", Pattern.CASE_INSENSITIVE)
-        private val DATE_PATTERN = Pattern.compile("\\b\\d{2}\\.\\d{2}\\.\\d{2}\\b")
+        private val DATE_PATTERN = Pattern.compile("\\b\\d{2}\\.\\d{2}\\.(\\d{4}|\\d{2})\\b")
         private val HEADER_PATTERN = Pattern.compile(
             "Artikel\\s+Menge\\s+Preis\\s+Aktion\\s+Total\\s+Zusatz",
             Pattern.CASE_INSENSITIVE
         )
         private val TERMINATOR_PATTERN = Pattern.compile(
-            "(?m)^\\b(?:Total CHF|Rabatt|Bon)\\b.*", Pattern.CASE_INSENSITIVE
+            "(?m)^\\b(?:Total CHF|Bon)\\b.*", Pattern.CASE_INSENSITIVE
         )
 }
 
@@ -36,7 +36,7 @@ class ReceiptTextProcessor {
     fun extractRetailer(text: String): String = when {
         COOP_PATTERN.matcher(text).find() -> "Coop"
         MIGROS_PATTERN.matcher(text).find() -> "Migros"
-        else -> throw IllegalArgumentException("Neither Coop nor Migros found in text.")
+        else -> "Unknown"
     }
 
     fun extractTotal(receipt: String): String {
@@ -54,15 +54,28 @@ class ReceiptTextProcessor {
     }
 
     fun extractArticlesSection(receipt: String): String {
-        val matcher = TERMINATOR_PATTERN.matcher(receipt)
-        return if (matcher.find()) {
-            val idx = matcher.start()
-            LOGGER.fine("Terminating line at index $idx: \"${matcher.group()}\"")
-            receipt.substring(0, idx).trim()
+        val sep = System.lineSeparator()
+        val lines = receipt.split(sep)
+
+        val headerIdx = lines.indexOfFirst { HEADER_PATTERN.matcher(it).find() }
+        val startCharOffset = if (headerIdx >= 0) {
+            LOGGER.fine("Header row at line ${headerIdx + 1}; article section starts at line ${headerIdx + 2}")
+            lines.take(headerIdx + 1).sumOf { it.length + sep.length }
         } else {
-            LOGGER.fine("No terminator line found; returning entire receipt.")
-            receipt
+            LOGGER.warning("Header row not found; article section starts from beginning.")
+            0
         }
+
+        val terminatorMatcher = TERMINATOR_PATTERN.matcher(receipt)
+        val endCharOffset = if (terminatorMatcher.find()) {
+            LOGGER.fine("Terminating line at index ${terminatorMatcher.start()}: \"${terminatorMatcher.group()}\"")
+            terminatorMatcher.start()
+        } else {
+            LOGGER.fine("No terminator line found; using end of receipt.")
+            receipt.length
+        }
+
+        return receipt.substring(startCharOffset.coerceAtMost(endCharOffset), endCharOffset).trim()
     }
 
     fun findTotalLineIndex(receipt: String): Int {

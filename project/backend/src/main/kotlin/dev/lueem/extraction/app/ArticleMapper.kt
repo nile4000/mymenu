@@ -71,7 +71,9 @@ class ArticleMapper {
                     val rawQty = readBigDecimal(jsonObject, ArticleJsonSchema.QUANTITY_FIELD)
                     val quantity = if (rawQty < BigDecimal.ZERO) BigDecimal.ZERO else rawQty
                     val discount = readBigDecimal(jsonObject, ArticleJsonSchema.DISCOUNT_FIELD)
-                    val calculatedTotal = price.multiply(quantity).subtract(discount)
+                    val total = readBigDecimal(jsonObject, ArticleJsonSchema.TOTAL_FIELD)
+                        .takeIf { it.compareTo(BigDecimal.ZERO) != 0 }
+                        ?: price.multiply(quantity).subtract(discount)
                         .let { if (it < BigDecimal.ZERO) BigDecimal.ZERO else it }
 
                     if (name.isBlank()) blankNameCount++
@@ -82,7 +84,7 @@ class ArticleMapper {
                         price = price,
                         quantity = quantity,
                         discount = discount,
-                        total = calculatedTotal
+                        total = total
                         // category filled later by the frontend; defaults to ""
                     )
                 } catch (e: NumberFormatException) {

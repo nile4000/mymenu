@@ -44,7 +44,7 @@ export function useSupercardSync(options: UseSupercardSyncOptions = {}) {
   });
 
   const session = reactive({
-    connected: false,
+    connected: null as boolean | null,
     updatedAt: "" as string | null | undefined,
   });
 
@@ -143,6 +143,8 @@ export function useSupercardSync(options: UseSupercardSyncOptions = {}) {
     if (status.ok && status.data.connected) {
       session.connected = true;
       session.updatedAt = status.data.sessionUpdatedAt;
+    } else {
+      session.connected = false;
     }
   });
 

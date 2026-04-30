@@ -3,11 +3,26 @@ import { ref, watch } from "vue";
 
 const STORAGE_KEY = "mymenu_article_filters";
 
+export type ArticleQuickFilter =
+  | "all"
+  | "articles"
+  | "adjustments"
+  | "negative"
+  | "uncategorized"
+  | "noUnit";
+
 type StoredFilters = {
   search: string;
   selectedCategory: string | null;
   selectedReceiptIds: string[];
+  quickFilter: ArticleQuickFilter;
 };
+
+function parseQuickFilter(value: unknown): ArticleQuickFilter {
+  return ["articles", "adjustments", "negative", "uncategorized", "noUnit"].includes(String(value))
+    ? (value as ArticleQuickFilter)
+    : "all";
+}
 
 function readStoredFilters(): StoredFilters {
   if (typeof localStorage === "undefined") {
@@ -15,6 +30,7 @@ function readStoredFilters(): StoredFilters {
       search: "",
       selectedCategory: null,
       selectedReceiptIds: [],
+      quickFilter: "all",
     };
   }
 
@@ -25,6 +41,7 @@ function readStoredFilters(): StoredFilters {
         search: "",
         selectedCategory: null,
         selectedReceiptIds: [],
+        quickFilter: "all",
       };
     }
 
@@ -36,12 +53,14 @@ function readStoredFilters(): StoredFilters {
       selectedReceiptIds: Array.isArray(parsed.selectedReceiptIds)
         ? parsed.selectedReceiptIds
         : [],
+      quickFilter: parseQuickFilter(parsed.quickFilter),
     };
   } catch {
     return {
       search: "",
       selectedCategory: null,
       selectedReceiptIds: [],
+      quickFilter: "all",
     };
   }
 }
@@ -51,9 +70,10 @@ export const useFilterStore = defineStore("filters", () => {
   const search = ref(initial.search);
   const selectedCategory = ref<string | null>(initial.selectedCategory);
   const selectedReceiptIds = ref<string[]>(initial.selectedReceiptIds);
+  const quickFilter = ref<ArticleQuickFilter>(initial.quickFilter);
 
   watch(
-    [search, selectedCategory, selectedReceiptIds],
+    [search, selectedCategory, selectedReceiptIds, quickFilter],
     () => {
       if (typeof localStorage === "undefined") {
         return;
@@ -64,6 +84,7 @@ export const useFilterStore = defineStore("filters", () => {
           search: search.value,
           selectedCategory: selectedCategory.value,
           selectedReceiptIds: selectedReceiptIds.value,
+          quickFilter: quickFilter.value,
         } satisfies StoredFilters)
       );
     },
@@ -74,12 +95,14 @@ export const useFilterStore = defineStore("filters", () => {
     search.value = "";
     selectedCategory.value = null;
     selectedReceiptIds.value = [];
+    quickFilter.value = "all";
   }
 
   return {
     search,
     selectedCategory,
     selectedReceiptIds,
+    quickFilter,
     resetFilters,
   };
 });

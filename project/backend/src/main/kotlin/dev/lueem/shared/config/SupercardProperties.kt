@@ -20,26 +20,21 @@ class SupercardProperties {
     var dbPasswordValue: Optional<String> = Optional.empty()
 
     val encryptionKey: String
-        get() = normalize(encryptionKeyValue.orElse(""))
+        get() = encryptionKeyValue.normalized()
 
     val dbUrl: String
-        get() = normalize(dbUrlValue.orElse(""))
+        get() = dbUrlValue.normalized()
 
     val dbUser: String
-        get() = normalize(dbUserValue.orElse(""))
+        get() = dbUserValue.normalized()
 
     val dbPassword: String
-        get() = normalize(dbPasswordValue.orElse(""))
+        get() = dbPasswordValue.normalized()
 
-    private fun normalize(value: String): String {
-        val trimmed = value.trim()
-        if (trimmed.length >= 2) {
-            val first = trimmed.first()
-            val last = trimmed.last()
-            if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
-                return trimmed.substring(1, trimmed.length - 1).trim()
-            }
-        }
-        return trimmed
-    }
+    private fun Optional<String>.normalized(): String =
+        orElse("")
+            .trim()
+            .removeSurrounding("\"")
+            .removeSurrounding("'")
+            .trim()
 }

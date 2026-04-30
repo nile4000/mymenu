@@ -1,12 +1,13 @@
 import { Article } from "src/helpers/interfaces/article.interface";
 import { Recipe } from "src/helpers/interfaces/recipe.interface";
+import { withoutArticleAdjustments } from "src/helpers/articleAdjustments";
 import { ServiceResult, ok, err } from "src/services/shared/app/result";
 import { toServiceError } from "src/services/shared/app/serviceError";
 import { postRecipe } from "../infra/aiHttpClient";
 
 export async function createRecipe(articles: Article[], servings: number): Promise<ServiceResult<Recipe>> {
   try {
-    const items = articles.map((article) => ({
+    const items = withoutArticleAdjustments(articles).map((article) => ({
       name: article.Name,
       quantity: Number(article.Quantity ?? 0),
       unit: article.Unit || "stk",

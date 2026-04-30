@@ -121,27 +121,27 @@ class AiGatewayService @Inject constructor(
     }
 
     private fun validateCategorizeRequest(request: CategorizeRequest) {
-        require(request.items.isNotEmpty()) { "items must not be empty" }
-        require(request.items.size <= 40) { "items must not contain more than 40 entries" }
+        require(request.items.isNotEmpty()) { "Die Liste darf nicht leer sein" }
+        require(request.items.size <= 40) { "Die Liste darf maximal 40 Einträge enthalten" }
         require(request.items.all { it.id.isNotBlank() && it.name.isNotBlank() }) {
-            "each item requires id and name"
+            "Jeder Eintrag benötigt eine ID und einen Namen"
         }
     }
 
     private fun validateExtractUnitRequest(request: ExtractUnitRequest) {
-        require(request.items.isNotEmpty()) { "items must not be empty" }
-        require(request.items.size <= 40) { "items must not contain more than 40 entries" }
+        require(request.items.isNotEmpty()) { "Die Liste darf nicht leer sein" }
+        require(request.items.size <= 40) { "Die Liste darf maximal 40 Einträge enthalten" }
         require(request.items.all {
             it.id.isNotBlank() && it.name.isNotBlank() && it.quantity.isFinite() && it.price.isFinite()
-        }) { "each item requires id, name, quantity and price" }
+        }) { "Jeder Eintrag benötigt eine ID, einen Namen, eine Menge und einen Preis" }
     }
 
     private fun validateRecipeRequest(request: RecipeRequest) {
-        require(request.items.isNotEmpty()) { "items must not be empty" }
-        require(request.items.size <= 30) { "items must not contain more than 30 entries" }
-        require(request.servings in 1..10) { "servings must be between 1 and 10" }
+        require(request.items.isNotEmpty()) { "Die Liste darf nicht leer sein" }
+        require(request.items.size <= 30) { "Die Liste darf maximal 30 Einträge enthalten" }
+        require(request.servings in 1..10) { "Die Portionsanzahl muss zwischen 1 und 10 liegen" }
         require(request.items.all { it.name.isNotBlank() && it.unit.isNotBlank() && it.quantity.isFinite() }) {
-            "each item requires name, quantity and unit"
+            "Jeder Eintrag benötigt einen Namen, eine Menge und eine Einheit"
         }
     }
 

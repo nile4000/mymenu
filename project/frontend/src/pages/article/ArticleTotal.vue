@@ -89,7 +89,7 @@ export default defineComponent({
       required: true,
     },
     totalsPerReceipt: {
-      type: Array as PropType<Array<{ id: string; date: string; total: number }>>,
+      type: Array as PropType<Array<{ id: string; date: string; total: number; corp?: string }>>,
       required: true,
     },
   },
@@ -122,7 +122,8 @@ export default defineComponent({
     const receiptFilterItems = computed(() =>
       sortedTotalsPerReceipt.value.map((receipt) => ({
         id: String(receipt.id),
-        label: formatDate(receipt.date),
+        label: receipt.corp || formatDate(receipt.date),
+        sublabel: receipt.corp ? formatDate(receipt.date) : undefined,
         amount: receipt.total,
       }))
     );
@@ -163,7 +164,7 @@ export default defineComponent({
           selectedReceiptIds.value = availableIds;
         }
       },
-      { immediate: true }
+      { immediate: true, deep: true }
     );
 
     watch(
@@ -201,6 +202,7 @@ export default defineComponent({
   border: 1px solid $primary;
   margin-bottom: 12px;
   height: fit-content;
+  overflow: hidden;
 }
 
 .filter-panel {

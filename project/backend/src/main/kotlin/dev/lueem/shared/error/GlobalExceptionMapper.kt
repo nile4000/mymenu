@@ -1,8 +1,9 @@
 package dev.lueem.shared.error
+
 import jakarta.ws.rs.WebApplicationException
+import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.ext.ExceptionMapper
 import jakarta.ws.rs.ext.Provider
-import jakarta.ws.rs.core.Response
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -18,22 +19,21 @@ class GlobalExceptionMapper : ExceptionMapper<Exception> {
             is WebApplicationException -> e.response
             is IllegalArgumentException -> {
                 LOGGER.log(Level.WARNING, "Validation error: ${e.message}")
-                Response.status(422)
-                    .entity(ApiError(code = "VALIDATION_ERROR", message = e.message ?: "Invalid input"))
-                    .build()
+                errorResponse(422, "VALIDATION_ERROR", e.message ?: "Invalid input")
             }
             is UpstreamOpenAiException -> {
                 LOGGER.log(Level.SEVERE, "Upstream OpenAI error", e)
-                Response.status(502)
-                    .entity(ApiError(code = "UPSTREAM_ERROR", message = "Upstream AI call failed"))
-                    .build()
+                errorResponse(502, "UPSTREAM_ERROR", "Upstream AI call failed")
             }
             else -> {
                 LOGGER.log(Level.SEVERE, "Unhandled exception", e)
-                Response.serverError()
-                    .entity(ApiError(code = "INTERNAL_ERROR", message = "An internal error occurred"))
-                    .build()
+                errorResponse(500, "INTERNAL_ERROR", "An internal error occurred")
             }
         }
     }
+
+    private fun errorResponse(status: Int, code: String, message: String): Response =
+        Response.status(status)
+            .entity(ApiError(code = code, message = message))
+            .build()
 }
