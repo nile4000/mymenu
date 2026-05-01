@@ -4,14 +4,14 @@
 
 Full-Stack-Applikation zum Importieren, Analysieren und Kategorisieren von Kassenbons.
 
-- **Backend**: Quarkus 3 + Kotlin, Maven, PostgreSQL, OpenAI-API
+- **Middleware**: Quarkus 3 + Kotlin, Maven, PostgreSQL, OpenAI-API
 - **Frontend**: Vue 3 + TypeScript, Quasar, Pinia, Supabase
 
 ---
 
 ## Architektur
 
-### Backend – Schichtenmodell (DDD)
+### Middleware – Schichtenmodell (DDD)
 
 ```
 api/        REST-Endpunkte, DTOs, Request-/Response-Typen
@@ -78,7 +78,7 @@ val items = buildItemList()
 
 ---
 
-## Backend (Kotlin / Quarkus)
+## Middleware (Kotlin / Quarkus)
 
 ### Stil
 
@@ -169,7 +169,7 @@ export function useFeature(options: UseFeatureOptions = {}) {
 ### TypeScript
 
 - Interfaces für alle API-Datenstrukturen in `helpers/interfaces/`.
-- API-Felder in `Snake_Case` (Backend-Mapping), lokale Variablen in `camelCase`.
+- API-Felder in `Snake_Case` (Middleware-Mapping), lokale Variablen in `camelCase`.
 - Generics nutzen statt `any` – `any` ist verboten.
 - Optionale Felder mit `?`, keine Union mit `undefined` explizit setzen wenn `?` ausreicht.
 

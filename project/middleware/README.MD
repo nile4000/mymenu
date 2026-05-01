@@ -12,7 +12,7 @@
 ### Local development
 
 ```shell
-cd C:\dev\mymenu\project\backend
+cd C:\dev\mymenu\project\middleware
 
 quarkus dev
 ```
@@ -26,7 +26,7 @@ quarkus dev
 Prerequisite: Docker Desktop must be running.
 
 ```powershell
-cd C:\dev\mymenu\project\backend\db
+cd C:\dev\mymenu\project\database
 
 # Restore local DB snapshot
 .\restore-local-db.ps1 -DumpFile local_dev_public.sql
@@ -44,7 +44,7 @@ Note:
 
 <http://localhost:8080/q/swagger-ui/#>
 
-Quick backend-only tests (PowerShell, from project root):
+Quick middleware-only tests (PowerShell, from project root):
 
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/ai/categorize" -Method Post -ContentType "application/json" -Body (Get-Content .\tmp_categorize_payload.json -Raw)

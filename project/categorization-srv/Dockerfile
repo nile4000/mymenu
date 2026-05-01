@@ -2,13 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY categorization-service/requirements.txt .
+COPY categorization-srv/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # pre-download model into image so container starts without network access
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 
-COPY categorization-service/ .
+COPY categorization-srv/ .
 COPY shared/categories.json /shared/categories.json
 
 ENV CATEGORIES_FILE=/shared/categories.json

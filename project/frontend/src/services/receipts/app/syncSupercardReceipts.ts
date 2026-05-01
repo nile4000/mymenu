@@ -60,7 +60,7 @@ function mapSupercardMessage(fallback: string, cause: unknown): string {
     return "Keine Supercard Session hinterlegt. Bitte zuerst verbinden.";
   }
   if (normalized.includes("missing supercard db config")) {
-    return "Supercard Backend ist nicht vollstaendig konfiguriert.";
+    return "Supercard Service ist nicht vollstaendig konfiguriert.";
   }
   if (normalized.includes("cookieheader must not be blank")) {
     return "Bitte einen vollstaendigen Session Cookie Header einfuegen.";
