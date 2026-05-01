@@ -1,0 +1,83 @@
+{
+  "categories": [
+    {
+      "name": "Obst und Gemüse",
+      "icon": "emoji_nature",
+      "color": "green-4",
+      "embeddingText": "Obst und Gemüse: frisches Obst, frisches Gemüse, Salat, Kräuter, Pilze, Beeren, Äpfel, Bananen, Tomaten, Karotten, Zwiebeln, Kartoffeln, Zucchini"
+    },
+    {
+      "name": "Milchprodukte, Eier und Alternativen",
+      "icon": "local_dining",
+      "color": "blue-4",
+      "embeddingText": "Milchprodukte, Eier und Alternativen: Milch, Joghurt, Quark, Käse, Butter, Rahm, Sahne, Eier, Hafermilch, Sojamilch, Tofu, Frischkäse, Mozzarella"
+    },
+    {
+      "name": "Fleisch, Fisch und pflanzliche Proteine",
+      "icon": "restaurant_menu",
+      "color": "red-4",
+      "embeddingText": "Fleisch, Fisch und pflanzliche Proteine: Rind, Schwein, Huhn, Geflügel, Wurst, Aufschnitt, Lachs, Thunfisch, Garnelen, Fischfilet, Tempeh, Seitan, Veggieschnitzel"
+    },
+    {
+      "name": "Backwaren und Getreide",
+      "icon": "bakery_dining",
+      "color": "brown-4",
+      "embeddingText": "Backwaren und Getreide: Brot, Brötchen, Toast, Croissant, Mehl, Reis, Pasta, Nudeln, Haferflocken, Müsli, Cornflakes, Quinoa, Couscous, Dinkel"
+    },
+    {
+      "name": "Getränke (alkoholisch & alkoholfrei)",
+      "icon": "local_cafe",
+      "color": "orange-4",
+      "embeddingText": "Getränke alkoholisch und alkoholfrei: Wasser, Mineralwasser, Saft, Orangensaft, Eistee, Cola, Limonade, Bier, Wein, Sekt, Kaffee, Tee, Energy Drink, Smoothie"
+    },
+    {
+      "name": "Snacks, Apero und Süßwaren",
+      "icon": "cake",
+      "color": "pink-4",
+      "embeddingText": "Snacks, Apero und Süßwaren: Chips, Nüsse, Cracker, Popcorn, Schokolade, Gummibärchen, Kekse, Riegel, Bonbons, Salzgebäck, Erdnüsse, Mandeln, Pralinés, Oliven"
+    },
+    {
+      "name": "Reinigungsmittel und Haushaltsreiniger",
+      "icon": "soap",
+      "color": "grey-4",
+      "embeddingText": "Reinigungsmittel und Haushaltsreiniger: Spülmittel, Waschmittel, Weichspüler, Allzweckreiniger, WC-Reiniger, Badreiniger, Glasreiniger, Desinfektionsmittel, Schwämme, Putztücher, Müllbeutel, Alufolie, Backpapier"
+    },
+    {
+      "name": "Körperpflegeprodukte und Hygieneartikel",
+      "icon": "spa",
+      "color": "purple-4",
+      "embeddingText": "Körperpflegeprodukte und Hygieneartikel: Shampoo, Duschgel, Seife, Zahnpasta, Zahnbürste, Deo, Rasierer, Feuchttücher, Toilettenpapier, Tampons, Binden, Hautcreme, Sonnencreme, Lippenpflege"
+    },
+    {
+      "name": "Tierbedarf und Sonstiges",
+      "icon": "pets",
+      "color": "teal-4",
+      "embeddingText": "Tierbedarf und Sonstiges: Katzenfutter, Hundefutter, Tiersnacks, Katzenstreu, Tierspielzeug, Aquariumbedarf, Vogelfutter, sonstige Artikel"
+    },
+    {
+      "name": "Tiefkühlprodukte",
+      "icon": "ac_unit",
+      "color": "cyan-4",
+      "embeddingText": "Tiefkühlprodukte: Tiefkühlpizza, Tiefkühlgemüse, Tiefkühlfleisch, Tiefkühlfisch, Tiefkühlpommes, Eis, Glacé, Tiefkühlfertiggerichte, gefrorene Früchte"
+    },
+    {
+      "name": "Konserven und Vorratsartikel",
+      "icon": "inventory",
+      "color": "yellow-4",
+      "embeddingText": "Konserven und Vorratsartikel: Dosengemüse, Dosentomaten, Thunfischdose, Kichererbsen, Bohnen aus der Dose, Linsen, Eingemachtes, Fertigsuppe, Brühe, Bouillon, Essig, Öl, Honig, Marmelade, Aufstrich"
+    },
+    {
+      "name": "Gewürze, Kräuter und Saucen",
+      "icon": "eco",
+      "color": "lime-4",
+      "embeddingText": "Gewürze, Kräuter und Saucen: Salz, Pfeffer, Paprika, Curry, Zimt, Oregano, Basilikum, Thymian, Ketchup, Senf, Mayonnaise, Sojasauce, Pestos, Tomatensauce, Würzmischungen, Bouillonwürfel"
+    },
+    {
+      "name": "Andere",
+      "icon": "category",
+      "color": "blue-grey-4",
+      "fallback": true,
+      "embeddingText": "Andere: sonstige Artikel, unklare Produkte, diverse Einkaeufe"
+    }
+  ]
+}

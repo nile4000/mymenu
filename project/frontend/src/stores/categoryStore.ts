@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import { CategoryDto, listCategories } from "src/services";
+import { Category, listCategories } from "src/services";
 
 interface CategoryState {
-  categories: CategoryDto[];
+  categories: Category[];
   loaded: boolean;
   loading: Promise<void> | null;
 }

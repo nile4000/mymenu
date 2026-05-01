@@ -1,4 +1,4 @@
-export interface CategoryDto {
+export interface Category {
   name: string;
   icon: string;
   color: string;
