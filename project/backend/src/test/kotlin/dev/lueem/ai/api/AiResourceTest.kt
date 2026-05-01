@@ -1,7 +1,7 @@
 package dev.lueem.ai.api
 
 import dev.lueem.ai.app.AiGatewayService
-import dev.lueem.shared.error.UpstreamOpenAiException
+import dev.lueem.shared.error.UploadOpenAiException
 import io.quarkus.test.InjectMock
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
@@ -82,9 +82,9 @@ class AiResourceTest {
     }
 
     @Test
-    fun categorizeReturnsBadGatewayOnUpstreamError() {
+    fun categorizeReturnsBadGatewayOnUploadError() {
         `when`(aiGatewayService.categorize(any(CategorizeRequest::class.java)))
-            .thenThrow(UpstreamOpenAiException("OpenAI HTTP 429"))
+            .thenThrow(UploadOpenAiException("OpenAI HTTP 429"))
 
         given()
             .contentType("application/json")
@@ -92,7 +92,7 @@ class AiResourceTest {
             .`when`().post("/api/ai/categorize")
             .then()
             .statusCode(502)
-            .body("code", equalTo("UPSTREAM_ERROR"))
-            .body("message", equalTo("Upstream AI call failed"))
+            .body("code", equalTo("Upload_ERROR"))
+            .body("message", equalTo("Upload AI call failed"))
     }
 }

@@ -1,5 +1,8 @@
 package dev.lueem.integration.supercard.app
 
+import dev.lueem.ai.api.dto.CategorizeItem
+import dev.lueem.ai.api.dto.CategorizeRequest
+import dev.lueem.extraction.api.ReceiptResponse
 import dev.lueem.extraction.app.ExtractionService
 import dev.lueem.integration.supercard.api.dto.SupercardAvailableReceipt
 import dev.lueem.integration.supercard.api.dto.SupercardAvailableResponse
@@ -15,6 +18,7 @@ import dev.lueem.integration.supercard.infra.SupercardConfigStore
 import dev.lueem.integration.supercard.infra.SupercardHtmlParser
 import dev.lueem.integration.supercard.infra.SupercardHttpClient
 import dev.lueem.integration.supercard.infra.SupercardReceiptRepository
+import dev.lueem.shared.client.CategorizationClient
 import dev.lueem.shared.config.SupercardProperties
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
@@ -33,6 +37,7 @@ class SupercardService @Inject constructor(
     private val htmlParser: SupercardHtmlParser,
     private val extractionService: ExtractionService,
     private val receiptRepository: SupercardReceiptRepository,
+    private val categorizationClient: CategorizationClient,
     private val properties: SupercardProperties
 ) {
 
@@ -142,7 +147,8 @@ class SupercardService @Inject constructor(
                 try {
                     tempFile.writeBytes(pdf)
                     val extraction = extractionService.analyzeReceipt(tempFile)
-                    receiptRepository.insertReceiptWithArticles(extraction, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf, link.locationName)
+                    val categorized = assignCategories(extraction)
+                    receiptRepository.insertReceiptWithArticles(categorized, SOURCE, link.supercardReceiptBarcode, link.purchaseDate, link.totalChf, link.locationName)
                     imported++
                 } finally {
                     tempFile.delete()
@@ -203,7 +209,7 @@ class SupercardService @Inject constructor(
         }
         LOGGER.warning(
             "[supercard] remote access paused until $nextAllowedSupercardRequestAt " +
-                "(status=${e.upstreamStatus}, retryAfter=${e.retryAfter})"
+                "(status=${e.uploadStatus}, retryAfter=${e.retryAfter})"
         )
         return nextAllowedSupercardRequestAt!!
     }
@@ -258,6 +264,26 @@ class SupercardService @Inject constructor(
         configStore.ensureSchema()
         receiptRepository.ensureSchema()
         schemaEnsured = true
+    }
+
+    private fun assignCategories(extraction: ReceiptResponse): ReceiptResponse {
+        if (extraction.articles.isEmpty()) return extraction
+        val request = CategorizeRequest(
+            items = extraction.articles.mapIndexed { index, article ->
+                CategorizeItem(id = index.toString(), name = article.name)
+            }
+        )
+        return try {
+            val results = categorizationClient.categorize(request).associateBy { it.id }
+            val enriched = extraction.articles.mapIndexed { index, article ->
+                val category = results[index.toString()]?.category ?: article.category
+                if (category != article.category) article.copy(category = category) else article
+            }
+            extraction.copy(articles = enriched)
+        } catch (e: Exception) {
+            LOGGER.log(Level.WARNING, "[supercard] categorization failed, articles saved without category", e)
+            extraction
+        }
     }
 
     private fun propertiesMissingForDb(): Boolean {

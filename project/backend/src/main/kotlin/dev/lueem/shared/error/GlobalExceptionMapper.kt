@@ -21,9 +21,13 @@ class GlobalExceptionMapper : ExceptionMapper<Exception> {
                 LOGGER.log(Level.WARNING, "Validation error: ${e.message}")
                 errorResponse(422, "VALIDATION_ERROR", e.message ?: "Invalid input")
             }
-            is UpstreamOpenAiException -> {
-                LOGGER.log(Level.SEVERE, "Upstream OpenAI error", e)
-                errorResponse(502, "UPSTREAM_ERROR", "Upstream AI call failed")
+            is UploadOpenAiException -> {
+                LOGGER.log(Level.SEVERE, "Upload OpenAI error", e)
+                errorResponse(502, "Upload_ERROR", "Upload AI call failed")
+            }
+            is UploadCategorizationException -> {
+                LOGGER.log(Level.SEVERE, "Upload categorization service error", e)
+                errorResponse(502, "Upload_ERROR", "Upload categorization service call failed")
             }
             else -> {
                 LOGGER.log(Level.SEVERE, "Unhandled exception", e)

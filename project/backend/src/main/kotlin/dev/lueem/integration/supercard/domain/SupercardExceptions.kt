@@ -25,14 +25,14 @@ class SupercardCooldownException(
 
 class SupercardRemoteAccessException(
     message: String,
-    val upstreamStatus: Int,
+    val uploadStatus: Int,
     val retryAfter: Duration? = null,
 ) : SupercardException(
     message = message,
-    httpStatus = if (upstreamStatus == 401 || upstreamStatus == 403) 401 else if (upstreamStatus == 429) 429 else 502,
-    code = when (upstreamStatus) {
+    httpStatus = if (uploadStatus == 401 || uploadStatus == 403) 401 else if (uploadStatus == 429) 429 else 502,
+    code = when (uploadStatus) {
         401, 403 -> "SUPERCARD_SESSION_INVALID"
         429 -> "SUPERCARD_RATE_LIMITED"
-        else -> "SUPERCARD_UPSTREAM_ERROR"
+        else -> "SUPERCARD_UPLOAD_ERROR"
     },
 )

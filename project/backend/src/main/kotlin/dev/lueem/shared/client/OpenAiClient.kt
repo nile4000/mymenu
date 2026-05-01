@@ -1,7 +1,7 @@
 package dev.lueem.shared.client
 
 import dev.lueem.shared.config.OpenAiProperties
-import dev.lueem.shared.error.UpstreamOpenAiException
+import dev.lueem.shared.error.UploadOpenAiException
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.json.bind.JsonbBuilder
@@ -17,7 +17,7 @@ import java.util.logging.Logger
  *
  * Responsibilities:
  * - Build and execute HTTP requests
- * - Translate HTTP / network errors into UpstreamOpenAiException
+ * - Translate HTTP / network errors into UploadOpenAiException
  * - Return the assistant message content
  *
  * Does NOT contain business logic or prompt construction.
@@ -33,14 +33,14 @@ class OpenAiClient @Inject constructor(
 
     private val resolvedApiKey: String
         get() = properties.apiKey.takeIf { it.isNotBlank() }
-            ?: throw UpstreamOpenAiException("OPENAI_API_KEY is not configured")
+            ?: throw UploadOpenAiException("OPENAI_API_KEY is not configured")
 
     private val httpClient = HttpClient.newHttpClient()
     private val jsonb = JsonbBuilder.create()
 
     /**
      * Executes a chat-completion request and returns the message content string.
-     * Throws UpstreamOpenAiException on any failure.
+     * Throws UploadOpenAiException on any failure.
      */
     fun chatCompletion(
         systemPrompt: String,
@@ -59,7 +59,7 @@ class OpenAiClient @Inject constructor(
         val responseBody = executeRequest(requestBody)
         val response = jsonb.fromJson(responseBody, OpenAiResponse::class.java)
         return response.choices?.firstOrNull()?.message?.content?.takeIf { it.isNotBlank() }
-            ?: throw UpstreamOpenAiException("OpenAI response missing message content")
+            ?: throw UploadOpenAiException("OpenAI response missing message content")
     }
 
     private fun executeRequest(requestBody: OpenAiRequest): String {
@@ -75,14 +75,14 @@ class OpenAiClient @Inject constructor(
             val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
             val status = response.statusCode()
             if (status < 200 || status >= 300) {
-                throw UpstreamOpenAiException("OpenAI HTTP $status")
+                throw UploadOpenAiException("OpenAI HTTP $status")
             }
             response.body()
-        } catch (e: UpstreamOpenAiException) {
+        } catch (e: UploadOpenAiException) {
             throw e
         } catch (e: Exception) {
             LOGGER.log(Level.SEVERE, "OpenAI request failed", e)
-            throw UpstreamOpenAiException("OpenAI request failed", e)
+            throw UploadOpenAiException("OpenAI request failed", e)
         }
     }
 }

@@ -6,11 +6,11 @@ import dev.lueem.ai.api.dto.ExtractUnitRequest
 import dev.lueem.ai.api.dto.ExtractUnitResultItem
 import dev.lueem.ai.api.dto.RecipeRequest
 import dev.lueem.ai.domain.Recipe
+import dev.lueem.shared.client.CategorizationClient
 import dev.lueem.shared.client.OpenAiClient
 import dev.lueem.shared.config.OpenAiProperties
-import dev.lueem.shared.error.UpstreamOpenAiException
+import dev.lueem.shared.error.UploadOpenAiException
 import dev.lueem.shared.util.JsonSanitizer
-import dev.lueem.category.domain.Categories
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.json.bind.JsonbBuilder
@@ -18,13 +18,10 @@ import jakarta.json.bind.JsonbBuilder
 @ApplicationScoped
 class AiGatewayService @Inject constructor(
     private val openAiClient: OpenAiClient,
+    private val categorizationClient: CategorizationClient,
     private val properties: OpenAiProperties
 ) {
     companion object {
-        private const val CATEGORIZATION_SYSTEM_PROMPT =
-            "You are a categorization assistant. Return only valid JSON in the exact format " +
-                "[{\"id\":\"string\",\"category\":\"string\"}] with no markdown and no extra text."
-
         private const val UNIT_SYSTEM_PROMPT =
             "You are a text extraction assistant. Return only valid JSON in the exact format " +
                 "[{\"id\":\"string\",\"unit\":\"string\"}] with no markdown and no extra text."
@@ -53,22 +50,10 @@ class AiGatewayService @Inject constructor(
 
     private val jsonb = JsonbBuilder.create()
 
+    // Categorization now runs through our internal AI service instead of direct OpenAI prompts.
     fun categorize(request: CategorizeRequest): List<CategorizeResultItem> {
         validateCategorizeRequest(request)
-        val itemsText = request.items.joinToString("\n") { "ID: ${it.id}, Name: ${it.name}" }
-        val categories = Categories.NAMES.joinToString("\n")
-        val userPrompt =
-            "Categorize these articles:\n$itemsText\n" +
-                "Use only these categories (use the exact spelling, including umlauts):\n$categories\n" +
-                "If none fits, use category \"${Categories.FALLBACK_NAME}\"."
-
-        val content = openAiClient.chatCompletion(
-            CATEGORIZATION_SYSTEM_PROMPT,
-            userPrompt,
-            properties.resolveModel(properties.categorizationModel),
-            properties.temperature
-        )
-        return parseCategorizeResponse(content)
+        return categorizationClient.categorize(request)
     }
 
     fun extractUnit(request: ExtractUnitRequest): List<ExtractUnitResultItem> {
@@ -145,26 +130,12 @@ class AiGatewayService @Inject constructor(
         }
     }
 
-    private fun parseCategorizeResponse(content: String): List<CategorizeResultItem> {
-        val sanitized = JsonSanitizer.sanitize(content, '[')
-        val parsed = runCatching {
-            jsonb.fromJson(sanitized, Array<CategorizeResultItem>::class.java).toList()
-        }.getOrElse {
-            throw UpstreamOpenAiException("Invalid categorize JSON from AI", it)
-        }
-        require(parsed.isNotEmpty()) { "AI categorize response must not be empty" }
-        require(parsed.all { it.id.isNotBlank() && it.category.isNotBlank() }) {
-            "AI categorize response contains invalid entries"
-        }
-        return parsed
-    }
-
     private fun parseExtractUnitResponse(content: String): List<ExtractUnitResultItem> {
         val sanitized = JsonSanitizer.sanitize(content, '[')
         val parsed = runCatching {
             jsonb.fromJson(sanitized, Array<ExtractUnitResultItem>::class.java).toList()
         }.getOrElse {
-            throw UpstreamOpenAiException("Invalid extract-unit JSON from AI", it)
+            throw UploadOpenAiException("Invalid extract-unit JSON from AI", it)
         }
         require(parsed.isNotEmpty()) { "AI extract-unit response must not be empty" }
         require(parsed.all { it.id.isNotBlank() }) {
@@ -178,7 +149,7 @@ class AiGatewayService @Inject constructor(
         val parsed = runCatching {
             jsonb.fromJson(sanitized, Recipe::class.java)
         }.getOrElse {
-            throw UpstreamOpenAiException("Invalid recipe JSON from AI", it)
+            throw UploadOpenAiException("Invalid recipe JSON from AI", it)
         }
         require(parsed.title.isNotBlank()) { "AI recipe response must contain title" }
         require(parsed.ingredients.isNotEmpty()) { "AI recipe response must contain ingredients" }
