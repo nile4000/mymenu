@@ -72,7 +72,7 @@
               </div>
               <div class="filter-stats-pill">
                 <span class="filter-stats-count">Anzahl: {{ filteredRows.length }}</span>
-                <span class="filter-stats-sep">·</span>
+                <span class="filter-stats-sep">|</span>
                 <span class="filter-stats-total">{{ totalArticlesAmount.toFixed(2) }} CHF</span>
               </div>
             </div>

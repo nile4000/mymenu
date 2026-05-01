@@ -6,7 +6,7 @@
       caption="Klickbar: blendet Artikel pro Kassenzettel ein/aus."
       icon="receipt_long"
       icon-class="colored-icon2"
-      :badge-text="`${activeReceiptCount} aktiv`"
+      :badge-text="receiptBadgeText"
     >
       <template #controls>
         <div class="q-pa-sm">
@@ -57,11 +57,7 @@
         </div>
       </template>
 
-      <CategoryFilterList
-        v-model="selectedCategory"
-        :options="categoryFilterItems"
-        show-all-option
-      />
+      <CategoryFilterList v-model="selectedCategory" :options="categoryFilterItems" show-all-option />
     </FilterPanel>
   </q-list>
 </template>
@@ -113,9 +109,7 @@ export default defineComponent({
       Object.entries(props.totalsPerCategory)
         .map(([category, total]) => ({ category, total }))
         .sort((a, b) =>
-          categorySortCriteria.value === "Name"
-            ? a.category.localeCompare(b.category)
-            : b.total - a.total
+          categorySortCriteria.value === "Name" ? a.category.localeCompare(b.category) : b.total - a.total
         )
     );
 
@@ -139,9 +133,15 @@ export default defineComponent({
     );
 
     const activeReceiptCount = computed(() => selectedReceiptIds.value.length);
-    const categoryFilterStatus = computed(() =>
-      selectedCategory.value ? "aktiv" : "inaktiv"
-    );
+    const receiptBadgeText = computed(() => {
+      const total = props.totalsPerReceipt.length;
+      const active = activeReceiptCount.value;
+
+      if (!total) return "0 aktiv";
+
+      return active === total ? "inaktiv" : `${active} aktiv`;
+    });
+    const categoryFilterStatus = computed(() => (selectedCategory.value ? "aktiv" : "inaktiv"));
 
     watch(
       () => props.totalsPerReceipt,
@@ -188,7 +188,7 @@ export default defineComponent({
       categorySortCriteria,
       receiptFilterItems,
       categoryFilterItems,
-      activeReceiptCount,
+      receiptBadgeText,
       categoryFilterStatus,
     };
   },

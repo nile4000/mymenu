@@ -20,8 +20,18 @@
       >
         <template v-slot:item="props">
           <q-card class="receipt-card q-ma-sm shadow-1">
-            <q-card-section class="text-center q-py-sm">
-              <div class="text-subtitle1 text-weight-bold">{{ props.row.Corp }}</div>
+            <q-card-section class="text-center q-py-sm row items-center justify-between q-px-sm">
+              <div class="text-subtitle1 text-weight-bold col text-center">{{ props.row.Corp }}</div>
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                size="sm"
+                color="negative"
+                class="delete-btn"
+                @click="deleteReceipt(props.row)"
+              />
             </q-card-section>
 
             <q-separator inset />
@@ -48,10 +58,6 @@
                 fit="cover"
               />
             </q-card-section>
-
-            <q-card-actions align="around" class="q-pt-none">
-              <q-btn flat round dense icon="delete" color="negative" @click="deleteReceipt(props.row)" />
-            </q-card-actions>
           </q-card>
         </template>
       </q-table>
@@ -124,6 +130,14 @@ onMounted(async () => {
 <style scoped lang="scss">
 .border-grey {
   border: 1px solid #ececec;
+}
+
+.delete-btn {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+  .receipt-card:hover & {
+    opacity: 1;
+  }
 }
 
 .receipt-card {
