@@ -13,18 +13,18 @@
     "deploy": "firebase deploy"
   },
   "dependencies": {
-    "@quasar/extras": "^1.16.12",
-    "@supabase/supabase-js": "^2.45.4",
-    "axios": "^1.12.0",
+    "@quasar/extras": "^1.18.0",
+    "@supabase/supabase-js": "^2.105.1",
+    "axios": "^1.15.2",
     "core-js": "^3.6.5",
     "dotenv": "^16.4.5",
     "firebase": "^11.0.2",
     "mymenu": "file:",
     "openai": "^4.67.3",
-    "pinia": "2.1.7",
-    "quasar": "^2.8.0",
-    "vue": "3.4.15",
-    "vue-router": "^4.0.12",
+    "pinia": "2.3.1",
+    "quasar": "^2.19.3",
+    "vue": "3.5.33",
+    "vue-router": "^4.6.4",
     "vuex": "^4.0.1"
   },
   "devDependencies": {
