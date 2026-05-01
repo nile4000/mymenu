@@ -1,12 +1,12 @@
 package dev.lueem.ai.app
 
-import dev.lueem.ai.api.dto.CategorizeRequest
-import dev.lueem.ai.api.dto.CategorizeResultItem
 import dev.lueem.ai.api.dto.ExtractUnitRequest
 import dev.lueem.ai.api.dto.ExtractUnitResultItem
 import dev.lueem.ai.api.dto.RecipeRequest
 import dev.lueem.ai.domain.Recipe
-import dev.lueem.shared.client.CategorizationClient
+import dev.lueem.category.api.dto.CategorizeRequest
+import dev.lueem.category.api.dto.CategorizeResultItem
+import dev.lueem.category.infra.CategorizationClient
 import dev.lueem.shared.client.OpenAiClient
 import dev.lueem.shared.config.OpenAiProperties
 import dev.lueem.shared.error.UploadOpenAiException

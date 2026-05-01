@@ -1,5 +1,6 @@
 package dev.lueem.category.api
 
+import dev.lueem.category.api.dto.CategoryDto
 import dev.lueem.category.domain.Categories
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path

@@ -1,7 +1,8 @@
 package dev.lueem.integration.supercard.app
 
-import dev.lueem.ai.api.dto.CategorizeItem
-import dev.lueem.ai.api.dto.CategorizeRequest
+import dev.lueem.category.api.dto.CategorizeItem
+import dev.lueem.category.api.dto.CategorizeRequest
+import dev.lueem.category.infra.CategorizationClient
 import dev.lueem.extraction.api.ReceiptResponse
 import dev.lueem.extraction.app.ExtractionService
 import dev.lueem.integration.supercard.api.dto.SupercardAvailableReceipt
@@ -18,7 +19,6 @@ import dev.lueem.integration.supercard.infra.SupercardConfigStore
 import dev.lueem.integration.supercard.infra.SupercardHtmlParser
 import dev.lueem.integration.supercard.infra.SupercardHttpClient
 import dev.lueem.integration.supercard.infra.SupercardReceiptRepository
-import dev.lueem.shared.client.CategorizationClient
 import dev.lueem.shared.config.SupercardProperties
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject

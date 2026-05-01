@@ -1,4 +1,4 @@
-package dev.lueem.ai.api.dto
+package dev.lueem.category.api.dto
 
 data class CategorizeItem(
     var id: String = "",

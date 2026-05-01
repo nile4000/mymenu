@@ -2,6 +2,7 @@ package dev.lueem.ai.api
 
 import dev.lueem.ai.app.AiGatewayService
 import dev.lueem.ai.api.dto.*
+import dev.lueem.category.api.dto.CategorizeRequest
 import jakarta.inject.Inject
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.POST

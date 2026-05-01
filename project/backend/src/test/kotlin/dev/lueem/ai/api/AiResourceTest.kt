@@ -1,6 +1,10 @@
 package dev.lueem.ai.api
 
 import dev.lueem.ai.app.AiGatewayService
+import dev.lueem.ai.api.dto.ExtractUnitRequest
+import dev.lueem.ai.api.dto.RecipeRequest
+import dev.lueem.category.api.dto.CategorizeRequest
+import dev.lueem.category.api.dto.CategorizeResultItem
 import dev.lueem.shared.error.UploadOpenAiException
 import io.quarkus.test.InjectMock
 import io.quarkus.test.junit.QuarkusTest
