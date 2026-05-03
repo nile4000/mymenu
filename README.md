@@ -11,9 +11,10 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791?logo=postgresql&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT-412991?logo=openai&logoColor=white)
 
+**Live-App:** <https://nile4000.github.io/mymenu/#/>
+
 ![Showcase](image.png)
 
-**Live-App:** <https://nile4000.github.io/mymenu/#/>
 
 ---
 
@@ -43,7 +44,7 @@ Der Fokus liegt auf Schweizer Einkaufsbelegen von Coop/Supercard und Migros/Cumu
 | Funktion            | Beschreibung                                                                           |
 | ------------------- | -------------------------------------------------------------------------------------- |
 | Beleganalyse        | PDF-Text wird im Backend vorbereitet und per OpenAI in strukturiertes JSON umgewandelt |
-| Kategorisierung     | Artikel werden über einen eingebetteten AI-Service Einkaufskategorien zugeordnet       |
+| Kategorisierung     | Artikel werden über einen Kategorisierungsservice Einkaufskategorien zugeordnet        |
 | Einheitenerkennung  | Aus Artikelnamen und Preisen werden sinnvolle Einheiten extrahiert                     |
 | Rezeptgenerierung   | Aus vorhandenen Lebensmitteln erstellt die AI deutschsprachige Rezeptvorschläge        |
 
@@ -55,7 +56,7 @@ Der Fokus liegt auf Schweizer Einkaufsbelegen von Coop/Supercard und Migros/Cumu
 mymenu/
 ├── frontend/           # Quasar/Vue 3 SPA
 ├── middleware/         # Kotlin/Quarkus REST API
-├── categorization-srv/ # Embedded Python AI-Service
+├── categorization-srv/ # Embedded Python Cotegorization Service
 ├── database/           # SQL-Schema, Migrations, Snapshots
 └── docker-compose.yml
 ```

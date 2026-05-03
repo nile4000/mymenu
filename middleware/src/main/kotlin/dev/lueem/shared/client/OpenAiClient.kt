@@ -19,8 +19,7 @@ import java.util.logging.Logger
  * - Build and execute HTTP requests
  * - Translate HTTP / network errors into UploadOpenAiException
  * - Return the assistant message content
- *
- * Does NOT contain business logic or prompt construction.
+ * 
  */
 @ApplicationScoped
 class OpenAiClient @Inject constructor(
