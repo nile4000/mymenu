@@ -2,6 +2,7 @@ package dev.lueem.extraction.app
 
 import dev.lueem.extraction.api.ReceiptMetadata
 import dev.lueem.extraction.api.ReceiptResponse
+import dev.lueem.extraction.api.toDto
 import dev.lueem.extraction.infra.PdfFileHandler
 import dev.lueem.shared.client.OpenAiClient
 import jakarta.enterprise.context.ApplicationScoped

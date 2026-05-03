@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: categorization-srv/Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    mem_limit: 1g
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -14,9 +18,29 @@ services:
     build: ./middleware
     ports:
       - "8080:8080"
+    restart: unless-stopped
     environment:
       EMBEDDING_SERVICE_URL: http://categorization-srv:8000
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       categorization-srv:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4200:4200"
+    restart: unless-stopped
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

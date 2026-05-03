@@ -5,6 +5,7 @@ middleware/.env
 .idea
 .quarkus
 .DS_Store
+.env
 middleware/db/local_dev_*.sql
 middleware/db/local_dev_*.dump
 tmp_*.json

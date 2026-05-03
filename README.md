@@ -108,3 +108,12 @@ npm run start
 ```shell
 docker-compose up
 ```
+
+> Vor dem Start die Umgebungsvariable `OPENAI_API_KEY` setzen – entweder per `.env`-Datei im Projektroot oder als Shell-Variable. Docker Compose liest `.env` automatisch ein.
+
+**Categorization Service (FastAPI):**
+
+Läuft auf Port `8000`. Die interaktive API-Dokumentation ist erreichbar unter:
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
