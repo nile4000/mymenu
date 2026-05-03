@@ -26,6 +26,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -35,7 +36,7 @@ jobs:
 
       - name: Build with Maven
         working-directory: middleware
-        run: mvn package -DskipTests -q
+        run: mvn package -DskipTests
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
