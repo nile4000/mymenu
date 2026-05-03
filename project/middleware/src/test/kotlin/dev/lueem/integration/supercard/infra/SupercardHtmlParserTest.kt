@@ -1,7 +1,6 @@
 package dev.lueem.integration.supercard.infra
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class SupercardHtmlParserTest {
@@ -47,15 +46,17 @@ class SupercardHtmlParserTest {
 
     @Test
     fun `extractSupercardReceiptBarcode returns bc query parameter`() {
-        val id = parser.extractSupercardReceiptBarcode("https://example.org/receipt?bc=abc123&pdfType=receipt")
-        assertEquals("abc123", id)
+        val result = parser.extractSupercardReceiptBarcode("https://example.org/receipt?bc=abc123&pdfType=receipt")
+
+        assertEquals("abc123", result)
     }
 
     @Test
     fun `extractSupercardReceiptBarcode falls back to original url when bc missing`() {
         val url = "https://example.org/receipt?id=1"
-        val id = parser.extractSupercardReceiptBarcode(url)
-        assertEquals(url, id)
-        assertTrue(id.contains("receipt"))
+
+        val result = parser.extractSupercardReceiptBarcode(url)
+
+        assertEquals(url, result)
     }
 }

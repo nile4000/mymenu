@@ -21,19 +21,18 @@ class AiResourceTest {
 
     @Test
     fun extractUnitRejectsTooManyItems() {
-        val tooManyRequest = ExtractUnitRequest(
+        val request = ExtractUnitRequest(
             items = (1..41).map { ExtractUnitItem(id = "$it", name = "Item $it", quantity = 1.0, price = 1.0) }
         )
-        `when`(aiGatewayService.extractUnit(tooManyRequest))
-            .thenThrow(IllegalArgumentException("items must not contain more than 40 entries"))
-
-        val tooManyItemsJson = (1..41).joinToString(",") {
+        `when`(aiGatewayService.extractUnit(request))
+            .thenThrow(IllegalArgumentException("Die Liste darf maximal 40 Einträge enthalten"))
+        val itemsJson = (1..41).joinToString(",") {
             """{"id":"$it","name":"Item $it","quantity":1,"price":1}"""
         }
 
         given()
             .contentType("application/json")
-            .body("""{"items":[$tooManyItemsJson]}""")
+            .body("""{"items":[$itemsJson]}""")
             .`when`().post("/api/ai/extract-unit")
             .then()
             .statusCode(422)
@@ -48,7 +47,7 @@ class AiResourceTest {
             servings = 11
         )
         `when`(aiGatewayService.recipe(request))
-            .thenThrow(IllegalArgumentException("servings must be between 1 and 10"))
+            .thenThrow(IllegalArgumentException("Die Portionsanzahl muss zwischen 1 und 10 liegen"))
 
         given()
             .contentType("application/json")
@@ -57,7 +56,6 @@ class AiResourceTest {
             .then()
             .statusCode(422)
             .body("code", equalTo("VALIDATION_ERROR"))
-            .body("message", containsString("servings"))
+            .body("message", containsString("Portionsanzahl"))
     }
-
 }

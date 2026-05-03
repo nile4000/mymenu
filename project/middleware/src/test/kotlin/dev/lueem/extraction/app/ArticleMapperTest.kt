@@ -1,6 +1,7 @@
 package dev.lueem.extraction.app
 
-import dev.lueem.extraction.app.toDto
+import dev.lueem.extraction.api.toDto
+import dev.lueem.extraction.domain.Article
 import jakarta.json.Json
 import jakarta.json.JsonValue
 import java.math.BigDecimal
@@ -27,22 +28,10 @@ class ArticleMapperTest {
         assertEquals(1, result.size)
         val obj = result.getJsonObject(0)
         assertEquals("Milk", obj.getString(ArticleJsonSchema.NAME_FIELD))
-        assertBigDecimalEquals(
-            BigDecimal("1.5"),
-            obj.getJsonNumber(ArticleJsonSchema.PRICE_FIELD).bigDecimalValue()
-        )
-        assertBigDecimalEquals(
-            BigDecimal.ZERO,
-            obj.getJsonNumber(ArticleJsonSchema.QUANTITY_FIELD).bigDecimalValue()
-        )
-        assertBigDecimalEquals(
-            BigDecimal.ZERO,
-            obj.getJsonNumber(ArticleJsonSchema.DISCOUNT_FIELD).bigDecimalValue()
-        )
-        assertBigDecimalEquals(
-            BigDecimal.ZERO,
-            obj.getJsonNumber(ArticleJsonSchema.TOTAL_FIELD).bigDecimalValue()
-        )
+        assertBigDecimalEquals(BigDecimal("1.5"), obj.getJsonNumber(ArticleJsonSchema.PRICE_FIELD).bigDecimalValue())
+        assertBigDecimalEquals(BigDecimal.ZERO, obj.getJsonNumber(ArticleJsonSchema.QUANTITY_FIELD).bigDecimalValue())
+        assertBigDecimalEquals(BigDecimal.ZERO, obj.getJsonNumber(ArticleJsonSchema.DISCOUNT_FIELD).bigDecimalValue())
+        assertBigDecimalEquals(BigDecimal.ZERO, obj.getJsonNumber(ArticleJsonSchema.TOTAL_FIELD).bigDecimalValue())
     }
 
     @Test
@@ -110,28 +99,23 @@ class ArticleMapperTest {
 
     @Test
     fun toDto_mapsAllFieldsCorrectly() {
-        val input = Json.createArrayBuilder()
-            .add(
-                Json.createObjectBuilder()
-                    .add(ArticleJsonSchema.NAME_FIELD, "Butter")
-                    .add(ArticleJsonSchema.PRICE_FIELD, 3.0)
-                    .add(ArticleJsonSchema.QUANTITY_FIELD, 2.0)
-                    .add(ArticleJsonSchema.DISCOUNT_FIELD, 0.0)
-                    .add(ArticleJsonSchema.TOTAL_FIELD, 6.0)
-            )
-            .build()
+        val article = Article(
+            name = "Butter",
+            price = BigDecimal("3.0"),
+            quantity = BigDecimal("2.0"),
+            discount = BigDecimal.ZERO,
+            total = BigDecimal("6.0"),
+            category = "Molkereiprodukte"
+        )
 
-        val articles = mapper.mapToArticles(input)
-        val dtos = articles.map { it.toDto() }
+        val dto = article.toDto()
 
-        assertEquals(1, dtos.size)
-        val dto = dtos[0]
         assertEquals("Butter", dto.name)
         assertBigDecimalEquals(BigDecimal("3.0"), dto.price)
         assertBigDecimalEquals(BigDecimal("2.0"), dto.quantity)
         assertBigDecimalEquals(BigDecimal.ZERO, dto.discount)
         assertBigDecimalEquals(BigDecimal("6.0"), dto.total)
-        assertEquals("", dto.category)
+        assertEquals("Molkereiprodukte", dto.category)
     }
 
     private fun assertBigDecimalEquals(expected: BigDecimal, actual: BigDecimal) =

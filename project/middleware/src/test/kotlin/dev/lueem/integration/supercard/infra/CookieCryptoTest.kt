@@ -17,10 +17,9 @@ class CookieCryptoTest {
             dbPasswordValue = Optional.empty()
         }
         val crypto = CookieCrypto(properties)
-
         val plain = "CMSSESSIONID=abc; TS01=def"
-        val encrypted = crypto.encrypt(plain)
-        val decrypted = crypto.decrypt(encrypted)
+
+        val decrypted = crypto.decrypt(crypto.encrypt(plain))
 
         assertEquals(plain, decrypted)
     }
