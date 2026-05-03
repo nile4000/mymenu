@@ -36,6 +36,8 @@
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",
     "prettier": "^2.5.1",
+    "sass": "^1.99.0",
+    "sass-loader": "^14.2.1",
     "sass-migrator": "^1.8.1",
     "workbox-webpack-plugin": "^7.0.0"
   },
