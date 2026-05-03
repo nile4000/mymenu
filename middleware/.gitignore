@@ -7,6 +7,8 @@ release.properties
 .flattened-pom.xml
 config.properties
 .env
+.claude
+.mvn
 
 # Firebase
 firebase/

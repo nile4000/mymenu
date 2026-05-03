@@ -56,14 +56,14 @@ Die App nutzt AI für Texterkennung, Kategorisierung und Verarbeitung der Einkau
 Backend:
 
 ```shell
-cd C:\dev\mymenu\project\backend
+cd C:\dev\mymenu\middleware
 quarkus dev
 ```
 
 Frontend:
 
 ```shell
-cd C:\dev\mymenu\project\frontend
+cd C:\dev\mymenu\middleware
 npm run start
 ```
 

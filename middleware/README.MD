@@ -12,7 +12,7 @@
 ### Local development
 
 ```shell
-cd C:\dev\mymenu\project\middleware
+cd C:\dev\mymenu\middleware
 
 quarkus dev
 ```
@@ -26,7 +26,7 @@ quarkus dev
 Prerequisite: Docker Desktop must be running.
 
 ```powershell
-cd C:\dev\mymenu\project\database
+cd C:\dev\mymenu\database
 
 # Restore local DB snapshot
 .\restore-local-db.ps1 -DumpFile local_dev_public.sql
