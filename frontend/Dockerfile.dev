@@ -5,7 +5,5 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install -g @quasar/cli && npm install
 
-COPY . .
-
 EXPOSE 4200
 CMD ["quasar", "dev", "-m", "spa", "--port", "4200"]
