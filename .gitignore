@@ -4,7 +4,6 @@ middleware/.env
 .vscode
 .idea
 .quarkus
-.github
 .DS_Store
 middleware/db/local_dev_*.sql
 middleware/db/local_dev_*.dump
